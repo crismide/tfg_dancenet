@@ -1,1 +1,4 @@
-This is my bachelor's degree thesis 
+This is my bachelor's degree thesis.
+
+SUMARY
+
