@@ -6,8 +6,8 @@ import path from 'path';
 const app = express();
 const mongoose = require('mongoose');
 
-const uri = 'mongodb://localhost:27017/myapp';
-const options = {useNewUrlParser: true, useCreateIndex: true};
+const uri = 'mongodb+srv://Cluster88206:WXpUe1JKUW5v@cluster88206.2zfoqd5.mongodb.net/test';
+const options = {useNewUrlParser: true};
 
 // Middleware
 app.use(morgan('tiny'));
@@ -26,16 +26,17 @@ const history = require('connect-history-api-fallback');
 app.use(history());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/api', require('./routes/nota'));
+
 app.set('puerto', process.env.PORT || 3000);
 app.listen(app.get('puerto'), () => {
-  console.log('Example app listening on port'+ app.get('puerto'));
+  console.log('Example app listening on port '+ app.get('puerto'));
 });
 
 //Mongoose
 // Or using promises
 mongoose.connect(uri, options).then(
-    /** ready to use. The `mongoose.connect()` promise resolves to mongoose instance. */
+//mongoose.connect(uri).then(
     () => { console.log('Conectado a DB') },
-    /** handle initial connection error */
     err => { console.log(err) }
-  );
+);
