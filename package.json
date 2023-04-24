@@ -1,0 +1,19 @@
+{
+  "name": "tfg_dancenet",
+  "version": "1.0.0",
+  "description": "This is my bachelor's degree thesis.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.0.4",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.22",
+    "webpack": "^5.80.0"
+  }
+}
