@@ -1,0 +1,27 @@
+<template>
+    <div class="pestana">
+        <h4>{{ nombre_proceso }}</h4>
+        <p>vkfndmvh</p>
+    </div>
+</template>
+
+<script>
+export default{
+    props:["nombre_proceso","escenas"]
+}
+</script>
+
+<style>
+.pestana{
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0px;
+    width: auto;
+    height: auto;
+    padding: 0px 25px;
+    word-wrap: break-word;
+    background: #D9D9D9;
+    border-radius: 50px;
+}
+</style>

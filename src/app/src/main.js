@@ -1,10 +1,10 @@
 import Vue from 'vue'
-import PantallaInicio from './views/PantallaInicio.vue'
-import router from './router'
+import App from './views/App.vue'
+import router from './router.js'
 
 Vue.config.productionTip = false
 
 new Vue({
   router,
-  render: h => h(PantallaInicio),
+  render: h => h(App),
 }).$mount('#app')

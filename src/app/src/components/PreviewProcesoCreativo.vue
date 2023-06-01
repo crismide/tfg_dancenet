@@ -19,8 +19,8 @@ export default {
 
 <style>
 #frame_proceso_creativo{
-    height: 205px;
     width: 134px;
+    height: 205px;
     flex-direction: column;
     align-items: flex-start;
     gap: -5px;
@@ -36,8 +36,6 @@ export default {
 }
 
 #frame_etiquetas{
-    height: 205px;
-    width: 134px;
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -47,31 +45,25 @@ export default {
 }
 
 .boton_proceso_creativo{
-  box-sizing: border-box;
-  height: 40px;
-  background-color: transparent;
-  border: 1px solid #C286F1;
-  border-radius: 25px;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 17px;
+  width: fit-content;
+  height: 30px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
   align-items: center;
-  color: #C286F1;
-}
+  gap: 10px;
 
-.boton_proceso_creativo:hover{
-  box-sizing: border-box;
-  height: 40px;
-  background-color: #C286F1;
-  border: 1px solid #C286F1;
+  border: 2px solid #C286F1;
   border-radius: 25px;
+  background: transparent;
   font-family: 'Inter';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 700;
   font-size: 14px;
   line-height: 17px;
-  align-items: center;
-  color: #ffffff;
-}
+
+  color: #C286F1;
+  }
+
 
 </style>

@@ -9,7 +9,7 @@ export default {
 </script>
 
 <style>
-button{
+button.filtro_procesos{
     width: 99px;
     height: 32px;
     background: #D9D9D9;
