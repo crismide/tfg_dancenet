@@ -1,18 +1,22 @@
 <template>
     <div id="frame_botones">
-        <router-link to="/">
-            <button type="button" class="button_crear gris">Cancelar</button>
-        </router-link>
-        <router-link to="/procesoCreativo">
-            <button type="button" class="button_crear morado">Crear</button>
-        </router-link>
+        <button type="button" class="button_crear gris" @click="atras">Cancelar</button>
+        <button type="button" class="button_crear morado" @click="hacia">Crear</button>
         
     </div>
 </template>
 
 <script>
 export default{
-
+    props:['irAtras','irHacia'],
+    methods:{
+        atras(){
+            this.$router.push(this.irAtras);
+        },
+        hacia(){
+            this.$router.push(this.irHacia);
+        }
+    }
 }
 </script>
 

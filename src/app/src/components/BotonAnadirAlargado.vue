@@ -1,10 +1,15 @@
 <template>
-    <button type="button" id="anadir_alargado">{{ label }}</button>
+    <button type="button" id="anadir_alargado" @click="irHacia">{{ label }}</button>
 </template>
 
 <script>
 export default{
-    props: ["label"]
+    props: ["label","route_to"],
+    methods:{
+        irHacia(){
+            this.$router.push(this.route_to);
+        }
+    }
 }
 </script>
 

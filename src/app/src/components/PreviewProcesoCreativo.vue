@@ -1,7 +1,7 @@
 <template>
   <div id="frame_proceso_creativo">
     <!--<img src="../assets/imagen_bolero.png" width="134px" height="136px">-->
-    <div id="imagen_proceso"></div>
+    <div id="imagen_proceso"  @click="entrarEnProceso"></div>
     <h3 font-weight="700" font-size="20px" line-height="24px">{{ nombre_proceso }}</h3>
     <div id="frame_etiquetas">
         <button class="boton_proceso_creativo">#danza_contemporánea</button>
@@ -13,7 +13,12 @@
 
 <script>
 export default {
-  props: ['nombre_proceso']
+  props: ['nombre_proceso','route_to'],
+  methods:{
+    entrarEnProceso(){
+      this.$router.push(this.route_to)
+    }
+  }
 }
 </script>
 
@@ -22,10 +27,6 @@ export default {
     width: 134px;
     height: 205px;
     flex-direction: column;
-    align-items: flex-start;
-    gap: -5px;
-    font-family: 'Inter';
-    font-style: normal;
 }
 
 #imagen_proceso{

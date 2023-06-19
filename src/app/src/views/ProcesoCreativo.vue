@@ -1,16 +1,17 @@
 <template>
     <div class="main-div">
-        <BotonAtras/>
+        <BotonAtras route_to="/"/>
         <h1>Nombre proceso</h1>
-        <div id="apartados_proceso_creativo">
+        <div class="contenido_scroll">
             <!-- ***** APARTADO IDEAS *****-->
             <div class="apartado">
                 <div class="titulo_apartado" @click="display_ideas">
                     <h2>Ideas</h2>
-                    <i class="material-symbols-outlined dropdown">arrow_drop_down</i>
+                    <i v-if="!showIdeas" class="material-symbols-outlined dropdown">arrow_drop_down</i>
+                    <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showIdeas">
-                    <div class="carrusel">
+                    <div class="elementos_horizontales carrusel">
                         <Filtro nombre_filtro="Ordenar"/>
                         <Filtro nombre_filtro="Etiquetas"/>
                         <Filtro nombre_filtro="Creadorx"/>
@@ -23,11 +24,15 @@
             <div class="apartado">
                 <div class="titulo_apartado" @click="display_escena">
                     <h2>Escenas</h2>
-                    <i class="material-symbols-outlined dropdown">arrow_drop_down</i>
+                    <i v-if="!showEscenas" class="material-symbols-outlined dropdown">arrow_drop_down</i>
+                    <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showEscenas">
-                    <BotonAnadirAlargado label="Añadir escena +"/>
-                    <div class="carrusel">
+                    <router-link to="/procesoCreativo/escena">
+                        <BotonAnadirAlargado label="Añadir escena +"/>
+                    </router-link>
+                    
+                    <div class="elementos_horizontales carrusel">
                         <Pestana_Escenas nombre_proceso="Lore ipsum" escenas="12"/>
                         <Pestana_Escenas nombre_proceso="Lore ipsum" escenas="12"/>
                     </div>
@@ -39,15 +44,16 @@
             <div class="apartado">
                 <div class="titulo_apartado" @click="display_participantes">
                     <h2>Participantes</h2>
-                    <i class="material-symbols-outlined dropdown">arrow_drop_down</i>
+                    <i v-if="!showParticipantes" class="material-symbols-outlined dropdown">arrow_drop_down</i>
+                    <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showParticipantes">
-                    <div class="carrusel">
+                    <div class="elementos_horizontales carrusel">
                         <Filtro nombre_filtro="Ordenar"/>
                         <Filtro nombre_filtro="Rol"/>
                     </div>
                     <BotonAnadirAlargado label="Añadir participante +"/>
-                    <div class="carrusel">
+                    <div class="grid_dos_filas">
                         <Pestana_Participantes nombre="Andrea" imagen="" roles=""/>
                         <Pestana_Participantes nombre="Andrea" imagen="" roles=""/>
                         <Pestana_Participantes nombre="Andrea" imagen="" roles=""/>
@@ -60,10 +66,10 @@
             <div class="apartado">
                 <div class="titulo_apartado" @click="display_ensayos">
                     <h2>Ensayos</h2>
-                    <i class="material-symbols-outlined dropdown">arrow_drop_down</i>
+                    <i v-if="!showEnsayos" class="material-symbols-outlined dropdown">arrow_drop_down</i>
+                    <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showEnsayos">
-                    <p>placeholder</p>
                     <Calendario/>
                 </div>       
             </div>
@@ -130,7 +136,7 @@ export default{
     gap: 30px;
     }
 
-#apartados_proceso_creativo{
+.contenido_scroll{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -157,6 +163,7 @@ export default{
 
 .contenido_apartado{
     display: flex;
+    width: 302px;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
@@ -170,6 +177,16 @@ export default{
     gap: 14px;
     overflow-x: auto;
     width: auto;
+}
+
+.grid_dos_filas{
+    width: 302px;
+    display:grid;
+    grid-auto-flow:column dense; /* column flow with "dense" to fill all the cells */
+    grid-template-rows:auto auto; /* 2 rows */
+    grid-auto-columns:auto;
+    overflow-x: scroll;
+    gap: 10px;
 }
 
 </style>

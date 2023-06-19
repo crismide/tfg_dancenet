@@ -1,14 +1,18 @@
 <template>
-    <div class="pestana">
+    <button type="button" class="pestana" @click="irEscena">
         <h4>{{ nombre_proceso }}</h4>
         <p>vkfndmvh</p>
-    </div>
+    </button>
 </template>
 
 <script>
 export default{
-    props:["nombre_proceso","escenas"]
-}
+    props:["nombre_proceso","roles","route_to"],
+    methods:{
+        irEscena(){
+            this.$router.push(this.route_to);
+        }
+    }}
 </script>
 
 <style>
@@ -23,5 +27,6 @@ export default{
     word-wrap: break-word;
     background: #D9D9D9;
     border-radius: 50px;
+    border: none;
 }
 </style>

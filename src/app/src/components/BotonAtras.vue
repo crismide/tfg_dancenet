@@ -1,14 +1,19 @@
 <template>
-    <router-link to="/">
-        <button type="button" id="boton_atras">
-            <i class="material-symbols-outlined" width="88px" height="88px" id="icono_flecha">arrow_back_ios_new</i>
-        </button>
-    </router-link>
+    <button type="button" id="boton_atras" @click="irAtras">
+        <i class="material-symbols-outlined" width="88px" height="88px" id="icono_flecha">arrow_back_ios_new</i>
+    </button>
     
 </template>
 
 <script>
-export default{}
+export default{
+    props:['route_to'],
+    methods:{
+        irAtras(){
+            this.$router.push(this.route_to);
+        }
+    }
+}
 </script>
 
 <style>

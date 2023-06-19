@@ -1,11 +1,15 @@
 <template>
     <div>
-        <v-calendar></v-calendar>
+        <DatePicker is-expanded ></DatePicker>
     </div>
 </template>
 
 <script>
-export default{}
+import Calendar from 'v-calendar/lib/components/calendar.umd'
+import DatePicker from 'v-calendar/lib/components/date-picker.umd'
+export default{
+    components: {Calendar,DatePicker}
+}
 </script>
 
 <style>
