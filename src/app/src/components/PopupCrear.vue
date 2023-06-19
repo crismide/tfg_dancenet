@@ -21,7 +21,6 @@
 </template>  
 
 <script>
-import eventBus from '../eventBus';
 
 export default {
   methods:{
