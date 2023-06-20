@@ -1,33 +1,35 @@
 const express = require('express');
 const ProcesoCreativoRoute = express.Router();
+var ProcesoCreativoSchema = require('../models/procesoCreativo.model')
 
 
-ProcesoCreativoRoute.route('/crear-procesoCreativo').post(async(req,res) => {
-  var procesosCreativos = await (()=>{
-    return new Promise((resolve,reject) => {
-      ProcesoCreativoModel.create(req.body).then((error, result) => {
-          if (error) return reject(error)
-          else resolve(result)
-      })
-    })
-  })
-  res.send({"status":true, "data":procesosCreativos})
-})
+ProcesoCreativoRoute.route('/crear-procesoCreativo').post(async (req, res) => {
+  try {
+    const modeloProcesoCreativo = new ProcesoCreativoSchema({
+      title: req.body.title,
+      completed: req.body.completed
+    });
+    await modeloProcesoCreativo.save();
+    res.send({ status: true, message: 'Proceso creado con éxito' });
+  } catch (error) {
+    console.error(error); // Log the error message to the console
+    res.send({ status: false, message: 'Error creando proceso' });
+  }
+});
 
-ProcesoCreativoRoute.route('/procesosCreativos').get(async(req,res) => {
-  var procesosCreativos = await (()=>{
-    return new Promise((resolve,reject) => {
-      ProcesoCreativoModel.find().then((error, result) => {
-          if (error) return reject(error)
-          else resolve(result)
-      })
-    })
-  })
-  res.send({"status":true, "data":procesosCreativos})
-})
+ProcesoCreativoRoute.route('/procesosCreativos').get(async (req, res) => {
+  try {
+    const procesosCreativos = await ProcesoCreativoSchema.find();
+    res.send({ status: true, data: procesosCreativos });
+  } catch (error) {
+    console.error(error); // Log the error message to the console
+    res.status(500).send({ status: false, message: 'Error retrieving procesosCreativos' });
+  }
+});
+
 
  ProcesoCreativoRoute.route('/editar-procesoCreativo/:id').get((req, res, next) => {
-  ProcesoCreativoModel.findById(req.params.id).then((error, data) => {
+  ProcesoCreativoSchema.findById(req.params.id).then((error, data) => {
     if (error) {
       return next(error)
     } else {
@@ -37,7 +39,7 @@ ProcesoCreativoRoute.route('/procesosCreativos').get(async(req,res) => {
 })
 // Update
 ProcesoCreativoRoute.route('/actualizar-student/:id').put((req, res, next) => {
-  ProcesoCreativoModel.findByIdAndUpdate(req.params.id,{$set: req.body}).then((error, data) => {
+  ProcesoCreativoSchema.findByIdAndUpdate(req.params.id,{$set: req.body}).then((error, data) => {
     if (error) {
       return next(error)
     } else {
@@ -49,7 +51,7 @@ ProcesoCreativoRoute.route('/actualizar-student/:id').put((req, res, next) => {
 
 // Delete
 ProcesoCreativoRoute.route('/borrar-procesoCreativo/:id').delete((req, res, next) => {
-  ProcesoCreativoModel.findByIdAndRemove(req.params.id).then((error, data) => {
+  ProcesoCreativoSchema.findByIdAndRemove(req.params.id).then((error, data) => {
     if (error) {
       return next(error)
     } else {
