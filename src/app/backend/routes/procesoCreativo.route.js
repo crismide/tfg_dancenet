@@ -1,25 +1,31 @@
 const express = require('express');
 const ProcesoCreativoRoute = express.Router();
-// model
-let ProcesoCreativoModel = require('../models/ProcesoCreativo');
-ProcesoCreativoRoute.route('/crear-procesoCreativo').post((req, res, next) => {
-  ProcesoCreativoModel.create(req.body).then((error, data) => {
-    if (error) {
-      return next(error)
-    } else {
-      res.json(data)
-    }
+
+
+ProcesoCreativoRoute.route('/crear-procesoCreativo').post(async(req,res) => {
+  var procesosCreativos = await (()=>{
+    return new Promise((resolve,reject) => {
+      ProcesoCreativoModel.create(req.body).then((error, result) => {
+          if (error) return reject(error)
+          else resolve(result)
+      })
+    })
   })
-});
-ProcesoCreativoRoute.route('/').get((req, res, next) => {
-   ProcesoCreativoModel.find().then((error, data) => {
-    if (error) {
-      return next(error)
-    } else {
-      res.json(data)
-    }
+  res.send({"status":true, "data":procesosCreativos})
+})
+
+ProcesoCreativoRoute.route('/procesosCreativos').get(async(req,res) => {
+  var procesosCreativos = await (()=>{
+    return new Promise((resolve,reject) => {
+      ProcesoCreativoModel.find().then((error, result) => {
+          if (error) return reject(error)
+          else resolve(result)
+      })
+    })
   })
- })
+  res.send({"status":true, "data":procesosCreativos})
+})
+
  ProcesoCreativoRoute.route('/editar-procesoCreativo/:id').get((req, res, next) => {
   ProcesoCreativoModel.findById(req.params.id).then((error, data) => {
     if (error) {
