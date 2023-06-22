@@ -21,10 +21,11 @@
         <Filtro nombre_filtro="Creadorxs"/>
       </div>
       <div class="wrapper">
-        <PreviewProcesoCreativo/>
-        <PreviewProcesoCreativo nombre_proceso="Lore Ipsum" route_to="/procesoCreativo"/>
-        <PreviewProcesoCreativo/>
-        <PreviewProcesoCreativo/>
+        <PreviewProcesoCreativo
+          v-for="proceso in this.user.procesoCreativos"
+          :key="proceso.id"
+          :nombre_proceso="proceso.nombre"
+        />
       </div>
     
       
@@ -33,17 +34,20 @@
         <BotonAnadir @evento_anadir="interaccion_popup"/>
       </div>
      
-      <PopupCrear v-if="showPopupCrear" @evento_salir_popup="interaccion_popup"/>
+      <PopupCrear v-if="showPopupCrear" @evento_salir_popup="interaccion_popup" :userid="userId" />
 
   </div>
 </template>
 
 <script>
+import axios from "axios";
+import router from '@/router';
 import PreviewProcesoCreativo from '../components/PreviewProcesoCreativo.vue'
 import Filtro from '../components/Filtro.vue'
 import BotonAnadir from '../components/BotonAnadir.vue'
 import PopupCrear from '../components/PopupCrear.vue'
 import BotonAyuda from '../components/BotonAyuda.vue';
+import Vue from 'vue'
 
 export default {
   name: 'PantallaInicio',
@@ -57,14 +61,36 @@ export default {
 
   data() {
     return {
-      showPopupCrear:false
+      showPopupCrear:false,
+      user: {},
+      userId: ""
     }
+  },
+  mounted() {
+    const userId = this.$route.params.userId;
+    this.fetchUserData(userId);
   },
   methods:{
     interaccion_popup(){
-      console.log(this.showPopupCrear)
       if(this.showPopupCrear) this.showPopupCrear = false
       else this.showPopupCrear = true 
+    },
+    fetchUserData(userId) {
+      const apiURL = `http://localhost:4000/user/${userId}`;
+      axios.get(apiURL)
+        .then(response => {
+          const userData = response.data.data;
+          Vue.set(this.user, 'name', userData.name);
+          Vue.set(this.user, 'password', userData.password);
+          Vue.set(this.user, 'email', userData.email);
+          Vue.set(this.user, 'procesoCreativos', [...userData.procesoCreativos]);
+          Vue.set(this.user, 'ideas', [...userData.ideas]);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+      console.log(this.user)
+      console.log(userId)
     }
   }
 }

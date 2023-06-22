@@ -18,7 +18,13 @@ db.on('error', (error) => {
     console.log(error)
 })
 
-const procesoCreativoAPI = require('./routes/procesoCreativo.route.js')
+const procesoCreativoAPI = require('./routes/procesoCreativo.route.js');
+const userAPI = require('./routes/usuario.route.js');
+const ideaAPI = require('./routes/idea.route.js');
+const escenaAPI = require('./routes/escena.route.js');
+const ensayoAPI = require('./routes/ensayo.route.js');
+const participanteAPI = require('./routes/participante.route.js');
+
 const app = express()
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json())
@@ -29,7 +35,14 @@ app.use(
 )
 app.use(cors())
 // API
-app.use(procesoCreativoAPI)
+
+app.use(userAPI);
+app.use(ideaAPI);
+app.use(procesoCreativoAPI);
+app.use(escenaAPI);
+app.use(ensayoAPI);
+app.use(participanteAPI);
+
 // Create port
 const port = process.env.PORT || 4000
 app.listen(port, () => {

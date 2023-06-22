@@ -21,5 +21,6 @@ export default{
     height: auto;
     background: #FFFB97;
     word-wrap: break-word;
+    padding: 10px 10px 10px 10px;
 }
 </style>

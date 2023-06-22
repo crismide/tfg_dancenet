@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import PantallaInicio from './views/PantallaInicio.vue'
+import LogIn from './views/LogIn.vue'
 import FormCrearProcesosCreativos from './views/FormCrearProcesosCreativos.vue'
 import FormCrearEscena from './views/FormCrearEscena.vue'
 import FormRecorridoEspacial from './views/FormRecorridoEspacial.vue'
@@ -13,10 +14,14 @@ Vue.use(VueRouter)
 const routes = [
   { 
     path: '/',
-    component: PantallaInicio 
+    component: LogIn 
+  },
+  { 
+    path: '/inicio/:userId',
+    component: PantallaInicio
   },
   {
-    path: '/formularioCrearPC',
+    path: '/formularioCrearPC/:userId',
     component: FormCrearProcesosCreativos
   },
   {
@@ -28,11 +33,11 @@ const routes = [
     component: FormRecorridoEspacial
   },
   {
-    path: '/procesoCreativo/:id',
+    path: '/procesoCreativo/:procesoCreativoId',
     component: ProcesoCreativo
   },
   {
-    path: '/procesoCreativo/escena/:id',
+    path: '/procesoCreativo/escena',
     component: Escena
   },
   {

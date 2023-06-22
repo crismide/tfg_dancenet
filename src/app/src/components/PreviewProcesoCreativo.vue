@@ -1,13 +1,7 @@
 <template>
   <div id="frame_proceso_creativo">
-    <!--<img src="../assets/imagen_bolero.png" width="134px" height="136px">-->
     <div id="imagen_proceso"  @click="entrarEnProceso"></div>
     <h3 font-weight="700" font-size="20px" line-height="24px">{{ nombre_proceso }}</h3>
-    <div id="frame_etiquetas">
-        <button class="boton_proceso_creativo">#danza_contemporánea</button>
-        <button class="boton_proceso_creativo">#bolero_ravel</button>
-        <button class="boton_proceso_creativo">#csdvnd</button>
-    </div>
   </div>
 </template>
 
@@ -30,7 +24,7 @@ export default {
 }
 
 #imagen_proceso{
-  background-image: url("../assets/imagen_bolero.png");
+  background-image: url("../assets/default_proceso.png");
   width: 134px;
   height: 136px;
   background-size: cover;

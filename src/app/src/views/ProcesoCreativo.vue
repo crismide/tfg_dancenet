@@ -11,6 +11,9 @@
                     <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showIdeas">
+                    <router-link to="/procesoCreativo/escena">
+                        <BotonAnadirAlargado label="Añadir idea +"/>
+                    </router-link>
                     <div class="elementos_horizontales carrusel">
                         <Filtro nombre_filtro="Ordenar"/>
                         <Filtro nombre_filtro="Etiquetas"/>

@@ -2,8 +2,8 @@
     <div class="main-div">
         <h2>Creando un nuevo preoceso creativo</h2>
         <form class="formulario" @submit.prevent="handleSubmitForm">
-            <label for="fname">¿Cómo quieres llamarlo?</label>
-            <input type="text" id="fname" name="fname" v-model="procesoCreativo.nombre"><br><br><br>
+            <label for="title">¿Cómo quieres llamarlo?</label>
+            <input type="text" id="title" name="title" v-model="procesoCreativo.title"><br><br><br>
             <label><input type="checkbox" id="cbox1" value="first_checkbox"> Aún no sé que nombre ponerle, ponle uno por defecto</label><br><br><br>
             <label>¿Con quién lo quieres compartir?</label><br><br>
             <select>
@@ -11,40 +11,60 @@
                 <option>Con mis amistades</option>
                 <option>Con nadie</option>
             </select>
-            <BotonesCrear irAtras="/" irHacia="/procesoCreativo"/>
+            <div id="frame_botones">
+        <button type="button" class="button_crear gris" @click="goToPreviousView">Cancelar</button>
+        <button type="submit" class="button_crear morado">Crear</button>
+        
+    </div>
             
         </form>
     </div>
 </template>
 
 <script>
-import BotonesCrear from '../components/BotonesCrear.vue';
 import axios from "axios";
+import router from '@/router';
+import Vue from 'vue'
 
 export default{
     name: "FormCrearProcesosCreativos",
-    components: { 
-        BotonesCrear 
-    },
     data() {
         return {
             procesoCreativo: {
-                nombre: ''
-            }
+                title: '',
+                completed: false
+            },
+            user: {}
         }
     },
     methods: {
         handleSubmitForm() {
-            let apiURL = 'http://localhost:4000/api/crear-procesoCreativo';
-            
-            axios.post(apiURL, this.student).then(() => {
-                this.$router.push('/')
-                this.procesoCreativo = {
-                    nombre: ''
-                }
-            }).catch(error => {
-                console.log(error)
+            let apiURLcrear = `http://localhost:4000/crear-procesoCreativo`;
+            let apiURLasignar = `http://localhost:4000/user/asignar-procesoCreativo/`;
+
+            axios.post(apiURLcrear, this.procesoCreativo)
+                .then((response) => {
+                const procesoCreativoId = response.data.data._id; // Access the created ProcesoCreativo ID
+                const userId = this.$route.params.userId;
+                apiURLasignar = apiURLasignar + userId + "/" + procesoCreativoId;
+                console.log("apiAsignar: "+apiURLasignar)
+                axios.post(apiURLasignar)
+                    .then(() => {
+                    console.log("Proceso creativo asignado a usuario");
+                    this.$router.push(`/procesoCreativo/${procesoCreativoId}`);
+                    this.procesoCreativo = {
+                        title: '',
+                        completed: false
+                        };
+                    })
+                    .catch(error => {
+                    console.log(error);});})
+                    .catch(error => {
+                    console.log(error);
             });
+        },
+        goToPreviousView() {
+            router.go(-1);
         }
 }
 }
