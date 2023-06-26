@@ -22,9 +22,10 @@
       </div>
       <div class="wrapper">
         <PreviewProcesoCreativo
-          v-for="proceso in this.user.procesoCreativos"
+          v-for="proceso in this.procesosCreativos"
           :key="proceso.id"
-          :nombre_proceso="proceso.nombre"
+          :id="proceso.id"
+          :nombre_proceso="proceso.title"
         />
       </div>
     
@@ -41,7 +42,6 @@
 
 <script>
 import axios from "axios";
-import router from '@/router';
 import PreviewProcesoCreativo from '../components/PreviewProcesoCreativo.vue'
 import Filtro from '../components/Filtro.vue'
 import BotonAnadir from '../components/BotonAnadir.vue'
@@ -63,7 +63,8 @@ export default {
     return {
       showPopupCrear:false,
       user: {},
-      userId: ""
+      userId: "",
+      procesosCreativos: []
     }
   },
   mounted() {
@@ -85,12 +86,21 @@ export default {
           Vue.set(this.user, 'email', userData.email);
           Vue.set(this.user, 'procesoCreativos', [...userData.procesoCreativos]);
           Vue.set(this.user, 'ideas', [...userData.ideas]);
+          this.user.procesoCreativos.forEach((procesoCreativo)=>{
+            const apiURLgetPC = `http://localhost:4000/procesoCreativo/${procesoCreativo}`;
+            axios.get(apiURLgetPC)
+              .then(response => {
+                const procesoCreativoData = response.data.data
+                const elementosProceso = {};
+                Vue.set(elementosProceso, 'title', procesoCreativoData.title)
+                Vue.set(elementosProceso, 'id', procesoCreativo)
+                this.procesosCreativos.push(elementosProceso)
+              })
+          })
         })
         .catch(error => {
           console.log(error);
         });
-      console.log(this.user)
-      console.log(userId)
     }
   }
 }
@@ -159,7 +169,7 @@ body{
 }
 
 .foto.perfil{
-  background-image: url("../assets/foto_persona.jpeg");
+  background-image: url("../assets/default_proceso.png");
   width: 48px;
   height: 48px;
 }

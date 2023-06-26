@@ -1,7 +1,7 @@
 <template>
     <div class="main-div">
         <BotonAtras route_to="/"/>
-        <h1>Nombre proceso</h1>
+        <h1 style="color: #C286F1;">{{ procesoCreativo.title }}</h1>
         <div class="contenido_scroll">
             <!-- ***** APARTADO IDEAS *****-->
             <div class="apartado">
@@ -11,15 +11,21 @@
                     <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showIdeas">
-                    <router-link to="/procesoCreativo/escena">
-                        <BotonAnadirAlargado label="Añadir idea +"/>
-                    </router-link>
+                    <BotonAnadirAlargado label="Añadir idea +" @mostrar-popup="interaccion_popup" />
                     <div class="elementos_horizontales carrusel">
                         <Filtro nombre_filtro="Ordenar"/>
                         <Filtro nombre_filtro="Etiquetas"/>
                         <Filtro nombre_filtro="Creadorx"/>
                     </div>
-                    <Idea texto_idea="Lore Ipsumxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+                    <Idea v-for="idea in ideas" 
+                        :key="idea.id" 
+                        :type="idea.type" 
+                        :content="idea.content" 
+                        />
+                    <PopUpCrearIdea v-if="showPopupIdeas" 
+                        @evento_salir_popup="interaccion_popup"
+                        :where="'procesoCreativo'"
+                    />
                 </div>
             </div>
 
@@ -31,13 +37,15 @@
                     <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showEscenas">
-                    <router-link to="/procesoCreativo/escena">
-                        <BotonAnadirAlargado label="Añadir escena +"/>
-                    </router-link>
+                    <BotonAnadirAlargado label="Añadir escena +" @click="irFormCrearEscena"/>
                     
                     <div class="elementos_horizontales carrusel">
-                        <Pestana_Escenas nombre_proceso="Lore ipsum" escenas="12"/>
-                        <Pestana_Escenas nombre_proceso="Lore ipsum" escenas="12"/>
+                        <Pestana_Escenas v-for="escena in escenas" 
+                            :key="escena.id" 
+                            :id="escena.id" 
+                            :nombre_escena="escena.name"
+                            :nombre_proceso="procesoCreativoId"
+                        />
                     </div>
                     
                 </div>
@@ -61,7 +69,6 @@
                         <Pestana_Participantes nombre="Andrea" imagen="" roles=""/>
                         <Pestana_Participantes nombre="Andrea" imagen="" roles=""/>
                     </div>
-                    
                 </div>
             </div>
 
@@ -88,6 +95,9 @@ import BotonAnadirAlargado from '../components/BotonAnadirAlargado.vue';
 import Pestana_Escenas from '../components/Pestana_Escenas.vue';
 import Pestana_Participantes from '../components/Pestana_Participantes.vue';
 import Calendario from '../components/Calendario.vue';
+import PopUpCrearIdea from '../components/PopUpCrearIdea.vue';
+import Vue from 'vue'
+import axios from "axios";
 
 export default{
     name: "ProcesoCreativo",
@@ -98,17 +108,34 @@ export default{
         BotonAnadirAlargado,
         Pestana_Escenas,
         Pestana_Participantes,
-        Calendario
+        Calendario,
+        PopUpCrearIdea
     },
     data() {
         return {
+            showPopupIdeas: false,
             showIdeas:false,
             showEscenas:false,
             showParticipantes:false,
-            showEnsayos:false
+            showEnsayos:false,
+            procesoCreativo: {},
+            procesoCreativoId: "",
+            ideas: [],
+            escenas: [],
+            participantes: [],
+            ensayos: []
         }
     },
+    mounted(){
+        const procesoCreativoId = this.$route.params.procesoCreativoId;
+        this.procesoCreativoId = procesoCreativoId
+        this.fetchProcesoCreativoData(procesoCreativoId);
+    },
     methods:{
+        interaccion_popup(){
+            if(this.showPopupIdeas) this.showPopupIdeas = false
+            else this.showPopupIdeas = true 
+        },
         display_ideas(){
             if(!this.showIdeas) this.showIdeas = true
             else this.showIdeas = false
@@ -124,7 +151,72 @@ export default{
         display_ensayos(){
             if(!this.showEnsayos) this.showEnsayos = true
             else this.showEnsayos = false
-        }
+        },
+        irFormCrearEscena(){
+            this.$router.push(`/formularioCrearEscena/${this.procesoCreativoId}`);
+        },
+        fetchProcesoCreativoData(procesoCreativoId) {
+            const apiURL = `http://localhost:4000/procesoCreativo/${procesoCreativoId}`;
+            axios.get(apiURL)
+                .then(response => {
+                const procesoCreativoData = response.data.data;
+                Vue.set(this.procesoCreativo, 'title', procesoCreativoData.title);
+                Vue.set(this.procesoCreativo, 'ideas', [...procesoCreativoData.ideas]);
+                Vue.set(this.procesoCreativo, 'escenas', [...procesoCreativoData.escenas]);
+                Vue.set(this.procesoCreativo, 'participantes', [...procesoCreativoData.participantes]);
+                
+                //RECOGER IDEAS DE PROCESO CREATIVO
+                this.procesoCreativo.ideas.forEach((idea) => {
+                const apiURLgetIdea = `http://localhost:4000/idea/${idea}`;
+                axios.get(apiURLgetIdea)
+                    .then(response => {
+                        const IdeaData = response.data.data
+                        const elementosIdea = {};
+                        Vue.set(elementosIdea, 'type', IdeaData.type)
+                        Vue.set(elementosIdea, 'content', IdeaData.content)
+                        Vue.set(elementosIdea, 'id', idea)
+                        this.$data.ideas.push(elementosIdea);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                });
+
+                console.log("ideas "+this.$data.ideas)
+
+                //RECOGER ESCENAS DE PROCESO CREATIVO
+                this.procesoCreativo.escenas.forEach((escena)=>{
+                    const apiURLgetEscena = `http://localhost:4000/escena/${escena}`;
+                    axios.get(apiURLgetEscena)
+                    .then(response => {
+                        const EscenaData = response.data.data
+                        const elementosEscena = {};
+                        Vue.set(elementosEscena, 'name', EscenaData.name)
+                        Vue.set(elementosEscena, 'id', escena)
+                        this.escenas.push(elementosEscena)
+                    })
+                })
+
+                console.log("escenas "+this.escenas)
+
+                //RECOGER PARTICIPANTES DE PROCESO CREATIVO
+                this.procesoCreativo.participantes.forEach((participante)=>{
+                    const apiURLgetParticipante = `http://localhost:4000/participante/${participante}`;
+                    axios.get(apiURLgetParticipante)
+                    .then(response => {
+                        const ParticipanteData = response.data.data
+                        const elementosParticipante = {};
+                        Vue.set(elementosParticipante, 'userId', participante)
+                        this.participantes.push(elementosParticipante)
+                    })
+                })
+
+                console.log("participantes "+this.participantes)
+            })
+                .catch(error => {
+                console.log(error);
+                });
+            }
     }
 }
 </script>

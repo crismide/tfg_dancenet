@@ -11,7 +11,7 @@
                 <option>Con mis amistades</option>
                 <option>Con nadie</option>
             </select>
-            <div id="frame_botones">
+            <div class="frame_botones">
         <button type="button" class="button_crear gris" @click="goToPreviousView">Cancelar</button>
         <button type="submit" class="button_crear morado">Crear</button>
         

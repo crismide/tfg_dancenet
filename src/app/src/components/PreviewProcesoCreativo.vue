@@ -7,10 +7,10 @@
 
 <script>
 export default {
-  props: ['nombre_proceso','route_to'],
+  props: ['nombre_proceso','id'],
   methods:{
     entrarEnProceso(){
-      this.$router.push(this.route_to)
+      this.$router.push(`/procesoCreativo/${this.id}`)
     }
   }
 }
@@ -21,6 +21,7 @@ export default {
     width: 134px;
     height: 205px;
     flex-direction: column;
+    word-wrap: break-word;
 }
 
 #imagen_proceso{

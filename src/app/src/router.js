@@ -5,6 +5,8 @@ import LogIn from './views/LogIn.vue'
 import FormCrearProcesosCreativos from './views/FormCrearProcesosCreativos.vue'
 import FormCrearEscena from './views/FormCrearEscena.vue'
 import FormRecorridoEspacial from './views/FormRecorridoEspacial.vue'
+import FormCrearPautaMov from './views/FormCrearPautaMov.vue'
+import FormObjeto from './views/FormObjeto.vue'
 import ProcesoCreativo from './views/ProcesoCreativo.vue'
 import Escena from './views/Escena.vue'
 import Ayuda from './views/Ayuda.vue'
@@ -25,19 +27,27 @@ const routes = [
     component: FormCrearProcesosCreativos
   },
   {
-    path: '/formularioCrearEscena',
+    path: '/formularioCrearEscena/:procesoCreativoId',
     component: FormCrearEscena
   },
   {
-    path: '/formularioRecorridoEspacial',
+    path: '/formularioPautaMov/:escenaId',
+    component: FormCrearPautaMov
+  },
+  {
+    path: '/formularioRecorridoEspacial/:escenaId',
     component: FormRecorridoEspacial
+  },
+  {
+    path: '/formularioObjeto/:escenaId',
+    component: FormObjeto
   },
   {
     path: '/procesoCreativo/:procesoCreativoId',
     component: ProcesoCreativo
   },
   {
-    path: '/procesoCreativo/escena',
+    path: '/procesoCreativo/:procesoCreativoId/escena/:escenaId',
     component: Escena
   },
   {

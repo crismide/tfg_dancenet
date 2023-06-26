@@ -9,6 +9,7 @@
                     <input type="password" class="form_login" v-model="user.password" placeholder="Contraseña"/><br><br><br><br>
                     <button type="submit" class="button_entrar">Entrar</button>
                 </form>
+                <p>{{ error }}</p>
             </div>
             
         </div>
@@ -28,7 +29,8 @@ export default{
             user: {
                 email: '',
                 password: ''
-            }
+            },
+            error:'error'
         }
     },
     methods: {
@@ -48,6 +50,7 @@ export default{
             })
             .catch(error => {
                 console.log(error);
+                this.error = error
             });
         }
     }

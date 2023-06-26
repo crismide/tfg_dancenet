@@ -1,16 +1,15 @@
 <template>
     <button type="button" class="pestana" @click="irEscena">
-        <h4>{{ nombre_proceso }}</h4>
-        <p>vkfndmvh</p>
+        <h4>{{ nombre_escena }}</h4>
     </button>
 </template>
 
 <script>
 export default{
-    props:["nombre_proceso","roles","route_to"],
+    props:["nombre_escena","id","nombre_proceso"],
     methods:{
         irEscena(){
-            this.$router.push(this.route_to);
+            this.$router.push(`/procesoCreativo/${this.nombre_proceso}/escena/${this.id}`);
         }
     }}
 </script>

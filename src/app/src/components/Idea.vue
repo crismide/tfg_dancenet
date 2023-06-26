@@ -1,14 +1,14 @@
 <template>
     <div>
-        <div class="nota frame">
-            <h3 class="nota texto">{{texto_idea}}</h3>
+        <div class="nota frame" v-if="type=='text'">
+            <h3 class="nota texto">{{content}}</h3>
         </div>
     </div>
 </template>
 
 <script>
 export default{
-    props: ['texto_idea']
+    props: ['content','type']
 }
 </script>
 

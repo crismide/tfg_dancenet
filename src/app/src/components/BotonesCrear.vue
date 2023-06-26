@@ -1,5 +1,5 @@
 <template>
-    <div id="frame_botones">
+    <div class="frame_botones">
         <button type="button" class="button_crear gris" @click="atras">Cancelar</button>
         <button type="button" class="button_crear morado" @click="hacia">Crear</button>
         
@@ -7,11 +7,13 @@
 </template>
 
 <script>
+import router from '@/router';
+
 export default{
-    props:['irAtras','irHacia'],
+    props:['irHacia'],
     methods:{
         atras(){
-            this.$router.push(this.irAtras);
+            router.go(-1);
         },
         hacia(){
             this.$router.push(this.irHacia);
@@ -21,14 +23,14 @@ export default{
 </script>
 
 <style>
-    #frame_botones{
+    .frame_botones{
         display: flex;
         flex-direction: row;
         justify-content: center;
         align-items: center;
         gap: 16px;
         width: 100%;
-        height: 100%;
+        height: auto;
     }
     
     .button_crear{

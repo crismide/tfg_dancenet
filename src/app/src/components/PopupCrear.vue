@@ -59,7 +59,7 @@ export default {
     background: rgba(44, 44, 44, 0.79);
     left: 50%;
     top: 0%;
-    bottom: -20%;
+    bottom: -70%;
     transform: translate(-50%, -50%);
     position: absolute;
     width: 100%;

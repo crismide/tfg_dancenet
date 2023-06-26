@@ -23,16 +23,15 @@ const userAPI = require('./routes/usuario.route.js');
 const ideaAPI = require('./routes/idea.route.js');
 const escenaAPI = require('./routes/escena.route.js');
 const ensayoAPI = require('./routes/ensayo.route.js');
+const pautaMovimientoAPI = require('./routes/pautaMovimiento.route.js');
 const participanteAPI = require('./routes/participante.route.js');
+const objetoAPI = require('./routes/objeto.route.js');
+const RecorridoEspacialAPI = require('./routes/recorrido.espacial.route.js');
 
 const app = express()
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json())
-app.use(
-  bodyParser.urlencoded({
-    extended: false,
-  }),
-)
 app.use(cors())
 // API
 
@@ -41,7 +40,10 @@ app.use(ideaAPI);
 app.use(procesoCreativoAPI);
 app.use(escenaAPI);
 app.use(ensayoAPI);
+app.use(pautaMovimientoAPI);
 app.use(participanteAPI);
+app.use(objetoAPI);
+app.use(RecorridoEspacialAPI);
 
 // Create port
 const port = process.env.PORT || 4000

@@ -9,8 +9,8 @@ IdeaRoute.route('/crear-idea').post(async (req, res) => {
       content: req.body.content
     });
 
-    await newIdea.save();
-    res.send({ status: true, message: 'Idea creado con éxito' });
+    const idea = await newIdea.save();
+    res.send({ status: true, message: 'Idea creado con éxito', data: idea });
   } catch (error) {
     console.error(error);
     res.send({ status: false, message: 'Error creando idea' });

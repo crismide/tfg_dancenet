@@ -6,11 +6,13 @@
 </template>
 
 <script>
+import router from '@/router';
+
 export default{
     props:['route_to'],
     methods:{
         irAtras(){
-            this.$router.push(this.route_to);
+            router.go(-1);
         }
     }
 }

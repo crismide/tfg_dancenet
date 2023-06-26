@@ -1,5 +1,5 @@
 <template>
-    <div class="pestana">
+    <div class="pestana" @click="changeColors">
         <div class="dos_columnas">
             <div class="foto participante"></div>
             <h4>{{ nombre }}</h4>
@@ -10,11 +10,21 @@
 
 <script>
 export default{
-    props:["nombre","imagen","roles"]
+    props:["nombre","imagen","roles"],
+    methods: {
+        changeColors() {
+        this.$el.classList.toggle("active");
+        }
+    }
 }
 </script>
 
 <style>
+.pestana.active {
+  background: #858585;
+  color: #fff;
+}
+
 .dos_columnas{
     display: flex;
     flex-direction: row;
@@ -26,6 +36,6 @@ export default{
 .foto.participante{
     width: 64px;
     height: 64px;
-    background-image: url("../assets/foto_persona.jpeg");
+    background-image: url("../assets/default_proceso.png");
 }
 </style>

@@ -1,14 +1,11 @@
 <template>
-    <button type="button" id="anadir_alargado" @click="irHacia">{{ label }}</button>
+    <button type="button" id="anadir_alargado" @click="$emit('mostrar-popup')">{{ label }}</button>
 </template>
 
 <script>
 export default{
-    props: ["label","route_to"],
+    props: ["label"],
     methods:{
-        irHacia(){
-            this.$router.push(this.route_to);
-        }
     }
 }
 </script>

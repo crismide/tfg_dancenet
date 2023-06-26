@@ -1,8 +1,10 @@
 <template>
     <div class="main-div">
-            <BotonAtras route_to="/procesoCreativo"/>
-        <h2>Nombre escena</h2>
-        <BotonAnadirAlargado label="Añadir apartado +"/>
+        <div @click="irProcesoCreativo">
+            <BotonAtras/>
+        </div>
+            
+        <h2 style="color: #FFC46B;">{{escena.name}}</h2>
         <div class="contenido_scroll">
             <!-- ***** APARTADO IDEAS *****-->
             <div class="apartado">
@@ -12,8 +14,21 @@
                     <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showIdeas">
-                    <BotonAnadirAlargado label="Añadir idea +"/>
-                    <Idea texto_idea="Lore Ipsumxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+                    <BotonAnadirAlargado label="Añadir idea +" @mostrar-popup="interaccion_popup"/>
+                    <div class="elementos_horizontales carrusel">
+                        <Filtro nombre_filtro="Ordenar"/>
+                        <Filtro nombre_filtro="Etiquetas"/>
+                        <Filtro nombre_filtro="Creadorx"/>
+                    </div>
+                    <Idea v-for="idea in ideas" 
+                        :key="idea.id" 
+                        :type="idea.type" 
+                        :content="idea.content" 
+                        />
+                    <PopUpCrearIdea v-if="showPopupIdeas" 
+                        @evento_salir_popup="interaccion_popup"
+                        :where="'escena'"
+                    />
                 </div>
             </div>
             <!-- ***** APARTADO PAUTAS DE MOVIMIENTO *****-->
@@ -24,7 +39,10 @@
                     <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showPautaMovimiento">
-                    <BotonAnadirAlargado label="Añadir pauta de movimiento +"/>
+                    <div @click="irFormCrearPautaMovimiento">
+                        <BotonAnadirAlargado label="Añadir pauta de movimiento +"/>
+                    </div>
+                    
                     <div>
                         <div class="elementos_horizontales">
                             <div class="cuadrado verde"></div>
@@ -39,6 +57,13 @@
                             Nivel alto
                         </div>
                     </div>
+
+                    <div v-for="pautaMovimiento in pautasMovimiento">
+                        <h5>{{ pautaMovimiento.name }}</h5>
+                        <p> {{ pautaMovimiento.description }}</p>
+                        <p> Nivel: {{ pautaMovimiento.level }}</p>
+                    </div>
+
                 </div>
             </div>
             <!-- ***** APARTADO RECORRIDO ESPACIAL *****-->
@@ -49,7 +74,14 @@
                     <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showRecorridoEspacial">
-                    <BotonAnadirAlargado label="Añadir recorrido espacial +" route_to="/formularioRecorridoEspacial"/>
+                    <div @click="irFormCrearRecorridoEspacial">
+                        <BotonAnadirAlargado label="Añadir recorrido espacial +"/>
+                    </div>
+                    <div class="display_individual">
+                        <div v-for="recorridoEspacial in recorridosEspaciales">
+                            <img :src="recorridoEspacial.image" alt="Imagen cargada" width="200"/>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- ***** APARTADO PARTICIPANTES *****-->
@@ -88,7 +120,13 @@
                     <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showObjetos">
-                    <BotonAnadirAlargado label="Añadir objeto +"/>
+                    <div @click="irFormCrearObjeto">
+                        <BotonAnadirAlargado label="Añadir objeto +"/>
+                        <div v-for="objeto in objetos">
+                            <img :src="objeto.image" alt="Imagen cargada" width="200"/>
+                        </div>
+                    </div>
+                    
                     
                 </div>
             </div>
@@ -103,20 +141,56 @@ import Filtro from '../components/Filtro.vue';
 import Idea from '../components/Idea.vue';
 import Pestana_Participantes from '../components/Pestana_Participantes.vue';
 import Calendario from '../components/Calendario.vue';
+import PopUpCrearIdea from '../components/PopUpCrearIdea.vue';
+import axios from "axios";
+import Vue from 'vue'
 
 export default{
-    components: {BotonAtras,BotonAnadirAlargado,Filtro,Idea,Pestana_Participantes,Calendario},
+    components: {BotonAtras,BotonAnadirAlargado,Filtro,Idea,Pestana_Participantes,Calendario,PopUpCrearIdea},
     data() {
         return {
+            showPopupIdeas: false,
             showIdeas:false,
             showPautaMovimiento:false,
             showRecorridoEspacial:false,
             showParticipantes:false,
             showEnsayos:false,
             showObjetos:false,
+            escenaId: "",
+            escena: {},
+            ideas: [],
+            pautasMovimiento: [],
+            recorridosEspaciales: [],
+            participantes: [],
+            ensayos: [],
+            objetos: []
         }
     },
+    mounted(){
+        const escenaId = this.$route.params.escenaId;
+        this.escenaId = escenaId
+        const procesoCreativoId = this.$route.params.procesoCreativoId;
+        this.procesoCreativoId = procesoCreativoId
+        this.fetchEscenaData(escenaId);
+    
+    },
     methods:{
+        irFormCrearPautaMovimiento(){
+            this.$router.push(`/formularioPautaMov/${this.escenaId}`);
+        },
+        irFormCrearObjeto(){
+            this.$router.push(`/formularioObjeto/${this.escenaId}`);
+        },
+        irFormCrearRecorridoEspacial(){
+            this.$router.push(`/formularioRecorridoEspacial/${this.escenaId}`);
+        },
+        irProcesoCreativo(){
+            this.$router.push(`/procesoCreativo/${this.procesoCreativoId}`);
+        },
+        interaccion_popup(){
+            if(this.showPopupIdeas) this.showPopupIdeas = false
+            else this.showPopupIdeas = true 
+        },
         display_ideas(){
             if(!this.showIdeas) this.showIdeas = true
             else this.showIdeas = false
@@ -141,6 +215,128 @@ export default{
             if(!this.showObjetos) this.showObjetos = true
             else this.showObjetos = false
         },
+        fetchEscenaData(escenaId) {
+            const apiURL = `http://localhost:4000/escena/${escenaId}`;
+            axios.get(apiURL)
+                .then(response => {
+                const escenaData = response.data.data;
+                Vue.set(this.escena, 'name', escenaData.name);
+                Vue.set(this.escena, 'id', escenaData._id);
+                Vue.set(this.escena, 'ideas', [...escenaData.ideas]);
+                Vue.set(this.escena, 'pautasMovimiento', [...escenaData.pautasMovimiento]);
+                Vue.set(this.escena, 'recorridosEspaciales', [...escenaData.recorridosEspaciales]);
+                Vue.set(this.escena, 'participantes', [...escenaData.participantes]);
+                Vue.set(this.escena, 'ensayos', [...escenaData.ensayos]);
+                Vue.set(this.escena, 'objetos', [...escenaData.objetos]);
+
+                //RECOGER IDEAS DE ESCENA
+                this.escena.ideas.forEach((idea) => {
+                const apiURLgetIdea = `http://localhost:4000/idea/${idea}`;
+                axios.get(apiURLgetIdea)
+                    .then(response => {
+                        const IdeaData = response.data.data
+                        const elementosIdea = {};
+                        Vue.set(elementosIdea, 'type', IdeaData.type)
+                        Vue.set(elementosIdea, 'content', IdeaData.content)
+                        Vue.set(elementosIdea, 'id', idea)
+                        this.ideas.push(elementosIdea);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                });
+                
+                //RECOGER PAUTAS DE MOVIMIENTO DE ESCENA
+                this.escena.pautasMovimiento.forEach((pautaMovimiento) => {
+                    console.log("pautaMovimiento "+pautaMovimiento)
+                const apiURLgetPautaMovimiento = `http://localhost:4000/pautaMovimiento/${pautaMovimiento}`;
+                console.log("apiURL "+apiURLgetPautaMovimiento)
+                axios.get(apiURLgetPautaMovimiento)
+                    .then(response => {
+                        const PautaMovimientoData = response.data.data
+                        const elementosPautaMovimiento = {};
+                        Vue.set(elementosPautaMovimiento, 'name', PautaMovimientoData.name)
+                        Vue.set(elementosPautaMovimiento, 'description', PautaMovimientoData.description)
+                        //Vue.set(elementosPautaMovimiento, 'inicialTime', PautaMovimientoData.inicialTime)
+                        //Vue.set(elementosPautaMovimiento, 'finalTime', PautaMovimientoData.finalTime)
+                        //Vue.set(elementosPautaMovimiento, 'participantes', [...PautaMovimientoData.participantes]);
+                        Vue.set(elementosPautaMovimiento, 'level', PautaMovimientoData.level)
+                        Vue.set(elementosPautaMovimiento, 'id', pautaMovimiento)
+                        console.log(elementosPautaMovimiento)
+                        this.pautasMovimiento.push(elementosPautaMovimiento);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                });
+                
+                //RECOGER RECORRIDO ESPACIAL DE ESCENA
+                this.escena.recorridosEspaciales.forEach((recorridoEspacial) => {
+                const apiURLgetRecorridoEspacial = `http://localhost:4000/recorridoEspacial/${recorridoEspacial}`;
+                axios.get(apiURLgetRecorridoEspacial)
+                    .then(response => {
+                        const RecorridoEspacialData = response.data.data
+                        const elementosRecorridoEspacial = {};
+                        Vue.set(elementosRecorridoEspacial, 'image', RecorridoEspacialData.image)
+                        Vue.set(elementosRecorridoEspacial, 'id', recorridoEspacial)
+                        this.recorridosEspaciales.push(elementosRecorridoEspacial);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                });
+                
+                //RECOGER PARTICIPANTES DE ESCENA
+                this.escena.participantes.forEach((participante)=>{
+                    const apiURLgetParticipante = `http://localhost:4000/participante/${participante}`;
+                    axios.get(apiURLgetParticipante)
+                    .then(response => {
+                        const ParticipanteData = response.data.data
+                        const elementosParticipante = {};
+                        Vue.set(elementosParticipante, 'userId', participante)
+                        this.participantes.push(elementosParticipante)
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                })
+
+                //RECOGER ENSAYOS DE ESCENA
+                this.escena.ensayos.forEach((ensayo) => {
+                const apiURLgetEnsayo = `http://localhost:4000/ensayo/${ensayo}`;
+                axios.get(apiURLgetEnsayo)
+                    .then(response => {
+                        const EnsayoData = response.data.data
+                        const elementosEnsayo = {};
+                        Vue.set(elementosEnsayo, 'image', EnsayoData.image)
+                        Vue.set(elementosEnsayo, 'id', ensayo)
+                        this.ensayos.push(elementosEnsayo);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                });
+
+                //RECOGER OBJETOS DE ESCENA
+                this.escena.objetos.forEach((objeto) => {
+                const apiURLgetObjeto = `http://localhost:4000/objeto/${objeto}`;
+                axios.get(apiURLgetObjeto)
+                    .then(response => {
+                        const ObjetoData = response.data.data
+                        const elementosObjeto = {};
+                        Vue.set(elementosObjeto, 'image', ObjetoData.image)
+                        Vue.set(elementosObjeto, 'pautaMovimiento', ObjetoData.pautaMovimiento)
+                        Vue.set(elementosObjeto, 'participantes', [...ObjetoData.participantes]);
+                        Vue.set(elementosObjeto, 'responsable', ObjetoData.responsable)
+                        Vue.set(elementosObjeto, 'id', objeto)
+                        this.objetos.push(elementosObjeto);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                });
+            })
+        }
     }
 }
 </script>
@@ -172,5 +368,13 @@ export default{
     background-color: #B4F186;
 }
 
-
+.display_individual{
+    width: 200px;
+    display:grid;
+    grid-auto-flow:column dense; /* column flow with "dense" to fill all the cells */
+    grid-template-rows:auto; /* 2 rows */
+    grid-auto-columns:auto;
+    overflow-x: scroll;
+    gap: 10px;
+}
 </style>
