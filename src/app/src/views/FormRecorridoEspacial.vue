@@ -30,7 +30,6 @@
   import BotonesCrear from '../components/BotonesCrear.vue';
   import VueDrawingCanvas from 'vue-drawing-canvas';
   import router from '@/router';
-  import axios from "axios";
   import Vue from 'vue'
   
   export default {
@@ -103,7 +102,7 @@
             let apiURLcrear = `http://localhost:4000/crear-recorridoEspacial`;
             let apiURLasignar = `http://localhost:4000/escena/asignar-recorridoEspacial/`;
 
-            axios.post(apiURLcrear, this.recorridoEspacial)
+            this.$http.post(apiURLcrear, this.recorridoEspacial)
                 .then((response) => {
                 console.log(response)
                 const recorridoEspacialId = response.data.data._id; 
@@ -111,7 +110,7 @@
                 const procesoCreativoId = this.$route.params.procesoCreativoId;
                 apiURLasignar = apiURLasignar + escenaId + "/" + recorridoEspacialId;
                 console.log("apiAsignar: "+apiURLasignar)
-                axios.post(apiURLasignar)
+                this.$http.post(apiURLasignar)
                     .then(() => {
                     console.log("Recorrido Espacial asignado a escena");
                     this.$router.push(`/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`);

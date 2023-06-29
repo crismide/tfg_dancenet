@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const ProcesoCreativo = require('../models/procesoCreativo.model').ProcesoCreativo;
+const Participante = require('../models/participante.model');
 const Idea = require('../models/idea.model');
 
 const userSchema = mongoose.Schema({
@@ -15,9 +15,9 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  procesoCreativos: [{
+  participantes: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'ProcesoCreativo'
+    ref: 'Participante'
   }],
   ideas: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -25,8 +25,8 @@ const userSchema = mongoose.Schema({
   }]
 });
 
-userSchema.methods.addProcesoCreativo = function (procesoCreativoId) {
-    this.procesoCreativos.push(procesoCreativoId);
+userSchema.methods.addParticipante = function (participanteId) {
+    this.participantes.push(participanteId);
 };
 
 userSchema.methods.addIdea = function (ideaId) {

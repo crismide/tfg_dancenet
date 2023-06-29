@@ -108,8 +108,8 @@
                     <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showEnsayos">
-                    <BotonAnadirAlargado label="Añadir ensayo +"/>
-                    <Calendario/>
+                    <v-calendar :attributes='attributes' @dayclick="interaccionCalendario" :value="null" color="yellow">
+                    </v-calendar>
                 </div>
             </div>
             <!-- ***** APARTADO OBJETOS *****-->
@@ -119,11 +119,11 @@
                     <i v-if="!showObjetos" class="material-symbols-outlined dropdown">arrow_drop_down</i>
                     <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
-                <div class="contenido_apartado" v-if="showObjetos">
+                <div class="contenido_apartado espaciado" v-if="showObjetos">
                     <div @click="irFormCrearObjeto">
-                        <BotonAnadirAlargado label="Añadir objeto +"/>
-                        <div v-for="objeto in objetos">
-                            <img :src="objeto.image" alt="Imagen cargada" width="200"/>
+                        <BotonAnadirAlargado label="Añadir objeto +"/><br><br>
+                        <div v-for="objeto in objetos" class="apartado">
+                            <img :src="objeto.image" alt="Imagen cargada" width="200"/><br><br>
                         </div>
                     </div>
                     
@@ -140,13 +140,11 @@ import BotonAnadirAlargado from '../components/BotonAnadirAlargado.vue';
 import Filtro from '../components/Filtro.vue';
 import Idea from '../components/Idea.vue';
 import Pestana_Participantes from '../components/Pestana_Participantes.vue';
-import Calendario from '../components/Calendario.vue';
 import PopUpCrearIdea from '../components/PopUpCrearIdea.vue';
-import axios from "axios";
 import Vue from 'vue'
 
 export default{
-    components: {BotonAtras,BotonAnadirAlargado,Filtro,Idea,Pestana_Participantes,Calendario,PopUpCrearIdea},
+    components: {BotonAtras,BotonAnadirAlargado,Filtro,Idea,Pestana_Participantes,PopUpCrearIdea},
     data() {
         return {
             showPopupIdeas: false,
@@ -163,7 +161,24 @@ export default{
             recorridosEspaciales: [],
             participantes: [],
             ensayos: [],
-            objetos: []
+            objetos: [],
+            days: [],
+            attributes:[
+                {
+                    key: 'today',
+                    highlight: {
+                        color: 'purple',
+                        fillMode: 'outline',
+                    },
+                    dates: new Date(),
+                }
+            ],
+            value:''
+        }
+    },
+    computed: {
+        dates() {
+            return this.days.map(day => day.date);
         }
     },
     mounted(){
@@ -175,6 +190,9 @@ export default{
     
     },
     methods:{
+        interaccionCalendario(day){
+            this.$router.push(`/formularioEnsayo/escena/${this.escenaId}/${this.procesoCreativoId}/${day.id}`);
+        },
         irFormCrearPautaMovimiento(){
             this.$router.push(`/formularioPautaMov/${this.escenaId}`);
         },
@@ -217,7 +235,7 @@ export default{
         },
         fetchEscenaData(escenaId) {
             const apiURL = `http://localhost:4000/escena/${escenaId}`;
-            axios.get(apiURL)
+            this.$http.get(apiURL)
                 .then(response => {
                 const escenaData = response.data.data;
                 Vue.set(this.escena, 'name', escenaData.name);
@@ -232,7 +250,7 @@ export default{
                 //RECOGER IDEAS DE ESCENA
                 this.escena.ideas.forEach((idea) => {
                 const apiURLgetIdea = `http://localhost:4000/idea/${idea}`;
-                axios.get(apiURLgetIdea)
+                this.$http.get(apiURLgetIdea)
                     .then(response => {
                         const IdeaData = response.data.data
                         const elementosIdea = {};
@@ -251,7 +269,7 @@ export default{
                     console.log("pautaMovimiento "+pautaMovimiento)
                 const apiURLgetPautaMovimiento = `http://localhost:4000/pautaMovimiento/${pautaMovimiento}`;
                 console.log("apiURL "+apiURLgetPautaMovimiento)
-                axios.get(apiURLgetPautaMovimiento)
+                this.$http.get(apiURLgetPautaMovimiento)
                     .then(response => {
                         const PautaMovimientoData = response.data.data
                         const elementosPautaMovimiento = {};
@@ -273,7 +291,7 @@ export default{
                 //RECOGER RECORRIDO ESPACIAL DE ESCENA
                 this.escena.recorridosEspaciales.forEach((recorridoEspacial) => {
                 const apiURLgetRecorridoEspacial = `http://localhost:4000/recorridoEspacial/${recorridoEspacial}`;
-                axios.get(apiURLgetRecorridoEspacial)
+                this.$http.get(apiURLgetRecorridoEspacial)
                     .then(response => {
                         const RecorridoEspacialData = response.data.data
                         const elementosRecorridoEspacial = {};
@@ -289,7 +307,7 @@ export default{
                 //RECOGER PARTICIPANTES DE ESCENA
                 this.escena.participantes.forEach((participante)=>{
                     const apiURLgetParticipante = `http://localhost:4000/participante/${participante}`;
-                    axios.get(apiURLgetParticipante)
+                    this.$http.get(apiURLgetParticipante)
                     .then(response => {
                         const ParticipanteData = response.data.data
                         const elementosParticipante = {};
@@ -301,26 +319,28 @@ export default{
                     });
                 })
 
-                //RECOGER ENSAYOS DE ESCENA
-                this.escena.ensayos.forEach((ensayo) => {
-                const apiURLgetEnsayo = `http://localhost:4000/ensayo/${ensayo}`;
-                axios.get(apiURLgetEnsayo)
+                //RECOGER ENSAYOS DE PROCESO CREATIVO
+                this.escena.ensayos.forEach((ensayo)=>{
+                    const apiURLgetEnsayo = `http://localhost:4000/ensayo/${ensayo}`;
+                    this.$http.get(apiURLgetEnsayo)
                     .then(response => {
                         const EnsayoData = response.data.data
                         const elementosEnsayo = {};
-                        Vue.set(elementosEnsayo, 'image', EnsayoData.image)
-                        Vue.set(elementosEnsayo, 'id', ensayo)
-                        this.ensayos.push(elementosEnsayo);
+                        Vue.set(elementosEnsayo, 'fecha', ensayo)
+                        this.ensayos.push(elementosEnsayo)
+
+                        const elementosEnsayoAttr = {};
+                        Vue.set(elementosEnsayoAttr, 'dates', new Date(EnsayoData.fecha))
+                        Vue.set(elementosEnsayoAttr, 'content', "red")
+                        Vue.set(elementosEnsayoAttr, 'highlight', true)
+                        this.attributes.push(elementosEnsayoAttr)
                     })
-                    .catch(error => {
-                        console.log(error);
-                    });
-                });
+                })
 
                 //RECOGER OBJETOS DE ESCENA
                 this.escena.objetos.forEach((objeto) => {
                 const apiURLgetObjeto = `http://localhost:4000/objeto/${objeto}`;
-                axios.get(apiURLgetObjeto)
+                this.$http.get(apiURLgetObjeto)
                     .then(response => {
                         const ObjetoData = response.data.data
                         const elementosObjeto = {};
@@ -349,6 +369,10 @@ export default{
     gap: 25px;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.espaciado{
+    gap: 20px;
 }
 
 .cuadrado{

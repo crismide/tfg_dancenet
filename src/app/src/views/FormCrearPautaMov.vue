@@ -45,7 +45,6 @@
 
 <script>
 import router from '@/router';
-import axios from "axios";
 import Vue from 'vue'
 import Pestana_Participantes from '../components/Pestana_Participantes.vue';
 
@@ -75,7 +74,7 @@ export default{
         },
         fetchEscenaData(escenaId) {
             const apiURL = `http://localhost:4000/escena/${escenaId}`;
-            axios.get(apiURL)
+            this.$http.get(apiURL)
                 .then(response => {
                 const escenaData = response.data.data;
                 Vue.set(this.escena, 'name', escenaData.name);
@@ -85,7 +84,7 @@ export default{
                 //RECOGER PARTICIPANTES DE ESCENA
                 this.escena.participantes.forEach((participante)=>{
                     const apiURLgetParticipanteName = `http://localhost:4000/participante/${participante}/name`;
-                    axios.get(apiURLgetParticipanteName)
+                    this.$http.get(apiURLgetParticipanteName)
                     .then(response => {
                         const ParticipanteData = response.data.data
                         const elementosParticipante = {};
@@ -105,7 +104,7 @@ export default{
             let apiURLcrear = `http://localhost:4000/crear-pautaMovimiento`;
             let apiURLasignar = `http://localhost:4000/escena/asignar-pautaMovimiento/`;
 
-            axios.post(apiURLcrear, this.pautaMovimiento)
+            this.$http.post(apiURLcrear, this.pautaMovimiento)
                 .then((response) => {
                 console.log(response)
                 const pautaMovimientoId = response.data.data._id; 
@@ -113,7 +112,7 @@ export default{
                 const procesoCreativoId = this.$route.params.procesoCreativoId;
                 apiURLasignar = apiURLasignar + escenaId + "/" + pautaMovimientoId;
                 console.log("apiAsignar: "+apiURLasignar)
-                axios.post(apiURLasignar)
+                this.$http.post(apiURLasignar)
                     .then(() => {
                     console.log("Pauta de Movimiento asignada a escena");
                     this.$router.push(`/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`);

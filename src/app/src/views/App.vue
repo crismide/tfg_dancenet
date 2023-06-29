@@ -29,7 +29,7 @@ export default{
   align-items: center;
   gap: 18%;
   height: 25%;
-  width: auto;
+  width: 360px;
   height: 60px;
   background: #D9D9D9;
 }

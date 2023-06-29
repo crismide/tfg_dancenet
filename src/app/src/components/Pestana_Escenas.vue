@@ -1,15 +1,20 @@
 <template>
-    <button type="button" class="pestana" @click="irEscena">
+    <button 
+        type="button" 
+        class="pestana" 
+        @click="selectEscena"
+        :class="{ selected: isSelected }">
         <h4>{{ nombre_escena }}</h4>
     </button>
 </template>
 
 <script>
 export default{
-    props:["nombre_escena","id","nombre_proceso"],
+    props:["nombre_escena","id","nombre_proceso","entrarDetalles","isSelected"],
     methods:{
-        irEscena(){
-            this.$router.push(`/procesoCreativo/${this.nombre_proceso}/escena/${this.id}`);
+        selectEscena(){
+            if(this.entrarDetalles)this.$router.push(`/procesoCreativo/${this.nombre_proceso}/escena/${this.id}`);
+            else this.$emit("escena-selected", { id: this.id, name: this.nombre_escena });
         }
     }}
 </script>
@@ -27,5 +32,10 @@ export default{
     background: #D9D9D9;
     border-radius: 50px;
     border: none;
+}
+
+.pestana.selected{
+    background: #858585;
+    color: #FFF;
 }
 </style>

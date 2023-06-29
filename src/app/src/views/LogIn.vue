@@ -17,7 +17,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import BotonAtras from '../components/BotonAtras.vue'
 
 export default{
@@ -29,14 +28,14 @@ export default{
                 email: '',
                 password: ''
             },
-            error:''
+            error:'error'
         }
     },
     methods: {
         handleLogInForm() {
-            let apiURL = `http://localhost:4000/login`;
+            let apiURL = `/login`;
 
-            axios.post(apiURL, this.user)
+            this.$http.post(apiURL, this.user)
             .then((response) => {
 
                 if (response.data.status === true) {
@@ -48,6 +47,8 @@ export default{
                 };}
             })
             .catch(error => {
+                console.log("error")
+                this.error = error
                 console.log(error);
             });
         }
@@ -96,6 +97,10 @@ export default{
   line-height: 24px;
   color: #FFFFFF;
   background: #C286F1;
+}
+
+.button_entrar:active{
+  background: #7B539A; 
 }
 
 ::placeholder {

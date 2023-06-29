@@ -3,11 +3,19 @@ const ObjetoRoute = express.Router();
 var Objeto = require('../models/objeto.model');
 var PautaMovimiento = require('../models/pautaMovimiento.model');
 const Participante = require('../models/participante.model');
+const cloudinary = require('../cloudinary');
 
 ObjetoRoute.route('/crear-objeto').post(async (req, res) => {
   try {
+    // Get the base64-encoded image data from the request body
+    const image = req.body.image;
+
+    // Upload the image to Cloudinary
+    const result = await cloudinary.uploader.upload(image, { folder: 'Assets' });
+
+    // Create a new Objeto document with the Cloudinary image URL
     const modeloObjeto = new Objeto({
-      image: req.body.image
+      image: result.secure_url // Store the secure URL of the uploaded image
     });
     const objeto = await modeloObjeto.save();
     res.send({ status: true, message: 'Objeto creada con éxito', data: objeto});

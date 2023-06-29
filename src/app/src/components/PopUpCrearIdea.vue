@@ -32,7 +32,6 @@
   </template>  
 
 <script>
-import axios from "axios";
 import router from '@/router';
 
 export default {
@@ -62,7 +61,7 @@ export default {
         let apiURLcrear = `http://localhost:4000/crear-idea`;
         let apiURLasignar = `http://localhost:4000/${this.where}/asignar-idea/`;
 
-        axios.post(apiURLcrear, this.idea)
+        this.$http.post(apiURLcrear, this.idea)
             .then((response) => {
                 console.log(response.data)
                 const ideaId = response.data.data._id; // Access the created ProcesoCreativo ID
@@ -72,7 +71,7 @@ export default {
                 console.log("apiURLasignar "+apiURLasignar)
                 apiURLasignar = apiURLasignar + procesoCreativoId + "/" + ideaId;
                 console.log("apiAsignar: "+apiURLasignar)
-                axios.post(apiURLasignar)
+                this.$http.post(apiURLasignar)
                     .then(() => {
                     window.location.reload();
                     })

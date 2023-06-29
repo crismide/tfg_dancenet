@@ -19,7 +19,7 @@
 
 <script>
 import router from '@/router';
-import axios from "axios";
+
 
 export default{
     data() {
@@ -38,13 +38,13 @@ export default{
             let apiURLcrear = `http://localhost:4000/crear-escena`;
             let apiURLasignar = `http://localhost:4000/procesoCreativo/asignar-escena/`;
 
-            axios.post(apiURLcrear, this.escena)
+            this.$http.post(apiURLcrear, this.escena)
                 .then((response) => {
                 const escenaId = response.data.data._id; // Access the created ProcesoCreativo ID
                 const procesoCreativoId = this.$route.params.procesoCreativoId;
                 apiURLasignar = apiURLasignar + procesoCreativoId + "/" + escenaId;
                 console.log("apiAsignar: "+apiURLasignar)
-                axios.post(apiURLasignar)
+                this.$http.post(apiURLasignar)
                     .then(() => {
                     console.log("Escena asignada a proceso creativo");
                     this.$router.push(`/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`);

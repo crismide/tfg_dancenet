@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import axios from "axios";
+
 import router from '@/router';
 import Vue from 'vue'
 
@@ -42,13 +42,13 @@ export default{
             let apiURLcrear = `http://localhost:4000/crear-procesoCreativo`;
             let apiURLasignar = `http://localhost:4000/user/asignar-procesoCreativo/`;
 
-            axios.post(apiURLcrear, this.procesoCreativo)
+            this.$http.post(apiURLcrear, this.procesoCreativo)
                 .then((response) => {
                 const procesoCreativoId = response.data.data._id; // Access the created ProcesoCreativo ID
                 const userId = this.$route.params.userId;
                 apiURLasignar = apiURLasignar + userId + "/" + procesoCreativoId;
                 console.log("apiAsignar: "+apiURLasignar)
-                axios.post(apiURLasignar)
+                this.$http.post(apiURLasignar)
                     .then(() => {
                     console.log("Proceso creativo asignado a usuario");
                     this.$router.push(`/procesoCreativo/${procesoCreativoId}`);
