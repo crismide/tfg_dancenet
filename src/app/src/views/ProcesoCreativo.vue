@@ -37,7 +37,10 @@
                     <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showEscenas">
-                    <BotonAnadirAlargado label="Añadir escena +" @click="irFormCrearEscena"/>
+                    <div @click="irFormCrearEscena">
+                        <BotonAnadirAlargado label="Añadir escena +"/>
+                    </div>
+                    
                     
                     <div class="elementos_horizontales carrusel">
                         <Pestana_Escenas v-for="escena in escenas" 
@@ -45,6 +48,7 @@
                             :id="escena.id" 
                             :nombre_escena="escena.name"
                             :nombre_proceso="procesoCreativoId"
+                            :entrarDetalles="true"
                         />
                     </div>
                     
@@ -80,7 +84,8 @@
                     <i v-else class="material-symbols-outlined dropdown">arrow_drop_up</i>
                 </div>
                 <div class="contenido_apartado" v-if="showEnsayos">
-                    <Calendario/>
+                    <v-calendar :attributes='attributes' @dayclick="interaccionCalendario" :value="null" color="yellow">
+                    </v-calendar>
                 </div>       
             </div>
         </div>
@@ -97,7 +102,7 @@ import Pestana_Participantes from '../components/Pestana_Participantes.vue';
 import Calendario from '../components/Calendario.vue';
 import PopUpCrearIdea from '../components/PopUpCrearIdea.vue';
 import Vue from 'vue'
-import axios from "axios";
+
 
 export default{
     name: "ProcesoCreativo",
@@ -123,7 +128,24 @@ export default{
             ideas: [],
             escenas: [],
             participantes: [],
-            ensayos: []
+            ensayos: [],
+            days: [],
+            attributes:[
+                {
+                    key: 'today',
+                    highlight: {
+                        color: 'purple',
+                        fillMode: 'outline',
+                    },
+                    dates: new Date(),
+                }
+            ],
+            value:''
+        }
+    },
+    computed: {
+        dates() {
+            return this.days.map(day => day.date);
         }
     },
     mounted(){
@@ -132,6 +154,9 @@ export default{
         this.fetchProcesoCreativoData(procesoCreativoId);
     },
     methods:{
+        interaccionCalendario(day){
+            this.$router.push(`/formularioEnsayo/procesoCreativo/${this.procesoCreativoId}/${day.id}`);
+        },
         interaccion_popup(){
             if(this.showPopupIdeas) this.showPopupIdeas = false
             else this.showPopupIdeas = true 
@@ -157,18 +182,19 @@ export default{
         },
         fetchProcesoCreativoData(procesoCreativoId) {
             const apiURL = `http://localhost:4000/procesoCreativo/${procesoCreativoId}`;
-            axios.get(apiURL)
+            this.$http.get(apiURL)
                 .then(response => {
                 const procesoCreativoData = response.data.data;
                 Vue.set(this.procesoCreativo, 'title', procesoCreativoData.title);
                 Vue.set(this.procesoCreativo, 'ideas', [...procesoCreativoData.ideas]);
                 Vue.set(this.procesoCreativo, 'escenas', [...procesoCreativoData.escenas]);
                 Vue.set(this.procesoCreativo, 'participantes', [...procesoCreativoData.participantes]);
+                Vue.set(this.procesoCreativo, 'ensayos', [...procesoCreativoData.ensayos]);
                 
                 //RECOGER IDEAS DE PROCESO CREATIVO
                 this.procesoCreativo.ideas.forEach((idea) => {
                 const apiURLgetIdea = `http://localhost:4000/idea/${idea}`;
-                axios.get(apiURLgetIdea)
+                this.$http.get(apiURLgetIdea)
                     .then(response => {
                         const IdeaData = response.data.data
                         const elementosIdea = {};
@@ -182,12 +208,10 @@ export default{
                     });
                 });
 
-                console.log("ideas "+this.$data.ideas)
-
                 //RECOGER ESCENAS DE PROCESO CREATIVO
                 this.procesoCreativo.escenas.forEach((escena)=>{
                     const apiURLgetEscena = `http://localhost:4000/escena/${escena}`;
-                    axios.get(apiURLgetEscena)
+                    this.$http.get(apiURLgetEscena)
                     .then(response => {
                         const EscenaData = response.data.data
                         const elementosEscena = {};
@@ -197,12 +221,10 @@ export default{
                     })
                 })
 
-                console.log("escenas "+this.escenas)
-
                 //RECOGER PARTICIPANTES DE PROCESO CREATIVO
                 this.procesoCreativo.participantes.forEach((participante)=>{
                     const apiURLgetParticipante = `http://localhost:4000/participante/${participante}`;
-                    axios.get(apiURLgetParticipante)
+                    this.$http.get(apiURLgetParticipante)
                     .then(response => {
                         const ParticipanteData = response.data.data
                         const elementosParticipante = {};
@@ -211,7 +233,23 @@ export default{
                     })
                 })
 
-                console.log("participantes "+this.participantes)
+                //RECOGER ENSAYOS DE PROCESO CREATIVO
+                this.procesoCreativo.ensayos.forEach((ensayo)=>{
+                    const apiURLgetEnsayo = `http://localhost:4000/ensayo/${ensayo}`;
+                    this.$http.get(apiURLgetEnsayo)
+                    .then(response => {
+                        const EnsayoData = response.data.data
+                        const elementosEnsayo = {};
+                        Vue.set(elementosEnsayo, 'fecha', ensayo)
+                        this.ensayos.push(elementosEnsayo)
+
+                        const elementosEnsayoAttr = {};
+                        Vue.set(elementosEnsayoAttr, 'dates', new Date(EnsayoData.fecha))
+                        Vue.set(elementosEnsayoAttr, 'content', "red")
+                        Vue.set(elementosEnsayoAttr, 'highlight', true)
+                        this.attributes.push(elementosEnsayoAttr)
+                    })
+                })
             })
                 .catch(error => {
                 console.log(error);

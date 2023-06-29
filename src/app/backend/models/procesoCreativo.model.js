@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Escena = require('../models/escena.model');
 const Idea = require('../models/idea.model');
 const Participante = require('../models/participante.model');
+const Ensayo = require('../models/ensayo.model');
 
 const procesoCreativoSchema = mongoose.Schema({
   title: {
@@ -26,6 +27,10 @@ const procesoCreativoSchema = mongoose.Schema({
   participantes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Participante'
+  }],
+  ensayos: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Ensayo'
   }]
 });
 
@@ -39,6 +44,10 @@ procesoCreativoSchema.methods.addIdea = function (ideaId) {
 
 procesoCreativoSchema.methods.addParticipante = function (participanteId) {
   this.participantes.push(participanteId);
+};
+
+procesoCreativoSchema.methods.addEnsayo = function (ensayoId) {
+  this.ensayos.push(ensayoId);
 };
 
 const ProcesoCreativo = mongoose.model('ProcesoCreativo', procesoCreativoSchema);

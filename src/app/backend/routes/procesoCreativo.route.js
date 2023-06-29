@@ -4,12 +4,12 @@ var ProcesoCreativo = require('../models/procesoCreativo.model');
 const Escena = require('../models/escena.model');
 const Idea = require('../models/idea.model');
 const Participante = require('../models/participante.model');
+const Ensayo = require('../models/ensayo.model');
 
 ProcesoCreativoRoute.route('/crear-procesoCreativo').post(async (req, res) => {
   try {
     const modeloProcesoCreativo = new ProcesoCreativo({
-      title: req.body.title,
-      completed: req.body.completed
+      title: req.body.title
     });
     const procesoCreativo = await modeloProcesoCreativo.save();
     res.send({ status: true, message: 'Proceso creado con éxito', data: procesoCreativo});
@@ -174,6 +174,52 @@ ProcesoCreativoRoute.route('/procesoCreativo/encontrar-participantes/:procesoCre
   }
 });
 /***********************************************/
+
+/***************** ENSAYO ***********************/
+ProcesoCreativoRoute.route('/procesoCreativo/asignar-ensayo/:procesoCreativoId/:ensayoId').post(async (req, res) => {
+  try {
+    const procesoCreativoId = req.params.procesoCreativoId;
+    const ensayoId = req.params.ensayoId;
+
+    const procesoCreativo = await ProcesoCreativo.findById(procesoCreativoId);
+    const ensayo = await Ensayo.findById(ensayoId);
+
+    if (!procesoCreativo || !ensayo) {
+      return res.send({ status: false, message: 'ProcesoCreativo o ensayo no encontrado' });
+    }
+
+    procesoCreativo.addEnsayo(ensayo._id);
+    await procesoCreativo.save();
+
+    res.send({ status: true, message: 'ensayo asignado correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.send({ status: false, message: 'Error asignando ensayo' });
+  }
+});
+
+ProcesoCreativoRoute.route('/escena/encontrar-ensayos/:procesoCreativoId/ensayos').get(async (req, res) => {
+  try {
+    const procesoCreativoId = req.params.procesoCreativoId;
+
+    // Find the ProcesoCreativo by ID
+    const procesoCreativo = await ProcesoCreativo.findById(procesoCreativoId).populate('ensayos');
+
+    if (!procesoCreativo) {
+      return res.send({ status: false, message: 'ProcesoCreativo no encontrado' });
+    }
+
+    // Access the populated 'escenas' property to get all the associated Escena documents
+    const ensayos = procesoCreativo.ensayos;
+
+    res.send({ status: true, data: ensayos });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ status: false, message: 'Error retrieving ensayos' });
+  }
+});
+/***********************************************/
+
 
 
 module.exports = ProcesoCreativoRoute;

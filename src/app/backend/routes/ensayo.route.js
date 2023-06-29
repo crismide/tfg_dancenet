@@ -6,11 +6,12 @@ const Escena = require('../models/escena.model');
 EnsayoRoute.route('/crear-ensayo').post(async (req, res) => {
   try {
     const newEnsayo = new Ensayo({
-      fecha: req.body.fecha
+      fecha: req.body.fecha,
+      escenas: req.body.escenas
     });
 
-    await newEnsayo.save();
-    res.send({ status: true, message: 'Ensayo creado con éxito' });
+    const ensayo = await newEnsayo.save();
+    res.send({ status: true, message: 'Ensayo creado con éxito', data: ensayo });
   } catch (error) {
     console.error(error);
     res.send({ status: false, message: 'Error creando ensayo' });

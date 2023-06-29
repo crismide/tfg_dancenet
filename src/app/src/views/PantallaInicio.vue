@@ -11,15 +11,7 @@
       <div class="elementos_horizontales izq">
         <i class="material-icons">list</i>
       </div>
-      <div class="elementos_horizontales">
-        <h4>Filtros</h4>
-      </div>
-        
-      <div class="elementos_horizontales carrusel">
-        <Filtro nombre_filtro="Ordenar"/>
-        <Filtro nombre_filtro="Etiquetas"/>
-        <Filtro nombre_filtro="Creadorxs"/>
-      </div>
+      
       <div class="wrapper">
         <PreviewProcesoCreativo
           v-for="proceso in this.procesosCreativos"
@@ -41,7 +33,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import PreviewProcesoCreativo from '../components/PreviewProcesoCreativo.vue'
 import Filtro from '../components/Filtro.vue'
 import BotonAnadir from '../components/BotonAnadir.vue'
@@ -78,7 +69,7 @@ export default {
     },
     fetchUserData(userId) {
       const apiURL = `http://localhost:4000/user/${userId}`;
-      axios.get(apiURL)
+      this.$http.get(apiURL)
         .then(response => {
           const userData = response.data.data;
           Vue.set(this.user, 'name', userData.name);
@@ -88,7 +79,7 @@ export default {
           Vue.set(this.user, 'ideas', [...userData.ideas]);
           this.user.procesoCreativos.forEach((procesoCreativo)=>{
             const apiURLgetPC = `http://localhost:4000/procesoCreativo/${procesoCreativo}`;
-            axios.get(apiURLgetPC)
+            this.$http.get(apiURLgetPC)
               .then(response => {
                 const procesoCreativoData = response.data.data
                 const elementosProceso = {};
