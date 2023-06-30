@@ -33,43 +33,73 @@ export default{
                 title: '',
                 completed: false
             },
-            userId:''
+            participante: {
+                userId: '',
+                name:''
+            },
+            userId:'',
+            procesoCreativoId:'',
+            participanteId:''
         }
     },
     mounted(){
         this.userId = this.$route.params.userId;
-        
+        this.participante.userId = this.userId;
+        this.getUserName(this.userId)
     },
     methods: {
         handleSubmitForm() {
             let apiURLcrear = `http://localhost:4000/crear-procesoCreativo`;
-            let apiURLasignar = `http://localhost:4000/user/asignar-procesoCreativo/`;
+            let apiURLasignarUser = `http://localhost:4000/user/asignar-procesoCreativo/`;
+            let apiURLcrearParticipante = `http://localhost:4000/crear-participante`;
+            let apiURLasignarParticipante = `/procesoCreativo/asignar-participante/`
 
-            this.$http.post(apiURLcrear, this.procesoCreativo)
+            this.$http.post(apiURLcrear, this.procesoCreativo).then((response) => {
+                this.procesoCreativoId = response.data.data._id
+                apiURLasignarUser = apiURLasignarUser + this.userId + "/" + this.procesoCreativoId
+                this.$http.post(apiURLasignarUser).then(() => {
+                    this.$http.post(apiURLcrearParticipante,this.participante).then((response) => {
+                        this.participanteId = response.data.data._id
+                        apiURLasignarParticipante = apiURLasignarParticipante + this.procesoCreativoId + "/" + this.participanteId
+                        this.$http.post(apiURLasignarParticipante).then(() => {
+                            this.$router.push({
+                                path: `/procesoCreativo/${this.procesoCreativoId}`, 
+                                query: {userId: this.userId}
+                            })
+                        }).catch((error) => {console.log(error)})
+                    }).catch((error) => {console.log(error)})
+                }).catch((error) => {console.log(error)})
+            }).catch((error) => {console.log(error)})
+
+            /*
                 .then((response) => {
-                const procesoCreativoId = response.data.data._id; // Access the created ProcesoCreativo ID
-                apiURLasignar = apiURLasignar + this.userId + "/" + procesoCreativoId;
-                console.log("apiAsignar: "+apiURLasignar)
-                this.$http.post(apiURLasignar)
-                    .then(() => {
-                    console.log("Proceso creativo asignado a usuario");
-                    //`/procesoCreativo/${procesoCreativoId}`
-                    this.$router.push({
-                        path: `/procesoCreativo/${procesoCreativoId}`, 
-                        query: {userId: this.userId}
-                    })
-                    this.procesoCreativo = {
-                        title: ''
-                        };
+                    const procesoCreativoId = response.data.data._id; // Access the created ProcesoCreativo ID
+                    apiURLasignarUser = apiURLasignarUser + this.userId + "/" + procesoCreativoId;
+                    this.$http.post(apiURLasignar)
+                        .then(() => {
+                            this.$router.push({
+                                path: `/procesoCreativo/${procesoCreativoId}`, 
+                                query: {userId: this.userId}
+                            })
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        })
                     })
                     .catch(error => {
-                    console.log(error);});})
-                    .catch(error => {
-                    console.log(error);
-            });
+                        console.log(error);
+                });
+            */
         },
         goToPreviousView() {
             router.go(-1);
+        },
+
+        getUserName(userId){
+            const URLgetName = `http://localhost:4000/user/${userId}`
+            this.$http.get(URLgetName).then((response) => {
+                this.participante.name = response.data.data.name
+            }).catch(error => { console.log(error); })
         }
 }
 }

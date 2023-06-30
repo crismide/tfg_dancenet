@@ -6,6 +6,10 @@ const participanteSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  name: {
+    type: String,
+    required:true
+  },
   escenas: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Escena'

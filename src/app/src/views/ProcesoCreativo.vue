@@ -69,9 +69,9 @@
                     </div>
                     <BotonAnadirAlargado label="Añadir participante +"/>
                     <div class="grid_dos_filas">
-                        <Pestana_Participantes nombre="Andrea" imagen="" roles=""/>
-                        <Pestana_Participantes nombre="Andrea" imagen="" roles=""/>
-                        <Pestana_Participantes nombre="Andrea" imagen="" roles=""/>
+                        <Pestana_Participantes v-for="participante in participantes" 
+                            :nombre="participante.name"
+                            :key="participante.userId"/>
                     </div>
                 </div>
             </div>
@@ -153,9 +153,9 @@ export default{
     mounted(){
         const procesoCreativoId = this.$route.params.procesoCreativoId;
         this.procesoCreativoId = procesoCreativoId
-        console.log(this.$route)
         this.userId = this.$route.query.userId
         this.fetchProcesoCreativoData(procesoCreativoId);
+        console.log(this.participantes)
     },
     methods:{
         interaccionCalendario(day){
@@ -236,6 +236,7 @@ export default{
                         const ParticipanteData = response.data.data
                         const elementosParticipante = {};
                         Vue.set(elementosParticipante, 'userId', participante)
+                        Vue.set(elementosParticipante, 'name', ParticipanteData.name)
                         this.participantes.push(elementosParticipante)
                     })
                 })

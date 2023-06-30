@@ -8,7 +8,7 @@ Vue.use(VCalendar);
 
 Vue.prototype.$http=axios
 
-axios.defaults.baseURL = 'https://ae08-83-49-188-65.ngrok-free.app'
+axios.defaults.baseURL = 'https://7a7f-83-49-188-65.ngrok-free.app'
 
 Vue.config.productionTip = false
 
