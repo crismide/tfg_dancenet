@@ -9,10 +9,10 @@
 import router from '@/router';
 
 export default{
-    props:['route_to'],
+    props:['id','route'],
     methods:{
         irAtras(){
-            router.go(-1);
+            this.$router.push(this.route + this.id)
         }
     }
 }

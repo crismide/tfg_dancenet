@@ -173,7 +173,8 @@ export default{
                     dates: new Date(),
                 }
             ],
-            value:''
+            value:'',
+            userId:''
         }
     },
     computed: {
@@ -182,28 +183,42 @@ export default{
         }
     },
     mounted(){
-        const escenaId = this.$route.params.escenaId;
-        this.escenaId = escenaId
-        const procesoCreativoId = this.$route.params.procesoCreativoId;
-        this.procesoCreativoId = procesoCreativoId
-        this.fetchEscenaData(escenaId);
+        this.escenaId = this.$route.params.escenaId;
+        this.procesoCreativoId = this.$route.params.procesoCreativoId;
+        this.userId = this.$route.query.userId;
+        this.fetchEscenaData(this.escenaId);
     
     },
     methods:{
         interaccionCalendario(day){
-            this.$router.push(`/formularioEnsayo/escena/${this.escenaId}/${this.procesoCreativoId}/${day.id}`);
+            this.$router.push({
+                path: `/formularioEnsayo/escena/${this.escenaId}/${day.id}`, 
+                query: {procesoCreativoId: this.procesoCreativoId, userId: this.userId}
+            })
         },
         irFormCrearPautaMovimiento(){
-            this.$router.push(`/formularioPautaMov/${this.escenaId}`);
+            this.$router.push({
+                path: `/formularioPautaMov/${this.escenaId}`, 
+                query: {procesoCreativoId: this.procesoCreativoId, userId: this.userId}
+            })
         },
         irFormCrearObjeto(){
-            this.$router.push(`/formularioObjeto/${this.escenaId}`);
+            this.$router.push({
+                path: `/formularioObjeto/${this.escenaId}`, 
+                query: {procesoCreativoId: this.procesoCreativoId, userId: this.userId}
+            })
         },
         irFormCrearRecorridoEspacial(){
-            this.$router.push(`/formularioRecorridoEspacial/${this.escenaId}`);
+            this.$router.push({
+                path: `/formularioRecorridoEspacial/${this.escenaId}`, 
+                query: {procesoCreativoId: this.procesoCreativoId, userId: this.userId}
+            })
         },
         irProcesoCreativo(){
-            this.$router.push(`/procesoCreativo/${this.procesoCreativoId}`);
+            this.$router.push({
+                path: `/procesoCreativo/${this.procesoCreativoId}`, 
+                query: {userId: this.userId}
+            })
         },
         interaccion_popup(){
             if(this.showPopupIdeas) this.showPopupIdeas = false

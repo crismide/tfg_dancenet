@@ -60,13 +60,18 @@ export default{
                 description:'',
                 level: ''
             },
-            participantes: []
+            participantes: [],
+            escenaId: '',
+            procesoCreativoId: '',
+            userId:''
         }
     },
     mounted(){
-        const escenaId = this.$route.params.escenaId;
-        this.escenaId = escenaId
-        this.fetchEscenaData(escenaId);
+        console.log(this.$route)
+        this.escenaId = this.$route.params.escenaId;
+        this.procesoCreativoId = this.$route.query.procesoCreativoId;
+        this.userId = this.$route.query.userId;
+        this.fetchEscenaData(this.escenaId);
     },
     methods:{
         atras(){
@@ -108,14 +113,13 @@ export default{
                 .then((response) => {
                 console.log(response)
                 const pautaMovimientoId = response.data.data._id; 
-                const escenaId = this.$route.params.escenaId;
-                const procesoCreativoId = this.$route.params.procesoCreativoId;
-                apiURLasignar = apiURLasignar + escenaId + "/" + pautaMovimientoId;
-                console.log("apiAsignar: "+apiURLasignar)
+                apiURLasignar = apiURLasignar + this.escenaId + "/" + pautaMovimientoId;
                 this.$http.post(apiURLasignar)
                     .then(() => {
-                    console.log("Pauta de Movimiento asignada a escena");
-                    this.$router.push(`/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`);
+                        this.$router.push({
+                            path: `/procesoCreativo/${this.procesoCreativoId}/escena/${this.escenaId}`, 
+                            query: {userId: this.userId}
+                        })
                     })
                     .catch(error => {
                     console.log(error);});})
@@ -130,7 +134,7 @@ export default{
 
 <style>
     .textarea_peque{
-        width: 100%;
+        width: 90%;
         border-radius: 5px;
         background: #F4F4F4;
         border: 0px;
