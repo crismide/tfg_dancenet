@@ -7,10 +7,13 @@
 
 <script>
 export default {
-  props: ['nombre_proceso','id'],
+  props: ['nombre_proceso','id','userId'],
   methods:{
     entrarEnProceso(){
-      this.$router.push(`/procesoCreativo/${this.id}`)
+      this.$router.push({
+        path: `/procesoCreativo/${this.id}`, 
+        query: {userId: this.userId}
+      })
     }
   }
 }

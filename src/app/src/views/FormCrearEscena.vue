@@ -27,10 +27,15 @@ export default{
             escena: {
                 name: ''
             },
-            procesoCreativo: {}
+            procesoCreativo: {},
+            userId:''
         }
     },
+    mounted(){
+        this.userId = this.$route.query.userId
+    },
     methods:{
+        
         atras(){
             router.go(-1);
         },
@@ -47,7 +52,11 @@ export default{
                 this.$http.post(apiURLasignar)
                     .then(() => {
                     console.log("Escena asignada a proceso creativo");
-                    this.$router.push(`/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`);
+                    //this.$router.push(`/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`);
+                        this.$router.push({
+                            path: `/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`, 
+                            query: {userId: this.userId}
+                        })
                     })
                     .catch(error => {
                     console.log(error);});})
@@ -63,25 +72,22 @@ export default{
     input[type=text]{
         border:none;
         border-bottom: 1px solid #939393;
-        width: 100%;
-    }
-    /* Style the custom checkbox */
-    input[type="checkbox"].cbox + label {
-        position: relative;
-        padding-left: 40px;
-    }
-
-    /* Create the checkbox appearance */
-    input[type="checkbox"].cbox + label::before {
-        content: "";
-        position: absolute;
-        top: 2px;
-        left: 0;
-        width: 34px;
-        height: 34px;
-        border: 0px;
-        background-color: #D9D9D9;
+        width: 90%;
+        color: #929292;
+        font-size: 15px;
+        font-family: Inter;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
     }
     
+    label{
+        color: #000;
+        font-size: 15px;
+        font-family: Inter;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+    }
     
 </style>

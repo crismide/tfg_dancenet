@@ -19,6 +19,10 @@ const userSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Participante'
   }],
+  procesoCreativos: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Participante'
+  }],
   ideas: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Idea'
@@ -31,6 +35,10 @@ userSchema.methods.addParticipante = function (participanteId) {
 
 userSchema.methods.addIdea = function (ideaId) {
     this.ideas.push(ideaId);
+};
+
+userSchema.methods.addProcesoCreativo = function (procesoCreativoId) {
+  this.procesoCreativos.push(procesoCreativoId);
 };
 
 const User = mongoose.model('User', userSchema);

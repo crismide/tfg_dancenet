@@ -26,7 +26,10 @@ export default {
   methods:{
     crearProceso(){
       const userId = this.$route.params.userId;
-      this.$router.push(`/formularioCrearPC/${userId}`);
+      //this.$router.push(`/formularioCrearPC/${userId}`);
+      this.$router.push({
+        path: `/formularioCrearPC/${userId}`
+      })
     }
   }
 }

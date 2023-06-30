@@ -9,10 +9,6 @@ const procesoCreativoSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  completed: {
-    type: Boolean,
-    required: true
-  },
   portada:{
     type: String
   },

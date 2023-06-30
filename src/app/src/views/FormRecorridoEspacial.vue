@@ -48,51 +48,17 @@
         context: null,
         recorridoEspacial: {
             image:''
-        }
+        },
+        userId:'',
+        escenaId:''
       };
     },
-    /*mounted() {
-      this.canvas = this.$refs.myCanvas.$refs.canvas; // Access the underlying canvas element
-      this.context = this.canvas.getContext("2d");
-      this.redraw(); // Redraw the existing lines on mount
-    }*,*/
+    mounted() {
+      this.procesoCreativoId = this.$route.query.procesoCreativoId;
+      this.escenaId = this.$route.params.escenaId;
+      this.userId = this.$route.query.userId;
+    },
     methods: {
-      /*startDrawing(event) {
-        this.isDrawing = true;
-        this.currentPath = [];
-        this.currentPath.push({
-          x: event.clientX - this.canvas.offsetLeft,
-          y: event.clientY - this.canvas.offsetTop
-        });
-      },
-      draw(event) {
-        if (!this.isDrawing) return;
-        this.currentPath.push({
-          x: event.clientX - this.canvas.offsetLeft,
-          y: event.clientY - this.canvas.offsetTop
-        });
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.redraw();
-      },
-      stopDrawing() {
-        this.isDrawing = false;
-        this.lines.push([...this.currentPath]);
-      },
-      redraw() {
-        this.lines.forEach((path) => {
-          this.context.beginPath();
-          path.forEach((point, index) => {
-            if (index === 0) {
-              this.context.moveTo(point.x, point.y);
-            } else {
-              this.context.lineTo(point.x, point.y);
-            }
-          });
-          this.context.strokeStyle = this.color;
-          this.context.lineWidth = 2;
-          this.context.stroke();
-        });
-      },*/
       atras() {
         router.go(-1);
       },
@@ -106,14 +72,15 @@
                 .then((response) => {
                 console.log(response)
                 const recorridoEspacialId = response.data.data._id; 
-                const escenaId = this.$route.params.escenaId;
-                const procesoCreativoId = this.$route.params.procesoCreativoId;
-                apiURLasignar = apiURLasignar + escenaId + "/" + recorridoEspacialId;
+                apiURLasignar = apiURLasignar + this.escenaId + "/" + recorridoEspacialId;
                 console.log("apiAsignar: "+apiURLasignar)
                 this.$http.post(apiURLasignar)
                     .then(() => {
                     console.log("Recorrido Espacial asignado a escena");
-                    this.$router.push(`/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`);
+                    this.$router.push({
+                        path: `/procesoCreativo/${this.procesoCreativoId}/escena/${this.escenaId}`, 
+                        query: {userId: this.userId}
+                    })
                     })
                     .catch(error => {
                     console.log(error);});})

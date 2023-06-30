@@ -55,7 +55,8 @@ export default{
             },
             attributes:[],
             isProcesoCreativo: true,
-            ensayoId: ''
+            ensayoId: '',
+            userId:''
         }
     },
     mounted(){
@@ -65,14 +66,20 @@ export default{
         const path = this.$route.path
         const trimmedPath = path.split("/").slice(0, 3).join("/");
         this.isProcesoCreativo = trimmedPath === '/formularioEnsayo/procesoCreativo';
-        this.procesoCreativoId = this.$route.params.procesoCreativoId;
+        
 
-        if (this.isProcesoCreativo) this.fetchProcesoCreativoData(this.procesoCreativoId);
+        if (this.isProcesoCreativo) {
+            this.procesoCreativoId = this.$route.params.procesoCreativoId;
+            this.fetchProcesoCreativoData(this.procesoCreativoId);
+        } 
 
         else{
+            this.procesoCreativoId = this.$route.query.procesoCreativoId;
             this.escenaId = this.$route.params.escenaId;
             this.fetchEscenaData(this.escenaId);
         }
+
+        this.userId = this.$route.query.userId;
         
     },
     methods: {
@@ -115,11 +122,12 @@ export default{
                         .then(() => {
                             this.ensayo.escenas.forEach((escena)=>{
                                 apiURLasignarEscena = apiURLasignarEscena + escena + "/" + ensayoId
-                                console.log(apiURLasignarEscena)
                                 this.$http.post(apiURLasignarEscena)
                                     .then(() => {
-                                        console.log("Ensayo asignada a escena");
-                                        this.$router.push(`/procesoCreativo/${procesoCreativoId}`);
+                                        this.$router.push({
+                                            path: `/procesoCreativo/${this.procesoCreativoId}`, 
+                                            query: {userId: this.userId}
+                                        })
                                     })
                                     .catch(error => {
                                     console.log(error);});})
@@ -139,21 +147,24 @@ export default{
                 this.ensayo.escenas.push(this.escenaId)
                 
                 let apiURLcrear = `http://localhost:4000/crear-ensayo`;
-                let apiURLasignar = `http://localhost:4000/procesoCreativo/asignar-ensayo/`;
+                let apiURLasignar = `http://localhost:4000/procesoCreativo/asignar-ensayo/${this.procesoCreativoId}`;
                 let apiURLasignarEscena = `http://localhost:4000/escena/asignar-ensayo/${this.escenaId}/`;
 
                 this.$http.post(apiURLcrear, this.ensayo)
                     .then((response) => {
                     const ensayoId = response.data.data._id;
-                    apiURLasignar = apiURLasignar + this.procesoCreativoId + "/" + ensayoId;
+                    apiURLasignar = apiURLasignar + "/" + ensayoId;
+                    console.log(apiURLasignar)
                     apiURLasignarEscena = apiURLasignarEscena + ensayoId
                     this.$http.post(apiURLasignar)
                         .then(() => {
-                            console.log("Ensayo asignada a proceso creativo");
                             this.$http.post(apiURLasignarEscena)
                                 .then(() => {
-                                    console.log("Ensayo asignada a escena");
-                                    this.$router.push(`/procesoCreativo/${this.procesoCreativoId}/escena/${this.escenaId}`);
+                                    //this.$router.push(`/procesoCreativo/${this.procesoCreativoId}/escena/${this.escenaId}`);
+                                    this.$router.push({
+                                        path: `/procesoCreativo/${this.procesoCreativoId}/escena/${this.escenaId}`, 
+                                        query: {userId: this.userId}
+                                    })
                                 })
                                 .catch(error => {
                                 console.log(error);});})

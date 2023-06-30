@@ -13,7 +13,7 @@
       </div>
       
       <div class="wrapper">
-        <PreviewProcesoCreativo
+        <PreviewProcesoCreativo :userId="userId"
           v-for="proceso in this.procesosCreativos"
           :key="proceso.id"
           :id="proceso.id"
@@ -27,7 +27,7 @@
         <BotonAnadir @evento_anadir="interaccion_popup"/>
       </div>
      
-      <PopupCrear v-if="showPopupCrear" @evento_salir_popup="interaccion_popup" :userid="userId" />
+      <PopupCrear v-if="showPopupCrear" @evento_salir_popup="interaccion_popup"/>
 
   </div>
 </template>
@@ -59,8 +59,8 @@ export default {
     }
   },
   mounted() {
-    const userId = this.$route.params.userId;
-    this.fetchUserData(userId);
+    this.userId = this.$route.params.userId;
+    this.fetchUserData(this.userId);
   },
   methods:{
     interaccion_popup(){

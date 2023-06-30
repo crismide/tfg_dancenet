@@ -1,6 +1,6 @@
 <template>
     <div class="main-div">
-        <BotonAtras route_to="/"/>
+        <BotonAtras :id='userId' :route="'/inicio/'"/>
         <h1 style="color: #C286F1;">{{ procesoCreativo.title }}</h1>
         <div class="contenido_scroll">
             <!-- ***** APARTADO IDEAS *****-->
@@ -43,7 +43,7 @@
                     
                     
                     <div class="elementos_horizontales carrusel">
-                        <Pestana_Escenas v-for="escena in escenas" 
+                        <Pestana_Escenas :userId="userId" v-for="escena in escenas" 
                             :key="escena.id" 
                             :id="escena.id" 
                             :nombre_escena="escena.name"
@@ -140,17 +140,21 @@ export default{
                     dates: new Date(),
                 }
             ],
-            value:''
+            value:'',
+            userId:''
         }
     },
     computed: {
         dates() {
             return this.days.map(day => day.date);
+            console.log(router.currentRoute)
         }
     },
     mounted(){
         const procesoCreativoId = this.$route.params.procesoCreativoId;
         this.procesoCreativoId = procesoCreativoId
+        console.log(this.$route)
+        this.userId = this.$route.query.userId
         this.fetchProcesoCreativoData(procesoCreativoId);
     },
     methods:{
@@ -178,7 +182,10 @@ export default{
             else this.showEnsayos = false
         },
         irFormCrearEscena(){
-            this.$router.push(`/formularioCrearEscena/${this.procesoCreativoId}`);
+            this.$router.push({
+                path: `/formularioCrearEscena/${this.procesoCreativoId}`, 
+                query: {userId: this.userId}
+            })
         },
         fetchProcesoCreativoData(procesoCreativoId) {
             const apiURL = `http://localhost:4000/procesoCreativo/${procesoCreativoId}`;
@@ -320,6 +327,10 @@ export default{
     grid-auto-columns:auto;
     overflow-x: scroll;
     gap: 10px;
+}
+
+h1{
+    word-wrap: break-word;
 }
 
 </style>

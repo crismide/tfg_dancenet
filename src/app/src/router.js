@@ -21,7 +21,8 @@ const routes = [
   },
   { 
     path: '/inicio/:userId',
-    component: PantallaInicio
+    component: PantallaInicio,
+    name: PantallaInicio
   },
   {
     path: '/formularioCrearPC/:userId',
@@ -44,7 +45,7 @@ const routes = [
     component: FormCrearEnsayo
   },
   {
-    path: '/formularioEnsayo/escena/:escenaId/:procesoCreativoId/:diaId',
+    path: '/formularioEnsayo/escena/:escenaId/:diaId',
     component: FormCrearEnsayo
   },
   {
@@ -53,7 +54,9 @@ const routes = [
   },
   {
     path: '/procesoCreativo/:procesoCreativoId',
-    component: ProcesoCreativo
+    component: ProcesoCreativo,
+    name: "Proceso Creativo",
+    params: true
   },
   {
     path: '/procesoCreativo/:procesoCreativoId/escena/:escenaId',

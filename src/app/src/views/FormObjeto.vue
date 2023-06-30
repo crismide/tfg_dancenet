@@ -66,9 +66,9 @@
       };
     },
     mounted() {
-      const escenaId = this.$route.params.escenaId;
-      this.escenaId = escenaId;
-      this.fetchEscenaData(escenaId);
+      this.escenaId = this.$route.params.escenaId;
+      this.procesoCreativoId = this.$route.query.procesoCreativoId;
+      this.fetchEscenaData(this.escenaId);
     },
     methods: {
         handleFileChange(event) {
@@ -144,16 +144,13 @@
             .then((response) => {
                 console.log(response);
                 const objetoId = response.data.data._id;
-                const escenaId = this.$route.params.escenaId;
-                const procesoCreativoId = this.$route.params.procesoCreativoId;
-    
-                apiURLasignar = apiURLasignar + escenaId + "/" + objetoId;
+                apiURLasignar = apiURLasignar + this.escenaId + "/" + objetoId;
                 console.log("apiAsignar: " + apiURLasignar);
                 this.$http
                 .post(apiURLasignar)
                 .then(() => {
                     console.log("Objeto asignada a escena");
-                    this.$router.push(`/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`);
+                    this.$router.push(`/procesoCreativo/${this.procesoCreativoId}/escena/${this.escenaId}`);
                 })
                 .catch((error) => {
                     console.log(error);

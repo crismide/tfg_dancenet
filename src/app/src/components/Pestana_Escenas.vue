@@ -10,10 +10,16 @@
 
 <script>
 export default{
-    props:["nombre_escena","id","nombre_proceso","entrarDetalles","isSelected"],
+    props:["nombre_escena","id","nombre_proceso","entrarDetalles","isSelected","userId"],
     methods:{
         selectEscena(){
-            if(this.entrarDetalles)this.$router.push(`/procesoCreativo/${this.nombre_proceso}/escena/${this.id}`);
+            if(this.entrarDetalles){
+                console.log(this.userId)
+                this.$router.push({
+                    path: `/procesoCreativo/${this.nombre_proceso}/escena/${this.id}`, 
+                    query: {userId: this.userId}
+                })
+            }
             else this.$emit("escena-selected", { id: this.id, name: this.nombre_escena });
         }
     }}
