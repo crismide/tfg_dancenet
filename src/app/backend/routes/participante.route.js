@@ -7,11 +7,12 @@ const User = require('../models/user.model');
 ParticipanteRoute.route('/crear-participante').post(async (req, res) => {
   try {
     const newParticipante = new Participante({
-      userId: req.body.userId
+      userId: req.body.userId,
+      name: req.body.name
     });
 
-    await newParticipante.save();
-    res.send({ status: true, message: 'Participante creado con éxito' });
+    let participante = await newParticipante.save();
+    res.send({ status: true, message: 'Participante creado con éxito', data: participante });
   } catch (error) {
     console.error(error);
     res.send({ status: false, message: 'Error creando participante' });
