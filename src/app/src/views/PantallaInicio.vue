@@ -61,6 +61,7 @@ export default {
   mounted() {
     this.userId = this.$route.params.userId;
     this.fetchUserData(this.userId);
+    this.procesosCreativos = this.procesosCreativos
   },
   methods:{
     interaccion_popup(){

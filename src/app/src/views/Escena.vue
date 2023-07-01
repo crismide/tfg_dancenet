@@ -187,6 +187,7 @@ export default{
         this.procesoCreativoId = this.$route.params.procesoCreativoId;
         this.userId = this.$route.query.userId;
         this.fetchEscenaData(this.escenaId);
+        this.recorridosEspaciales = this.recorridosEspaciales.reverse()
     
     },
     methods:{
