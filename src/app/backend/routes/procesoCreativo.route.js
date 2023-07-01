@@ -166,8 +166,12 @@ ProcesoCreativoRoute.route('/procesoCreativo/encontrar-participantes/:procesoCre
 
     // Access the populated 'escenas' property to get all the associated Escena documents
     const participantes = procesoCreativo.participantes;
+    let participantesId = []
+    participantes.forEach(participante => {
+      participantesId.push(participante._id)
+    });
 
-    res.send({ status: true, data: participantes });
+    res.send({ status: true, data: participantesId });
   } catch (error) {
     console.error(error);
     res.status(500).send({ status: false, message: 'Error retrieving participantes' });

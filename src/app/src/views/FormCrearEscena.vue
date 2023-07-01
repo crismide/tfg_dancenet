@@ -19,7 +19,7 @@
 
 <script>
 import router from '@/router';
-
+import Vue from 'vue'
 
 export default{
     data() {
@@ -27,8 +27,8 @@ export default{
             escena: {
                 name: ''
             },
-            procesoCreativo: {},
-            userId:''
+            userId:'',
+            participantes: []
         }
     },
     mounted(){
@@ -42,30 +42,43 @@ export default{
         handleSubmitForm() {
             let apiURLcrear = `http://localhost:4000/crear-escena`;
             let apiURLasignar = `http://localhost:4000/procesoCreativo/asignar-escena/`;
+            let apiURLgetParticipantes = `http://localhost:4000/procesoCreativo/encontrar-participantes/`
+            let apiURLpostParticipantes = `http://localhost:4000/escena/asignar-participante/`
 
-            this.$http.post(apiURLcrear, this.escena)
-                .then((response) => {
+            this.$http.post(apiURLcrear, this.escena).then((response) => {
                 const escenaId = response.data.data._id; // Access the created ProcesoCreativo ID
                 const procesoCreativoId = this.$route.params.procesoCreativoId;
+
                 apiURLasignar = apiURLasignar + procesoCreativoId + "/" + escenaId;
-                console.log("apiAsignar: "+apiURLasignar)
-                this.$http.post(apiURLasignar)
-                    .then(() => {
-                    console.log("Escena asignada a proceso creativo");
-                    //this.$router.push(`/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`);
-                        this.$router.push({
-                            path: `/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`, 
-                            query: {userId: this.userId}
+                apiURLgetParticipantes = apiURLgetParticipantes + procesoCreativoId + "/participantes"
+                apiURLpostParticipantes = apiURLpostParticipantes +escenaId + "/"
+
+                this.$http.post(apiURLasignar).then(() => {
+                    this.$http.get(apiURLgetParticipantes).then((response) => {
+                        const participantes = response.data.data;
+                        participantes.forEach(participante => {
+                            apiURLpostParticipantes = apiURLpostParticipantes + participante
+                            this.$http.post(apiURLpostParticipantes).then(() => {
+                                this.$router.push({
+                                    path: `/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`, 
+                                    query: {userId: this.userId}
+                                })
+                            })
                         })
-                    })
-                    .catch(error => {
-                    console.log(error);});})
-                    .catch(error => {
-                    console.log(error);
+                        
+                        
+                    }).catch((error) => {console.log(error)})
+                }).catch(error => {console.log(error);}
+                );}).catch(error => {console.log(error);
             });
         }
     }
 }
+
+/*this.$router.push({
+                                path: `/procesoCreativo/${procesoCreativoId}/escena/${escenaId}`, 
+                                query: {userId: this.userId}
+                            })*/
 </script>
 
 <style>

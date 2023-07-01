@@ -94,9 +94,9 @@
                 <div class="contenido_apartado" v-if="showParticipantes">
                     <BotonAnadirAlargado label="Añadir rol +"/>
                     <div class="grid_dos_filas">
-                        <Pestana_Participantes nombre="Andrea" imagen="" roles=""/>
-                        <Pestana_Participantes nombre="Andrea" imagen="" roles=""/>
-                        <Pestana_Participantes nombre="Andrea" imagen="" roles=""/>
+                        <Pestana_Participantes v-for="participante in participantes" 
+                            :nombre="participante.name"
+                            :key="participante.userId"/>
                     </div>
                 </div>
             </div>
@@ -328,6 +328,7 @@ export default{
                         const ParticipanteData = response.data.data
                         const elementosParticipante = {};
                         Vue.set(elementosParticipante, 'userId', participante)
+                        Vue.set(elementosParticipante, 'name', ParticipanteData.name)
                         this.participantes.push(elementosParticipante)
                     })
                     .catch(error => {
