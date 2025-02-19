@@ -1,10 +1,13 @@
-import MyProcesses from "@/components/MyProcesses";
-import { StyleSheet, Text, View } from "react-native";
+import { View, Text } from 'react-native'
+import React from 'react'
+import "../global.css"
 
-export default function Page() {
+const Index = () => {
   return (
     <View>
-      <MyProcesses/>
+      <Text className='text-red-600'>Index</Text>
     </View>
-  );
+  )
 }
+
+export default Index
