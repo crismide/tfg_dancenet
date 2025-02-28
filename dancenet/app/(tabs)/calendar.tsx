@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const PreviewProcess = () => {
+const calendar = () => {
   return (
     <View>
-      <Text>PreviewProcess</Text>
+      <Text>calendar</Text>
     </View>
   )
 }
 
-export default PreviewProcess
+export default calendar

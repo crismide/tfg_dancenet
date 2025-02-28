@@ -8,11 +8,11 @@ const Ideas = () => {
   return (
     <View className='p-10 gap-8'>
         <View>
-            <Link href="/Index">
+            <Link href="/">
                 <Icon name="arrow-left" size={20} color="grey"/>
             </Link>
         </View>
-        <Text className='text-3xl font-bold'>Ideas</Text>
+        <Text className='screen-title'>Ideas</Text>
     </View>
   )
 }

@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components{
+    .modal-button{
+        @apply border border-white w-20 h-20 border-4 rounded-lg justify-center items-center mb-3
+    }
+    .screen-title{
+        @apply text-3xl font-bold
+    }
+
+    .form-button{
+        @apply rounded rounded-xl p-3 shadow shadow-lg w-36
+    }
+    .cancel-button{
+        @apply bg-[#5B5B5B]
+    }
+    .continue-button{
+        @apply bg-[#C286F1]
+    }
+    .button-text{
+        @apply text-white text-[16px] text-center
+    }
+}
