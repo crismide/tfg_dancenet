@@ -1,11 +1,13 @@
-import { View, Text, ActivityIndicator, Pressable, ScrollView } from 'react-native'
+import { View, Text, ActivityIndicator, Pressable, ScrollView, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { FontAwesome5 } from '@expo/vector-icons';
+import PreviewPerson from '@/components/PreviewPerson';
 
 const Scene = () => {
     const { id } = useLocalSearchParams();
+    const { creativeProcessId } = useLocalSearchParams();
     const database = useSQLiteContext();
     const [scene, setScene] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -13,6 +15,7 @@ const Scene = () => {
     const [activeMove, setActiveMove] = useState(false)
     const [activeSpace, setActiveSpace] = useState(false)
     const [activePeople, setActivePeople] = useState(false)
+    const [people,setPeople] = useState([])
     const [activeRehearsal, setActiveRehearsal] = useState(false)
     const [activeObjects, setActiveObjects] = useState(false)
 
@@ -25,6 +28,15 @@ const Scene = () => {
             );
             if (result.length > 0) {
                 setScene(result[0]);
+
+                const peopleResult = await database.getAllAsync(
+                  ` SELECT people.* 
+                    FROM people
+                    JOIN scene_people ON people.id = scene_people.person_id
+                    WHERE scene_people.scene_id = ?;
+                    `, [id]
+                  );  
+                setPeople(peopleResult);
             } else {
               console.log("No process found with the given ID");
             }
@@ -36,7 +48,7 @@ const Scene = () => {
         };
     
         loadData();
-      }, [id, database]);
+      }, [id, database,people]);
 
     if (loading) {
         // Show a loading indicator while the data is being fetched
@@ -89,7 +101,25 @@ const Scene = () => {
                     {activePeople ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
                     <Text className='text-2xl font-bold'>Participantes</Text>
                 </Pressable>
-                {activePeople && <Text className='mb-8'>Content</Text>}
+                {activePeople && 
+                  <View className='gap-8'>
+                  <Link href={{pathname: "/(forms)/FormPerson",params: { id_process: creativeProcessId, id_scene:id }}} >
+                      <View className='border-2 p-3 w-auto border-[#828282]'>
+                          <Text className='text-lg text-[#828282]'>Añadir participantes +</Text>
+                      </View>
+                  </Link>
+                  {people.length > 0 &&
+                    <FlatList
+                      data={people}
+                      keyExtractor={(item) => item.id.toString()}
+                      renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id}/>}
+                      horizontal={true}
+                      numColumns={Math.ceil(people.length / 2)}
+                      contentContainerStyle={{ gap: 20 }}
+                    />
+                  }
+                  </View>
+                }
                 <Pressable className='flex flex-row gap-3' onPress={() => setActiveRehearsal(!activeRehearsal)}>
                     {activeRehearsal ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
                     <Text className='text-2xl font-bold'>Ensayos</Text>

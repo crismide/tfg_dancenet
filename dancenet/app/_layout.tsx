@@ -16,6 +16,35 @@ export default function Layout() {
         FOREIGN KEY (creativeprocess_id) REFERENCES creativeprocesses(id) ON DELETE CASCADE
       );
     `);
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS people (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        img TEXT
+      );
+    `);
+    
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS person_creativeprocess (
+        person_id INTEGER NOT NULL,
+        creativeprocess_id INTEGER NOT NULL,
+        PRIMARY KEY (person_id, creativeprocess_id),
+        FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE,
+        FOREIGN KEY (creativeprocess_id) REFERENCES creativeprocesses(id) ON DELETE CASCADE
+      );
+    `);
+    
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS scene_people (
+        person_id INTEGER NOT NULL,
+        scene_id INTEGER NOT NULL,
+        creativeprocess_id INTEGER NOT NULL,
+        PRIMARY KEY (person_id, scene_id),
+        FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE,
+        FOREIGN KEY (scene_id) REFERENCES scenes(id) ON DELETE CASCADE,
+        FOREIGN KEY (creativeprocess_id) REFERENCES creativeprocesses(id) ON DELETE CASCADE
+      );
+    `);
   }
 
   return (

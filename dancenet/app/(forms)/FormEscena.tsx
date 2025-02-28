@@ -10,7 +10,6 @@ const FormEscena = () => {
   const handleSave = async () => {
     try {
       const result = await database.runAsync("INSERT INTO scenes (name,creativeprocess_id) VALUES (?,?);",[name,id_process])
-      const lastInsertId = result.lastInsertRowId;
       router.back()
       setName("")
     } catch (error) {

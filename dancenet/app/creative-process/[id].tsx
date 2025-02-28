@@ -4,12 +4,14 @@ import { View, Text, ActivityIndicator, Pressable, Button, FlatList } from 'reac
 import { useSQLiteContext } from 'expo-sqlite';
 import { FontAwesome5 } from "@expo/vector-icons";
 import PreviewScene from '@/components/PreviewScene';
+import PreviewPerson from '@/components/PreviewPerson';
 
 const CreativeProcessDetail = () => {
   const { id } = useLocalSearchParams();
   const database = useSQLiteContext();
   const [process, setProcess] = useState(null);
   const [scenes, setScenes] = useState([])
+  const [people, setPeople] = useState([])
   const [loading, setLoading] = useState(true); // Add a loading state
   const [activeIdeas, setActiveIdeas] = useState(false)
   const [activeScenes, setActiveScenes] = useState(false)
@@ -29,8 +31,16 @@ const CreativeProcessDetail = () => {
             "SELECT * FROM scenes WHERE creativeprocess_id = ?;",
             [id]
           );
-
           setScenes(scenesResult);
+          const peopleResult = await database.getAllAsync(
+            ` SELECT people.* 
+              FROM people
+              JOIN person_creativeprocess ON people.id = person_creativeprocess.person_id
+              WHERE person_creativeprocess.creativeprocess_id = ?;
+              `, [id]
+            );  
+          setPeople(peopleResult);
+          
         } else {
           console.log("No process found with the given ID");
         }
@@ -95,7 +105,7 @@ const CreativeProcessDetail = () => {
               {scenes.length > 0 &&
                 <FlatList
                   data={scenes}
-                  renderItem={({ item }) => <PreviewScene name={item.name} id={item.id}/>}
+                  renderItem={({ item }) => <PreviewScene name={item.name} id={item.id} id_process={id}/>}
                   horizontal={true}
                   contentContainerStyle={{ gap: 20 }}
               />
@@ -105,11 +115,27 @@ const CreativeProcessDetail = () => {
         }
       </View>
       <View>
-        <Pressable className='flex flex-row gap-3' onPress={() => setActivePeople(!activePeople)}>
+        <Pressable className='flex flex-row gap-3 mb-4' onPress={() => setActivePeople(!activePeople)}>
             {activePeople ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
             <Text className='text-2xl font-bold'>Participantes</Text>
         </Pressable>
-        {activePeople && <Text>Content</Text>}
+        {activePeople && 
+          <View className='gap-8'>
+          <Link href={{pathname: "/(forms)/FormPerson",params: { id_process: id, id_scene:"" }}} >
+              <View className='border-2 p-3 w-auto border-[#828282]'>
+                  <Text className='text-lg text-[#828282]'>Añadir participantes +</Text>
+              </View>
+          </Link>
+          {people.length > 0 &&
+             <FlatList
+              data={people}
+              renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id}/>}
+              horizontal={true}
+              contentContainerStyle={{ gap: 20 }}
+            />
+              }
+          </View>
+        }
       </View>
       <View>
         <Pressable className='flex flex-row gap-3' onPress={() => setActiveRehearsal(!activeRehearsal)}>
