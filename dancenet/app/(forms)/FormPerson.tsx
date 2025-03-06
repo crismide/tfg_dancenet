@@ -7,6 +7,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import LoadingScreen from '@/components/LoadingScreen';
 import SelectScene from '@/components/SelectScene';
 import FormButtons from '@/components/FormButtons';
+import GalleryPicker from '@/components/GalleryPicker';
 
 const FormPerson = () => {
     const [name,setName] = useState("")
@@ -43,35 +44,6 @@ const FormPerson = () => {
         
           loadData();
     },[])
-
-
-    const pickImage = async () => {
-        // Request permissions
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          alert("Sorry, we need camera roll permissions to make this work!");
-          return;
-        }
-    
-        // Launch the image picker
-        let result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images, // Only allow images
-          allowsEditing: true, // Allow the user to crop/edit the image
-          aspect: [3, 3], // Aspect ratio for cropping
-          quality: 1, // Image quality (0 to 1)
-          base64: true, // Return the image as a base64 string
-        });
-    
-        if (!result.canceled) {
-          // Set the image URI for display
-          setImage(result.assets[0].uri);
-    
-          // Set the base64 string for storage
-          if (result.assets[0].base64) {
-            setBase64Image(`data:image/jpeg;base64,${result.assets[0].base64}`);
-          }
-        }
-      };
     
     const handleSave = async () => {
         if(name==""){setErrorName(true)}
@@ -144,7 +116,7 @@ const FormPerson = () => {
                         {image ? <Image source={{ uri: image }} style={{width: 100, height: 100,borderRadius: 50}}/>: 
                         <View style={{width: 100, height: 100, backgroundColor: "#D9D9D9",borderRadius: 50}}></View>}
                     </View>
-                    <Button title='Elige una imagen de la galería' color="#F1A636" onPress={pickImage}/>
+                    <GalleryPicker image={image} setImage={setImage} setBase64Image={setBase64Image} />
                 </View>
                 
                 <View className='mb-10'>

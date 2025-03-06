@@ -1,15 +1,19 @@
-import { View, Text, ScrollView, TextInput } from 'react-native'
+import { View, Text, ScrollView, TextInput, Image } from 'react-native'
 import React, { useState } from 'react'
 import { router, Stack, useLocalSearchParams } from 'expo-router'
 import FormButtons from '@/components/FormButtons'
 import AudioPickerRecorder from '@/components/AudioPickerRecorder'
 import { useSQLiteContext } from 'expo-sqlite'
+import GalleryPicker from '@/components/GalleryPicker'
+import { Video } from 'expo-av'
 
 const FormIdea = () => {
   const {typeMedia} = useLocalSearchParams()
   const {source} = useLocalSearchParams()
   const database = useSQLiteContext()
   const [note,setNote] = useState("")
+  const [media, setMedia] = useState(null);
+  const [base64Media, setBase64Media] = useState("");
   const [processes,setProcesses] = useState([])
   const [height, setHeight] = useState(100);
   
@@ -27,6 +31,21 @@ const FormIdea = () => {
         } catch (error) {
           console.error(error)
         }
+      }
+      else if (typeMedia === 'image-video'){
+        try {
+          const result = await database.runAsync(
+              "INSERT INTO ideas (typeContent, data) VALUES (?, ?);",
+              [typeMedia, base64Media]
+          );
+          const mediaId = result.lastInsertRowId;
+          console.log(mediaId)
+        } catch (error) {
+          console.error(error)
+        }
+      }
+      else{
+        console.log("store audio")
       }
     }
     router.back()
@@ -61,7 +80,9 @@ const FormIdea = () => {
         </View> : 
         <View>
           <Text className='screen-title'>Añadiendo contenido de mi galería</Text>
-          <View></View>
+          <View style={{ alignItems: 'center' }} className='mb-2'>
+          <GalleryPicker image={media} setImage={setMedia} setBase64Image={setBase64Media} allowVideos={true}/>
+          </View>
           </View>}
         <FormButtons handleSave={handleSave}/>
       </View>

@@ -35,7 +35,7 @@ const Ideas = () => {
     <View className='p-10 gap-8'>
         <BackButton/>
         <Text className='screen-title'>Ideas</Text>
-        <ScrollView>
+        <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
           <FlatList
             data={ideas}
             renderItem={({item}) => 
