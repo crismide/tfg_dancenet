@@ -36,19 +36,34 @@ export default function Layout() {
         }}
       />
 
-<Tabs.Screen
-        name="calendar"
-        options={{
-          title: "Ensayos",
-          tabBarIcon: ({ focused, color, size }) => (
-            <FontAwesome5 
-                name="calendar" 
-                size={size} 
-                color={focused ? "#C286F1" : "#95a5a6"} // Blue when active, gray when inactive
-                solid={focused} />
-          ),
-        }}
-      />
-    </Tabs>
+      <Tabs.Screen
+              name="calendar"
+              options={{
+                title: "Ensayos",
+                tabBarIcon: ({ focused, color, size }) => (
+                  <FontAwesome5 
+                      name="calendar" 
+                      size={size} 
+                      color={focused ? "#C286F1" : "#95a5a6"} // Blue when active, gray when inactive
+                      solid={focused} />
+                ),
+              }}
+            />
+      <Tabs.Screen
+              name="people"
+              options={{
+                title: "Personas",
+                tabBarIcon: ({ focused, color, size }) => (
+                  <FontAwesome5 
+                      name="users" 
+                      size={size} 
+                      color={focused ? "#C286F1" : "#95a5a6"} // Blue when active, gray when inactive
+                      solid={focused} />
+                ),
+              }}
+            />
+          </Tabs>
+
+          
   );
 }

@@ -1,9 +1,11 @@
-import { View, Text, ActivityIndicator, Pressable, ScrollView, FlatList } from 'react-native'
+import { View, Text, ActivityIndicator, Pressable, ScrollView, FlatList, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PreviewPerson from '@/components/PreviewPerson';
+import CustomModal from '@/components/CustomModal';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const Scene = () => {
     const { id } = useLocalSearchParams();
@@ -18,6 +20,14 @@ const Scene = () => {
     const [people,setPeople] = useState([])
     const [activeRehearsal, setActiveRehearsal] = useState(false)
     const [activeObjects, setActiveObjects] = useState(false)
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const options = [
+      { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: creativeProcessId, id_scene:id }} },
+      { label: "Elegir ya existente", icon: "users", href: {pathname:"/person/selectPeople", params: {id_process: creativeProcessId, id_scene:id, source:'scene'
+      }}},
+    ];
+    
 
     useEffect(() => {
         const loadData = async () => {
@@ -50,15 +60,41 @@ const Scene = () => {
         loadData();
       }, [id, database,people]);
 
-    if (loading) {
-        // Show a loading indicator while the data is being fetched
-        return (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Stack.Screen options={{ headerShown: false }} />
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        );
-      }
+    const handleDelete = async () => {
+      Alert.alert(
+        "Borrando escena", // Title of the alert
+        "Estás segurx de que quieres borrar esta escena?", // Message in the alert
+        [
+          {
+            text: "Cancelar", // Button to cancel the action
+            style: "cancel", // Style for the cancel button
+          },
+          {
+            text: "Aceptar", // Button to confirm the deletion
+            onPress: async () => {
+              console.log("Deleting scene with ID:", id); // Debug log
+              try {
+                // Execute the delete query using runAsync
+                const result = await database.runAsync(`DELETE FROM scenes WHERE id = ?;`, [id]);
+                console.log("Delete result:", result); // Debug log
+      
+                // Verify the record was deleted
+                const checkResult = await database.getAllAsync(`SELECT * FROM scenes WHERE id = ?;`, [id]);
+                console.log("Scene still exists:", checkResult); // Debug log
+      
+                // Navigate back to the home screen or refresh the scene list
+                router.push(`/creative-process/${creativeProcessId}`)
+              } catch (error) {
+                console.error("Failed to delete scene:", error);
+              }
+            },
+          },
+        ],
+        { cancelable: true } // Allow the user to dismiss the alert by tapping outside
+      );
+    }
+    
+    if (loading) { <LoadingScreen/> }
     
       if (!scene) {
         // Handle the case where no process is found
@@ -75,11 +111,16 @@ const Scene = () => {
         <View className='p-10 gap-8'>
             <Stack.Screen options={{ headerShown: false }} />
             <View>
-                <Link href="" onPress={() => router.back()}>
+                <Pressable onPress={() => router.back()}>
                     <FontAwesome5 name="arrow-left" size={20} color="grey"/>
-                </Link>
+                </Pressable>
             </View>
-            <Text className='screen-title'>{scene.name}</Text>
+            <View className='flex flex-row justify-between items-center'>
+              <Text className='screen-title'>{scene.name}</Text>
+              <Pressable onPress={handleDelete}>
+                <FontAwesome5 name="trash" size={20} color="grey"/>
+              </Pressable>
+            </View>
             <ScrollView >
             <View>
                 <Pressable className='flex flex-row gap-3' onPress={() => setActiveIdeas(!activeIdeas)}>
@@ -97,22 +138,25 @@ const Scene = () => {
                     <Text className='text-2xl font-bold'>Recorrido espacial</Text>
                 </Pressable>
                 {activeSpace && <Text className='mb-8'>Content</Text>}
+
+
                 <Pressable className='flex flex-row gap-3' onPress={() => setActivePeople(!activePeople)}>
                     {activePeople ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
                     <Text className='text-2xl font-bold'>Participantes</Text>
                 </Pressable>
                 {activePeople && 
                   <View className='gap-8'>
-                  <Link href={{pathname: "/(forms)/FormPerson",params: { id_process: creativeProcessId, id_scene:id }}} >
+                  <Pressable onPress={() => setModalVisible(true)} >
                       <View className='border-2 p-3 w-auto border-[#828282]'>
                           <Text className='text-lg text-[#828282]'>Añadir participantes +</Text>
                       </View>
-                  </Link>
+                  </Pressable>
+                  <CustomModal visible={modalVisible} onClose={() => setModalVisible(false)} options={options} />
                   {people.length > 0 &&
                     <FlatList
                       data={people}
                       keyExtractor={(item) => item.id.toString()}
-                      renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id}/>}
+                      renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"scene"} id_process={id}/>}
                       horizontal={true}
                       numColumns={Math.ceil(people.length / 2)}
                       contentContainerStyle={{ gap: 20 }}

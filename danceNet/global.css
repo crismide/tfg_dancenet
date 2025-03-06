@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base{
+    :root{
+        --main-color: #C286F1;
+    }
+}
+
 @layer components{
     .modal-button{
         @apply border border-white w-20 h-20 border-4 rounded-lg justify-center items-center mb-3
@@ -21,5 +27,8 @@
     }
     .button-text{
         @apply text-white text-[16px] text-center
+    }
+    .input-text-box{
+        @apply border border-2 rounded-lg border-gray-300 p-4
     }
 }

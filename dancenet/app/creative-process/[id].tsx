@@ -1,10 +1,11 @@
-import { Link, Stack, useLocalSearchParams } from 'expo-router';
+import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, Pressable, Button, FlatList } from 'react-native';
+import { View, Text, ActivityIndicator, Pressable, Button, FlatList, Alert, ScrollView } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { FontAwesome5 } from "@expo/vector-icons";
 import PreviewScene from '@/components/PreviewScene';
 import PreviewPerson from '@/components/PreviewPerson';
+import CustomModal from '@/components/CustomModal';
 
 const CreativeProcessDetail = () => {
   const { id } = useLocalSearchParams();
@@ -12,11 +13,17 @@ const CreativeProcessDetail = () => {
   const [process, setProcess] = useState(null);
   const [scenes, setScenes] = useState([])
   const [people, setPeople] = useState([])
-  const [loading, setLoading] = useState(true); // Add a loading state
+  const [loading, setLoading] = useState(true); 
+  const [modalVisible, setModalVisible] = useState(false);
   const [activeIdeas, setActiveIdeas] = useState(false)
   const [activeScenes, setActiveScenes] = useState(false)
   const [activePeople, setActivePeople] = useState(false)
   const [activeRehearsal, setActiveRehearsal] = useState(false)
+
+  const options = [
+    { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: id, id_scene:"" }} },
+    { label: "Elegir ya existente", icon: "users", href: {pathname:"/person/selectPeople", params: {id_process: id, id_scene:"",source:"creative-process"}}},
+  ];
 
   useEffect(() => {
     const loadData = async () => {
@@ -54,12 +61,43 @@ const CreativeProcessDetail = () => {
     loadData();
   }, [id, database, scenes]);
 
+  const handleDelete = async () => {
+    Alert.alert(
+      "Borrando proceso creativo", // Title of the alert
+      "Estás segurx de que quieres borrar este proceso creativo?", // Message in the alert
+      [
+        {
+          text: "Cancelar", // Button to cancel the action
+          style: "cancel", // Style for the cancel button
+        },
+        {
+          text: "Aceptar", // Button to confirm the deletion
+          onPress: async () => {
+            try {
+              // Execute the delete query using runAsync
+              const result = await database.runAsync(`DELETE FROM creativeprocesses WHERE id = ?;`, [id]);
+    
+              // Verify the record was deleted
+              const checkResult = await database.getAllAsync(`SELECT * FROM creativeprocesses WHERE id = ?;`, [id]);
+    
+              // Navigate back to the home screen
+              router.push("/");
+            } catch (error) {
+              console.error("Failed to delete creative process:", error);
+            }
+          },
+        },
+      ],
+      { cancelable: true } // Allow the user to dismiss the alert by tapping outside
+    );
+  }
+
   if (loading) {
     // Show a loading indicator while the data is being fetched
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Stack.Screen options={{ headerShown: false }} />
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#C286F1" />
       </View>
     );
   }
@@ -82,8 +120,14 @@ const CreativeProcessDetail = () => {
                 <FontAwesome5 name="arrow-left" size={20} color="grey"/>
             </Link>
         </View>
-      <Text className='screen-title'>{process.name}</Text>
-      <View>
+          <View className='flex flex-row justify-between items-center'>
+            <Text className='screen-title'>{process.name}</Text>
+            <Pressable onPress={handleDelete}>
+              <FontAwesome5 name="trash" size={20} color="grey"/>
+            </Pressable>
+          </View>
+        <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+        <View>
         <Pressable className='flex flex-row gap-3' onPress={() => setActiveIdeas(!activeIdeas)}>
             {activeIdeas ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
             <Text className='text-2xl font-bold'>Ideas</Text>
@@ -121,15 +165,21 @@ const CreativeProcessDetail = () => {
         </Pressable>
         {activePeople && 
           <View className='gap-8'>
-          <Link href={{pathname: "/(forms)/FormPerson",params: { id_process: id, id_scene:"" }}} >
+            <Pressable onPress={() => setModalVisible(true)}>
+              <View className='border-2 p-3 w-2/3 border-[#828282]'>
+                    <Text className='text-lg text-[#828282]'>Añadir participantes +</Text>
+              </View>
+            </Pressable>
+            <CustomModal visible={modalVisible} onClose={() => setModalVisible(false)} options={options} />
+          {/* <Link href={{pathname: "/(forms)/FormPerson",params: { id_process: id, id_scene:"" }}} >
               <View className='border-2 p-3 w-auto border-[#828282]'>
                   <Text className='text-lg text-[#828282]'>Añadir participantes +</Text>
               </View>
-          </Link>
+          </Link> */}
           {people.length > 0 &&
              <FlatList
               data={people}
-              renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id}/>}
+              renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"creative-process"} id_process={id}/>}
               horizontal={true}
               contentContainerStyle={{ gap: 20 }}
             />
@@ -144,6 +194,7 @@ const CreativeProcessDetail = () => {
         </Pressable>
         {activeRehearsal && <Text>Content</Text>}
       </View>
+        </ScrollView>
     </View>
   );
 };

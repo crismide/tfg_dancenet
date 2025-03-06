@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Image, Modal, TouchableOpacity,StyleSheet, FlatList } from 'react-native'
+import { View, Text, Pressable, ScrollView, Image, Modal, TouchableOpacity,StyleSheet, FlatList, Button } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import "../../global.css"
 import { Link } from 'expo-router'
@@ -7,21 +7,42 @@ import { LinearGradient } from 'expo-linear-gradient';
 import GradientText from '../../components/GradientText'
 import { useSQLiteContext } from 'expo-sqlite'
 import PreviewProcess from '@/components/PreviewProcess'
+import LoadingScreen from '@/components/LoadingScreen'
+import CustomModal from '@/components/CustomModal'
 
 type ProcessType = {id:number, name:string}
 
 const Index = () => {
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isIdeaModalVisible, setIdeaModalVisible] = useState(false);
   const [processes, setProcesses] = useState<ProcessType[]>([])
   const database = useSQLiteContext()
+  const [loading, setLoading] = useState(true); 
+
+  const options1 = [
+    { label: "Proceso\nCreativo", icon: "eye", href: "/(forms)/FormCreativeProcess" },
+    { label: "Idea", icon: "lightbulb" , onPress:() => {
+      setModalVisible(false)
+      setIdeaModalVisible(true)
+    } },
+  ];
+
+  const ideaOptions = [
+    { label: "Texto", icon: "file-alt", href: {pathname:"/(forms)/FormIdea", params: {typeMedia:"text",source:"general"}},},
+    { label: "Audio", icon: "microphone", href: {pathname:"/(forms)/FormIdea", params: {typeMedia:"audio",source:"general"}},},
+    { label: "Multimedia", icon: "photo-video", href: {pathname:"/(forms)/FormIdea", params: {typeMedia:"image-video",source:"general"}},},
+  ];
 
   useEffect(() => {
     const loadData = async () => {
       const result = await database.getAllAsync<ProcessType>("SELECT * FROM creativeprocesses;")
       setProcesses(result)
+      setLoading(false)
     }
     loadData()
-  })
+  },[])
+
+  if(loading){return <LoadingScreen/>}
 
   return (
     <View className="flex-1 p-10 gap-5">
@@ -39,6 +60,7 @@ const Index = () => {
         data={processes}
         renderItem={({ item }) => <PreviewProcess name={item.name} img={item.img} id={item.id}/>}
         numColumns={2}
+        keyExtractor={(item) => item.id.toString()}
         columnWrapperStyle={{
           justifyContent: 'space-between',
           marginBottom: 10, // Adds gap between rows
@@ -56,48 +78,45 @@ const Index = () => {
       >
         <Text className="text-5xl text-[#C8C8C8]">+</Text>
       </Pressable>
-      {/* Bottom Sheet Modal */}
-      <Modal transparent visible={isModalVisible} onRequestClose={() => setModalVisible(false)}>
-        {/* Close modal when clicking outside */}
-        <TouchableOpacity
-          className="flex-1 justify-end bg-black/50"
-          activeOpacity={1}
-          onPress={() => setModalVisible(false)}
-        >
-          {/* Modal Content */}
-          <View className="bg-gray-300 rounded-t-2xl justify-center items-center">
-            <TouchableOpacity activeOpacity={1} className='flex flex-row p-16 gap-24'>
-              {/* First Option */}
-                <TouchableOpacity>
-                  <Link href="/(forms)/FormCreativeProcess">
-                    <View className='flex flex-col align-middle'>
-                      <View className='modal-button'>
-                        <Icon name="eye" size={40} color={"white"}/>
-                      </View>
-                      <Text className="text-xl text-center">Proceso{"\n"}Creativo</Text>
-                    </View>
-                  </Link>
-                </TouchableOpacity>
+      
+      <CustomModal
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        options={options1}
+      />
 
-              {/* Second Option */}
-              <TouchableOpacity>
-                  <Link href="/(forms)/FormIdea">
-                    <View className='flex flex-col align-middle'>
-                      <View className='modal-button'>
-                        <Icon name="lightbulb-o" size={40} color={"white"}/>
-                      </View>
-                      <Text className="text-xl text-center">Idea</Text>
-                    </View>
-                  </Link>
-                </TouchableOpacity>
-              
-              
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      <CustomModal
+        visible={isIdeaModalVisible}
+        onClose={() => {
+          setIdeaModalVisible(false);
+          setModalVisible(true);
+        }}
+        options={ideaOptions}
+      />
+      
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+});
 
 export default Index

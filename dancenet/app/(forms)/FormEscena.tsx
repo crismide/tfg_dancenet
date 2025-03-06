@@ -2,6 +2,7 @@ import { View, Text, TextInput, Pressable } from 'react-native'
 import React, { useState } from 'react'
 import { router, Stack, useLocalSearchParams } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
+import FormButtons from '@/components/FormButtons'
 
 const FormEscena = () => {
   const [name,setName] = useState("")
@@ -28,15 +29,7 @@ const FormEscena = () => {
         value={name}
         onChangeText={(text) => setName(text)}
       ></TextInput>
-      <View className='flex flex-row justify-center gap-8'>
-          <Pressable className='form-button cancel-button' onPress={() => router.back()} >
-            <Text className='button-text'>Cancelar</Text>
-          </Pressable>
-        
-        <Pressable className='form-button continue-button' onPress={handleSave}>
-          <Text className='button-text'>Crear</Text>
-        </Pressable>
-      </View>
+      <FormButtons handleSave={handleSave}/>
     </View>
   )
 }

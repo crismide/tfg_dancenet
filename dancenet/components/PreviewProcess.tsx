@@ -12,7 +12,7 @@ const PreviewProcess = ({ name, image,id }) => {
         source={image ? { uri: image } : require('../assets/default-img.png')}
         style={{ width: 100, height: 100 }}
       />
-      <Text className='text-xl font-bold'>{name}</Text>
+      <Text className='text-xl'>{name}</Text>
     </Pressable>
   
   );
