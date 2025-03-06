@@ -1,0 +1,50 @@
+import { View, Text } from 'react-native'
+import React, { useEffect, useState } from 'react'
+
+const useScene = (database, id) => {
+    const [scene, setScene] = useState(null);
+    const [people, setPeople] = useState([]);
+    const [ideas, setIdeas] = useState([]);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+      const loadData = async () => {
+        try {
+          const result = await database.getAllAsync(
+            "SELECT * FROM scenes WHERE id = ?;",
+            [id]
+          );
+          if (result.length > 0) {
+              setScene(result[0]);
+
+              const [peopleResult,ideasResult] = await Promise.all([database.getAllAsync(
+                ` SELECT people.* 
+                  FROM people
+                  JOIN scene_people ON people.id = scene_people.person_id
+                  WHERE scene_people.scene_id = ?;
+                  `, [id]
+                ),database.getAllAsync(
+                ` SELECT ideas.* 
+                  FROM ideas
+                  JOIN scene_idea ON ideas.id = scene_idea.idea_id
+                  WHERE scene_idea.scene_id = ?;
+                  `, [id]
+                )])
+                
+              setPeople(peopleResult);
+              setIdeas(ideasResult);
+          } else {
+            console.log("No process found with the given ID");
+          }
+        } catch (error) {
+          console.error("Error fetching process:", error);
+        } finally {
+          setLoading(false); // Set loading to false after the data is fetched
+        }
+      };
+  
+      loadData();
+    }, [id, database,people]);
+  return {scene,people,ideas,loading}
+}
+
+export default useScene

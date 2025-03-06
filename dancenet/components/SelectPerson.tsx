@@ -1,6 +1,4 @@
 import { View, Text, Pressable, Image } from 'react-native'
-import React, { useState } from 'react'
-import { router } from 'expo-router';
 
 const SelectPerson = ({name, img, id, isSelected, onPress}) => {
 

@@ -6,6 +6,7 @@ import BackButton from '@/components/BackButton'
 import { useSQLiteContext } from 'expo-sqlite'
 import LoadingScreen from '@/components/LoadingScreen'
 import PreviewIdea from '@/components/PreviewIdea'
+import ButtonMainAddIdea from '@/components/ButtonMainAddIdea'
 
 
 const Ideas = () => {
@@ -33,8 +34,10 @@ const Ideas = () => {
 
   return (
     <View className='p-10 gap-8'>
-        <BackButton/>
-        <Text className='screen-title'>Ideas</Text>
+        <View className='flex flex-row justify-between items-center'>
+          <Text className='screen-title'>Ideas</Text>
+          <ButtonMainAddIdea/>
+        </View>
         <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
           <FlatList
             data={ideas}

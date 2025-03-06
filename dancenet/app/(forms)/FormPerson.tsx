@@ -101,8 +101,7 @@ const FormPerson = () => {
             return [...prevSelectedIds, id];
           }
         });
-      };
-      console.log(selectedIds)
+    };
 
     if(loading){ return <LoadingScreen/> }
 
@@ -131,7 +130,7 @@ const FormPerson = () => {
                 </View>
 
                 {(id_process !== "" && id_scene==="") ? <View className='mb-10'>
-                    <Text className='text-xl mb-2'>Participara en las escenas...</Text>
+                    <Text className='text-xl mb-2'>Participara en las escenas... (opcional)</Text>
                     <FlatList
                         data={scenes}
                         horizontal={true}

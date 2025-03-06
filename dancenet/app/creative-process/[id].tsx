@@ -6,60 +6,37 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import PreviewScene from '@/components/PreviewScene';
 import PreviewPerson from '@/components/PreviewPerson';
 import CustomModal from '@/components/CustomModal';
+import useCreativeProcess from '@/hooks/useCreativeProcess';
+import LoadingScreen from '@/components/LoadingScreen';
+import BackButton from '@/components/BackButton';
+import PreviewIdea from '@/components/PreviewIdea';
 
 const CreativeProcessDetail = () => {
   const { id } = useLocalSearchParams();
   const database = useSQLiteContext();
-  const [process, setProcess] = useState(null);
-  const [scenes, setScenes] = useState([])
-  const [people, setPeople] = useState([])
-  const [loading, setLoading] = useState(true); 
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalPeopleVisible, setModalPeopleVisible] = useState(false);
+  const [modalIdeasVisible, setModalIdeasVisible] = useState(false);
+  const { process, scenes, people, ideas, loading } = useCreativeProcess(database, id);
   const [activeIdeas, setActiveIdeas] = useState(false)
   const [activeScenes, setActiveScenes] = useState(false)
   const [activePeople, setActivePeople] = useState(false)
   const [activeRehearsal, setActiveRehearsal] = useState(false)
 
-  const options = [
+  const optionsPeople = [
     { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: id, id_scene:"" }} },
     { label: "Elegir ya existente", icon: "users", href: {pathname:"/person/selectPeople", params: {id_process: id, id_scene:"",source:"creative-process"}}},
   ];
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const result = await database.getAllAsync(
-          "SELECT * FROM creativeprocesses WHERE id = ?;",
-          [id]
-        );
-        if (result.length > 0) {
-          setProcess(result[0]);
-          const scenesResult = await database.getAllAsync(
-            "SELECT * FROM scenes WHERE creativeprocess_id = ?;",
-            [id]
-          );
-          setScenes(scenesResult);
-          const peopleResult = await database.getAllAsync(
-            ` SELECT people.* 
-              FROM people
-              JOIN person_creativeprocess ON people.id = person_creativeprocess.person_id
-              WHERE person_creativeprocess.creativeprocess_id = ?;
-              `, [id]
-            );  
-          setPeople(peopleResult);
-          
-        } else {
-          console.log("No process found with the given ID");
-        }
-      } catch (error) {
-        console.error("Error fetching process:", error);
-      } finally {
-        setLoading(false); // Set loading to false after the data is fetched
-      }
-    };
+  // const optionsIdeas = [
+  //   { label: "Crear nueva idea", icon: "file-alt", href: {pathname:"/(forms)/FormIdea", params: {typeMedia:"text",source:"process", id_process: id}},},
+  //   { label: "Seleccionar una idea ya existente", icon: "microphone", href: {pathname:"/(forms)/FormIdea", params: {typeMedia:"audio",source:"process",id_process: id}},},
+  // ];
 
-    loadData();
-  }, [id, database, scenes]);
+  const optionsIdeas = [
+    { label: "Texto", icon: "file-alt", href: {pathname:"/(forms)/FormIdea", params: {typeMedia:"text",source:"process", id_process: id}},},
+    { label: "Audio", icon: "microphone", href: {pathname:"/(forms)/FormIdea", params: {typeMedia:"audio",source:"process",id_process: id}},},
+    { label: "Multimedia", icon: "photo-video", href: {pathname:"/(forms)/FormIdea", params: {typeMedia:"image-video",source:"process",id_process: id}},},
+  ];
 
   const handleDelete = async () => {
     Alert.alert(
@@ -92,15 +69,7 @@ const CreativeProcessDetail = () => {
     );
   }
 
-  if (loading) {
-    // Show a loading indicator while the data is being fetched
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Stack.Screen options={{ headerShown: false }} />
-        <ActivityIndicator size="large" color="#C286F1" />
-      </View>
-    );
-  }
+  if (loading) { return <LoadingScreen/> }
 
   if (!process) {
     // Handle the case where no process is found
@@ -115,24 +84,36 @@ const CreativeProcessDetail = () => {
   return (
     <View className='p-10 gap-8'>
     <Stack.Screen options={{ headerShown: false }} />
-        <View>
-            <Link href="/">
-                <FontAwesome5 name="arrow-left" size={20} color="grey"/>
-            </Link>
-        </View>
-          <View className='flex flex-row justify-between items-center'>
-            <Text className='screen-title'>{process.name}</Text>
-            <Pressable onPress={handleDelete}>
-              <FontAwesome5 name="trash" size={20} color="grey"/>
-            </Pressable>
-          </View>
+    <BackButton/>
+    <View className='flex flex-row justify-between items-center'>
+      <Text className='screen-title'>{process.name}</Text>
+      <Pressable onPress={handleDelete}>
+        <FontAwesome5 name="trash" size={20} color="grey"/>
+      </Pressable>
+    </View>
         <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <View>
         <Pressable className='flex flex-row gap-3' onPress={() => setActiveIdeas(!activeIdeas)}>
             {activeIdeas ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
             <Text className='text-2xl font-bold'>Ideas</Text>
         </Pressable>
-        {activeIdeas && <Text>Content</Text>}
+        {activeIdeas && <View className='gap-8'>
+          <Pressable onPress={() => setModalIdeasVisible(true)}>
+              <View className='border-2 p-3 w-2/3 border-[#828282]'>
+                <Text className='text-lg text-[#828282]'>Añadir idea +</Text>
+              </View>
+            </Pressable>
+            <CustomModal visible={modalIdeasVisible} onClose={() => setModalIdeasVisible(false)} options={optionsIdeas} />
+            <FlatList
+            data={ideas}
+            horizontal={true}
+            renderItem={({item}) => 
+              <View className='mb-4'>
+                <PreviewIdea typeContent={item.typeContent} data={item.data}/>
+              </View>
+            }
+            />
+          </View>}
       </View>
       <View className='gap-5'>
         <Pressable className='flex flex-row gap-3' onPress={() => setActiveScenes(!activeScenes)}>
@@ -165,12 +146,12 @@ const CreativeProcessDetail = () => {
         </Pressable>
         {activePeople && 
           <View className='gap-8'>
-            <Pressable onPress={() => setModalVisible(true)}>
+            <Pressable onPress={() => setModalPeopleVisible(true)}>
               <View className='border-2 p-3 w-2/3 border-[#828282]'>
                     <Text className='text-lg text-[#828282]'>Añadir participantes +</Text>
               </View>
             </Pressable>
-            <CustomModal visible={modalVisible} onClose={() => setModalVisible(false)} options={options} />
+            <CustomModal visible={modalPeopleVisible} onClose={() => setModalPeopleVisible(false)} options={optionsPeople} />
           {/* <Link href={{pathname: "/(forms)/FormPerson",params: { id_process: id, id_scene:"" }}} >
               <View className='border-2 p-3 w-auto border-[#828282]'>
                   <Text className='text-lg text-[#828282]'>Añadir participantes +</Text>
