@@ -7,7 +7,10 @@ export default function Layout() {
     
     console.log("creating db if needed")
     await db.execAsync(
-      "CREATE TABLE IF NOT EXISTS creativeprocesses (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, img TEXT);"
+      `CREATE TABLE IF NOT EXISTS creativeprocesses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        name TEXT NOT NULL, 
+        img TEXT);`
     )
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS scenes (

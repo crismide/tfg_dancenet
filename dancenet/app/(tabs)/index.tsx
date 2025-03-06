@@ -5,7 +5,8 @@ import GradientText from '../../components/GradientText'
 import { useSQLiteContext } from 'expo-sqlite'
 import PreviewProcess from '@/components/PreviewProcess'
 import LoadingScreen from '@/components/LoadingScreen'
-import ButtonMainAddIdea from '@/components/ButtonMainAddIdea'
+import ButtonMainAddIdea from '@/components/AddIdealButtonModal'
+import AddIdealButtonModal from '@/components/AddIdealButtonModal'
 
 type ProcessType = {id:number, name:string}
 
@@ -21,7 +22,7 @@ const Index = () => {
       setLoading(false)
     }
     loadData()
-  },[])
+  },[processes])
 
   if(loading){return <LoadingScreen/>}
 
@@ -47,7 +48,7 @@ const Index = () => {
       />
       </ScrollView>
       <View className='justify-end'>
-        <ButtonMainAddIdea/>
+        <AddIdealButtonModal source={'general'}/>
       </View>
       
     </View>

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { Pressable, Text } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import CustomModal from "./CustomModal";
 
-const ButtonMainAddIdea = () => {
+const AddIdealButtonModal = ({source,id_process,id_scene}) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isIdeaModalVisible, setIdeaModalVisible] = useState(false);
 
@@ -28,7 +28,7 @@ const ButtonMainAddIdea = () => {
       icon: "file-alt",
       href: {
         pathname: "/(forms)/FormIdea",
-        params: { typeMedia: "text", source: "general" },
+        params: { typeMedia: "text", source: source, id_process: id_process, id_scene: id_scene },
       },
     },
     {
@@ -36,7 +36,7 @@ const ButtonMainAddIdea = () => {
       icon: "microphone",
       href: {
         pathname: "/(forms)/FormIdea",
-        params: { typeMedia: "audio", source: "general" },
+        params: { typeMedia: "audio", source: source,id_process: id_process, id_scene: id_scene },
       },
     },
     {
@@ -44,7 +44,7 @@ const ButtonMainAddIdea = () => {
       icon: "photo-video",
       href: {
         pathname: "/(forms)/FormIdea",
-        params: { typeMedia: "image-video", source: "general" },
+        params: { typeMedia: "image-video", source: source,id_process: id_process, id_scene: id_scene },
       },
     },
   ];
@@ -52,12 +52,18 @@ const ButtonMainAddIdea = () => {
   return (
     <>
       {/* Floating "+" Button */}
-      <Pressable
+      {source === 'general' ? <Pressable
         onPress={() => setModalVisible(true)}
         className="bg-[#7B7474] w-20 h-20 rounded-xl justify-center items-center shadow-lg"
       >
         <Text className="text-5xl text-[#C8C8C8]">+</Text>
+      </Pressable> : 
+      <Pressable onPress={() => setModalVisible(true)}>
+        <View className='border-2 p-3 w-2/3 border-[#828282]'>
+          <Text className='text-lg text-[#828282]'>Añadir idea +</Text>
+        </View>
       </Pressable>
+      }
 
       {/* Modals */}
       <CustomModal
@@ -78,4 +84,4 @@ const ButtonMainAddIdea = () => {
   );
 };
 
-export default ButtonMainAddIdea;
+export default AddIdealButtonModal;

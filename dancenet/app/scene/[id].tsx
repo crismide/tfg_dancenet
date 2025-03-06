@@ -9,6 +9,7 @@ import LoadingScreen from '@/components/LoadingScreen';
 import PreviewIdea from '@/components/PreviewIdea';
 import useScene from '@/hooks/useScene';
 import BackButton from '@/components/BackButton';
+import AddIdealButtonModal from '@/components/AddIdealButtonModal';
 
 const Scene = () => {
     const { id } = useLocalSearchParams();
@@ -91,9 +92,10 @@ const Scene = () => {
           <View>
               <Pressable className='flex flex-row gap-3' onPress={() => setActiveIdeas(!activeIdeas)}>
                   {activeIdeas ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
-                  <Text className='text-2xl font-bold'>Ideas</Text>
+                  <Text className='text-2xl font-bold mb-7'>Ideas</Text>
               </Pressable>
-              {activeIdeas && <View>
+              {activeIdeas && <View className='inside-category'>
+                <AddIdealButtonModal source={"scene"} id_process={creativeProcessId} id_scene={id}/>
                 <FlatList
                   data={ideas}
                   horizontal={true}

@@ -1,12 +1,10 @@
 import { View, Text, ScrollView, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import Icon from 'react-native-vector-icons/FontAwesome'
-import { Link } from 'expo-router'
-import BackButton from '@/components/BackButton'
 import { useSQLiteContext } from 'expo-sqlite'
 import LoadingScreen from '@/components/LoadingScreen'
 import PreviewIdea from '@/components/PreviewIdea'
-import ButtonMainAddIdea from '@/components/ButtonMainAddIdea'
+import ButtonMainAddIdea from '@/components/AddIdealButtonModal'
+import AddIdealButtonModal from '@/components/AddIdealButtonModal'
 
 
 const Ideas = () => {
@@ -36,7 +34,7 @@ const Ideas = () => {
     <View className='p-10 gap-8'>
         <View className='flex flex-row justify-between items-center'>
           <Text className='screen-title'>Ideas</Text>
-          <ButtonMainAddIdea/>
+          <AddIdealButtonModal source={'general'} id_process={undefined} id_scene={undefined}/>
         </View>
         <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
           <FlatList

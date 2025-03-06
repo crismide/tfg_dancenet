@@ -10,6 +10,7 @@ import useCreativeProcess from '@/hooks/useCreativeProcess';
 import LoadingScreen from '@/components/LoadingScreen';
 import BackButton from '@/components/BackButton';
 import PreviewIdea from '@/components/PreviewIdea';
+import AddIdealButtonModal from '@/components/AddIdealButtonModal';
 
 const CreativeProcessDetail = () => {
   const { id } = useLocalSearchParams();
@@ -98,11 +99,7 @@ const CreativeProcessDetail = () => {
             <Text className='text-2xl font-bold'>Ideas</Text>
         </Pressable>
         {activeIdeas && <View className='gap-8'>
-          <Pressable onPress={() => setModalIdeasVisible(true)}>
-              <View className='border-2 p-3 w-2/3 border-[#828282]'>
-                <Text className='text-lg text-[#828282]'>Añadir idea +</Text>
-              </View>
-            </Pressable>
+            <AddIdealButtonModal source={'process'} id_process={id} id_scene={undefined}/>
             <CustomModal visible={modalIdeasVisible} onClose={() => setModalIdeasVisible(false)} options={optionsIdeas} />
             <FlatList
             data={ideas}

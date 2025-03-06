@@ -111,10 +111,6 @@ const FormPerson = () => {
             <Text className='screen-title'>Creando unx participante</Text>
             <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
                 <View style={{alignItems: "center"}} className='mb-10'>
-                    <View className='mb-2'>
-                        {image ? <Image source={{ uri: image }} style={{width: 100, height: 100,borderRadius: 50}}/>: 
-                        <View style={{width: 100, height: 100, backgroundColor: "#D9D9D9",borderRadius: 50}}></View>}
-                    </View>
                     <GalleryPicker image={image} setImage={setImage} setBase64Image={setBase64Image} />
                 </View>
                 

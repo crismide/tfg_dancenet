@@ -38,6 +38,7 @@ const FormIdea = () => {
             "SELECT * FROM scenes WHERE creativeprocess_id = ?;",
             [id_process]); 
           setScenes(scenesResult)
+          console.log(scenes)
         }
         else{console.log("nothing in theory")}
       } catch (error) {
@@ -82,6 +83,12 @@ const FormIdea = () => {
             ));
           }
         }
+      }
+      if(source==='scene'){
+        database.runAsync(
+          `INSERT INTO scene_idea (idea_id, creativeprocess_id, scene_id) VALUES (?, ?, ?);`,
+          [ideaId, id_process, id_scene]
+        )
       }
       if(source==='general' && selectedIds.length > 0){
         console.log("flag")

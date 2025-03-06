@@ -26,37 +26,6 @@ const ImagePickerComponent = ({ image, setImage, setBase64Image, allowVideos = f
       const selectedAsset = result.assets[0];
       setImage(selectedAsset.uri);
 
-      const { width: imgWidth, height: imgHeight } = selectedAsset;
-      const screenWidth = Dimensions.get('window').width;
-      const screenHeight = Dimensions.get('window').height;
-      const aspectRatio = imgWidth / imgHeight;
-
-      let width, height;
-
-      if (imgWidth > imgHeight) {
-        // Horizontal image: Fit to screen width, adjust height accordingly
-        width = screenWidth;
-        height = width / aspectRatio;
-
-        // If the height is too big, fit it to screen height instead
-        if (height > screenHeight) {
-          height = screenHeight;
-          width = height * aspectRatio;
-        }
-      } else {
-        // Vertical image: Fit to screen height, adjust width accordingly
-        height = screenHeight;
-        width = height * aspectRatio;
-
-        // If the width is too big, fit it to screen width instead
-        if (width > screenWidth) {
-          width = screenWidth;
-          height = width / aspectRatio;
-        }
-      }
-
-      setMediaDimensions({ width, height });
-
       if (selectedAsset.base64 && selectedAsset.type === 'image') {
         setBase64Image(`data:image/jpeg;base64,${selectedAsset.base64}`);
       } else if (selectedAsset.type === 'video') {
@@ -66,13 +35,13 @@ const ImagePickerComponent = ({ image, setImage, setBase64Image, allowVideos = f
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
       {image ? (
         mediaType === 'both' && image.endsWith('.mp4') ? (
           <Video
             ref={videoRef}
             source={{ uri: image }}
-            style={{ width: mediaDimensions.width, height: mediaDimensions.height }}
+            style={{ width: 200, height: 200 }}
             resizeMode={ResizeMode.CONTAIN}
             useNativeControls
             isLooping
@@ -80,7 +49,7 @@ const ImagePickerComponent = ({ image, setImage, setBase64Image, allowVideos = f
         ) : (
           <Image
             source={{ uri: image }}
-            style={{ width: mediaDimensions.width, height: mediaDimensions.height }}
+            style={{ width: 200, height: 200 }}
             resizeMode="contain"
           />
         )

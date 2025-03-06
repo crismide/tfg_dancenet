@@ -31,4 +31,7 @@
     .input-text-box{
         @apply border border-2 rounded-lg border-gray-300 p-4
     }
+    .inside-category{
+        @apply gap-5
+    }
 }
