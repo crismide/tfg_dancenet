@@ -22,7 +22,6 @@ const EditPerson = () => {
                     setName(result[0].name);
                     setImg(result[0].img);
                     setNotes(result[0].notes);
-                    console.log(img)
                 } else {
                     console.log("No person found with the given ID");
                 }

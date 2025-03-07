@@ -115,7 +115,7 @@ const Person = () => {
                     <Text className='text-xl mb-3 font-bold'>Procesos creativos en los que participa</Text>
                     <FlatList
                         data={creativeProcesses}
-                        renderItem={({ item }) => <PreviewProcess name={item.name} id={item.id} image={item.img}/>}
+                        renderItem={({ item }) => <PreviewProcess name={item.name} id={item.id} img={item.img}/>}
                         horizontal={true}
                         contentContainerStyle={{ gap: 20 }}
                     />

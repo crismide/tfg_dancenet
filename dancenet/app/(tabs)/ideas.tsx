@@ -40,9 +40,13 @@ const Ideas = () => {
           <FlatList
             data={ideas}
             renderItem={({item}) => 
-              <View className='mb-4'>
-                <PreviewIdea typeContent={item.typeContent} data={item.data}/>
-              </View>
+                <PreviewIdea 
+                  typeContent={item.typeContent} 
+                  data={item.data} 
+                  id={item.id} 
+                  source={'general'}
+                  id_process={undefined}
+                  />
             }
           />
         </ScrollView>

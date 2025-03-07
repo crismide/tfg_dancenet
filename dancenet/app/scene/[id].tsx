@@ -101,7 +101,12 @@ const Scene = () => {
                   horizontal={true}
                   renderItem={({item}) => 
                     <View className='mb-4'>
-                      <PreviewIdea typeContent={item.typeContent} data={item.data}/>
+                      <PreviewIdea 
+                        typeContent={item.typeContent} 
+                        data={item.data}
+                        id={item.id}
+                        source={'scene'}
+                        id_process={creativeProcessId}/>
                     </View>
                   }
                   />

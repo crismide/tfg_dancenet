@@ -85,10 +85,13 @@ const FormIdea = () => {
         }
       }
       if(source==='scene'){
+        
         database.runAsync(
           `INSERT INTO scene_idea (idea_id, creativeprocess_id, scene_id) VALUES (?, ?, ?);`,
           [ideaId, id_process, id_scene]
         )
+        await database.runAsync("INSERT INTO idea_creativeprocess (idea_id, creativeprocess_id) VALUES (?, ?);",
+          [ideaId, id_process]);
       }
       if(source==='general' && selectedIds.length > 0){
         console.log("flag")

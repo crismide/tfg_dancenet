@@ -1,10 +1,31 @@
 import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import CustomModal from "./CustomModal";
+import { router } from "expo-router";
 
 const AddIdealButtonModal = ({source,id_process,id_scene}) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isIdeaModalVisible, setIdeaModalVisible] = useState(false);
+  const [isInitialModalVisible, setInitialModalVisible] = useState(false);
+
+  const initialOptions = [
+    {
+      label: "Crear nueva idea",
+      icon: "plus-circle",
+      onPress: () => {
+        setInitialModalVisible(false);
+        setIdeaModalVisible(true);
+      },
+    },
+    {
+      label: "Seleccionar idea existente",
+      icon: "folder-open",
+      href: {
+        pathname: "/idea/selectIdeas",
+        params: { source: source, id_process: id_process, id_scene: id_scene },
+      },
+    },
+  ];
 
   const options1 = [
     {
@@ -58,12 +79,18 @@ const AddIdealButtonModal = ({source,id_process,id_scene}) => {
       >
         <Text className="text-5xl text-[#C8C8C8]">+</Text>
       </Pressable> : 
-      <Pressable onPress={() => setModalVisible(true)}>
+      <Pressable onPress={() => setInitialModalVisible(true)}>
         <View className='border-2 p-3 w-2/3 border-[#828282]'>
           <Text className='text-lg text-[#828282]'>Añadir idea +</Text>
         </View>
       </Pressable>
       }
+
+      <CustomModal
+        visible={isInitialModalVisible}
+        onClose={() => setInitialModalVisible(false)}
+        options={initialOptions}
+      />
 
       {/* Modals */}
       <CustomModal
@@ -76,10 +103,15 @@ const AddIdealButtonModal = ({source,id_process,id_scene}) => {
         visible={isIdeaModalVisible}
         onClose={() => {
           setIdeaModalVisible(false);
-          setModalVisible(true);
+          if (source === "general") {
+            setModalVisible(true);
+          } else {
+            setInitialModalVisible(true);
+          }
         }}
         options={ideaOptions}
       />
+
     </>
   );
 };

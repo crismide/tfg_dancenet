@@ -48,7 +48,7 @@ const Index = () => {
       />
       </ScrollView>
       <View className='justify-end'>
-        <AddIdealButtonModal source={'general'}/>
+        <AddIdealButtonModal source={'general'} id_process={undefined} id_scene={undefined}/>
       </View>
       
     </View>
