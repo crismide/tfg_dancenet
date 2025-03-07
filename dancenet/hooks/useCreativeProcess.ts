@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const useCreativeProcess = (database, id) => {
+const useCreativeProcess = (database,id) => {
   const [process, setProcess] = useState(null);
   const [scenes, setScenes] = useState([]);
   const [people, setPeople] = useState([]);
@@ -53,9 +53,10 @@ const useCreativeProcess = (database, id) => {
     };
 
     loadData();
-  }, [id, database,people,ideas,scenes]);
+  }, [id, database]);
 
   return { process, scenes, people, ideas, loading };
 };
 
 export default useCreativeProcess;
+

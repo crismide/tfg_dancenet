@@ -6,6 +6,7 @@ const useScene = (database, id) => {
     const [people, setPeople] = useState([]);
     const [ideas, setIdeas] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [creativeprocessId, setCreativeprocessId] = useState("")
     useEffect(() => {
       const loadData = async () => {
         try {
@@ -15,6 +16,7 @@ const useScene = (database, id) => {
           );
           if (result.length > 0) {
               setScene(result[0]);
+              setCreativeprocessId(result[0].creativeprocess_id);
 
               const [peopleResult,ideasResult] = await Promise.all([database.getAllAsync(
                 ` SELECT people.* 
@@ -44,7 +46,7 @@ const useScene = (database, id) => {
   
       loadData();
     }, [id, database,people]);
-  return {scene,people,ideas,loading}
+  return {scene,people,ideas,loading,creativeprocessId}
 }
 
 export default useScene

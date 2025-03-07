@@ -8,6 +8,7 @@ import PreviewProcess from '@/components/PreviewProcess';
 import Divider from '@/components/Divider';
 import PreviewScene from '@/components/PreviewScene';
 import BackButton from '@/components/BackButton';
+import EditDeletebuttons from '@/components/EditDeletebuttons';
 
 const Person = () => {
     const { id, source, id_process } = useLocalSearchParams();
@@ -93,15 +94,8 @@ const Person = () => {
             <Stack.Screen options={{ headerShown: false }} />
             <View className='flex flex-row justify-between items-center'>
             <BackButton/>
-            <View className='flex flex-row gap-10'>
-                <Pressable onPress={() => router.push(`/person/edit/${id}`)}>
-                    <FontAwesome5 name="edit" size={20} color="grey"/>
-                </Pressable>
-                <Pressable onPress={handleDelete}>
-                    <FontAwesome5 name="trash" size={20} color="grey"/>
-                </Pressable>
-            </View>
-            </View>
+            <EditDeletebuttons typeObject={"person"} table={"people"} id={id}/>
+        </View>
             
             <View style={{alignItems: "center"}} className='gap-5'>
                 <Image 

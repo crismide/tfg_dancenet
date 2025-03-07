@@ -11,6 +11,7 @@ import LoadingScreen from '@/components/LoadingScreen';
 import BackButton from '@/components/BackButton';
 import PreviewIdea from '@/components/PreviewIdea';
 import AddIdealButtonModal from '@/components/AddIdealButtonModal';
+import EditDeletebuttons from '@/components/EditDeletebuttons';
 
 const CreativeProcessDetail = () => {
   const { id } = useLocalSearchParams();
@@ -88,9 +89,7 @@ const CreativeProcessDetail = () => {
     <BackButton/>
     <View className='flex flex-row justify-between items-center'>
       <Text className='screen-title'>{process.name}</Text>
-      <Pressable onPress={handleDelete}>
-        <FontAwesome5 name="trash" size={20} color="grey"/>
-      </Pressable>
+      <EditDeletebuttons typeObject={"creative-process"} table={"creativeprocesses"} id={id}/>
     </View>
         <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <View>

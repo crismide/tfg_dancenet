@@ -6,7 +6,6 @@ const PreviewProcess = ({ name, img,id }) => {
   const handlePress = () => {
     router.push(`/creative-process/${id}`)
   }
-  useEffect(() => {console.log(img)},[])
   return (
     <Pressable onPress={handlePress}>
       <Image

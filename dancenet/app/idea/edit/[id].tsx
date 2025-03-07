@@ -1,6 +1,6 @@
-import { View, Text, TextInput, Image, Alert } from 'react-native'
+import { View, Text, TextInput, Image, Alert, TouchableHighlight } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import useIdea from '@/hooks/useIdea';
 import { ResizeMode, Video } from 'expo-av';
@@ -61,7 +61,36 @@ const EditIdea = () => {
         source={{ uri: idea.data }}
         style={{ width: 200, height: 150, borderRadius: 10 }}
         />}
-    
+      <View className='gap-4'>
+      <Link
+          href={{
+          pathname: '/creative-process/selectProcesses',
+          params: { id: id, object: 'idea', table: 'ideas', tableJoined: 'idea_creativeprocess' },
+          }}
+          asChild
+>
+          <TouchableHighlight
+          style={{ backgroundColor: '#F1A636', padding: 10, borderRadius: 5 }}
+          underlayColor="#D98E2B"
+          >
+          <Text style={{ color: '#FFF', textAlign: 'center' }}>Modificar procesos creativos</Text>
+          </TouchableHighlight>
+      </Link>
+      <Link
+          href={{
+          pathname: '/scene/selectScenes',
+          params: { id: id, object: 'idea', tableJoined: 'scene_idea' },
+          }}
+          asChild
+      >
+          <TouchableHighlight
+          style={{ backgroundColor: '#F1A636', padding: 10, borderRadius: 5 }}
+          underlayColor="#D98E2B"
+          >
+          <Text style={{ color: '#FFF', textAlign: 'center' }}>Modificar escena</Text>
+          </TouchableHighlight>
+      </Link>
+      </View>
       <FormButtons handleSave={handleSave}/>
     </View>
   )

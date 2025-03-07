@@ -1,9 +1,10 @@
-import { View, Text, TextInput, Pressable, Alert, Image, Button, ScrollView } from 'react-native';
+import { View, Text, TextInput, Pressable, Alert, Image, Button, ScrollView, TouchableHighlight } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { useLocalSearchParams, router, Stack } from 'expo-router';
+import { useLocalSearchParams, router, Stack, Link } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import LoadingScreen from '@/components/LoadingScreen';
 import * as ImagePicker from "expo-image-picker";
+import FormButtons from '@/components/FormButtons';
 
 const EditPerson = () => {
     const { id } = useLocalSearchParams();
@@ -76,6 +77,7 @@ const EditPerson = () => {
             <Stack.Screen options={{ headerShown: false }} />
             <Text className='screen-title'>Editando una persona</Text>
             <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+            <View className='gap-5'>
             <View style={{ alignItems: "center" }} className='mb-10'>
                 <View className='mb-2'>
                     {img ? (
@@ -87,7 +89,7 @@ const EditPerson = () => {
                 <Button title='Elige una imagen de la galería' color="#F1A636" onPress={pickImage} />
             </View>
 
-            <View className='mb-10'>
+            <View>
                 <Text className='text-xl mb-2'>Nombre</Text>
                 <TextInput
                     placeholder="Cambia el nombre"
@@ -98,7 +100,7 @@ const EditPerson = () => {
                 {errorName && <Text className='text-xl text-red-700'>Es obligatorio introducir un nombre</Text>}
             </View>
 
-            <View className='mb-10'>
+            <View>
                 <Text className='text-xl mb-2'>Notas y limitaciones</Text>
                 <TextInput
                     placeholder="Añade o modifica notas"
@@ -108,14 +110,36 @@ const EditPerson = () => {
                     multiline
                 />
             </View>
+            <Link
+                href={{
+                pathname: '/creative-process/selectProcesses',
+                params: { id: id, object: 'person', tableJoined: 'person_creativeprocess' },
+                }}
+                asChild
+            >
+                <TouchableHighlight
+                style={{ backgroundColor: '#F1A636', padding: 10, borderRadius: 5 }}
+                underlayColor="#D98E2B"
+                >
+                <Text style={{ color: '#FFF', textAlign: 'center' }}>Modificar procesos creativos</Text>
+                </TouchableHighlight>
+            </Link>
+            <Link
+                href={{
+                pathname: '/scene/selectScenes',
+                params: { id: id, object: 'person', tableJoined: 'scene_people' },
+                }}
+                asChild
+            >
+                <TouchableHighlight
+                style={{ backgroundColor: '#F1A636', padding: 10, borderRadius: 5 }}
+                underlayColor="#D98E2B"
+                >
+                <Text style={{ color: '#FFF', textAlign: 'center' }}>Modificar escenas</Text>
+                </TouchableHighlight>
+            </Link>
 
-            <View className='flex flex-row justify-center gap-8'>
-                <Pressable className='form-button cancel-button' onPress={() => router.back()}>
-                    <Text className='button-text'>Cancelar</Text>
-                </Pressable>
-                <Pressable onPress={handleSave} className='form-button continue-button'>
-                    <Text className='button-text'>Guardar</Text>
-                </Pressable>
+            <FormButtons handleSave={handleSave}/>
             </View>
             </ScrollView>
         </View>

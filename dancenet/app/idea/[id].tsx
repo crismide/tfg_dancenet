@@ -1,6 +1,6 @@
-import { View, Text, Image, FlatList } from 'react-native'
+import { View, Text, Image, FlatList, Pressable, Button, TouchableOpacity, TouchableHighlight } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import LoadingScreen from '@/components/LoadingScreen';
 import BackButton from '@/components/BackButton';
@@ -20,13 +20,13 @@ const Idea = () => {
     }
 
     return (
-        <View className='p-10 gap-8'>
+        <View className='p-10'>
             <Stack.Screen options={{ headerShown: false }} />
             <View className='flex flex-row justify-between items-center'>
                 <BackButton/>
                 <EditDeletebuttons typeObject={'idea'} table={'ideas'} id={id}/>
             </View>
-            <View>
+            <View className='mt-16 gap-8'>
             {idea.typeContent === 'text' && 
                 <View style={{ padding: 15, backgroundColor: '#FFFB97' }}>
                 <Text className='text-xl font-bold'>{idea.data}</Text>
@@ -49,7 +49,7 @@ const Idea = () => {
                     <View>
                         <Text className='text-xl mb-3 font-bold'>Correspondiente a los procesos creativos...</Text>
                         <FlatList
-                        data={process}
+                        data={processes}
                         renderItem={({ item }) => <PreviewProcess name={item.name} id={item.id} img={item.img}/>}
                         horizontal={true}
                         contentContainerStyle={{ gap: 20 }}
@@ -67,6 +67,7 @@ const Idea = () => {
                     />
                     </View>
                 }
+                
             </View>
         </View>
     )
