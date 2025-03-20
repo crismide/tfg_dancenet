@@ -93,8 +93,8 @@ const Person = () => {
         <View className='p-10 gap-8'>
             <Stack.Screen options={{ headerShown: false }} />
             <View className='flex flex-row justify-between items-center'>
-            <BackButton/>
-            <EditDeletebuttons typeObject={"person"} table={"people"} id={id}/>
+                <BackButton/>
+                <EditDeletebuttons typeObject={"person"} table={"people"} id={id}/>
         </View>
             
             <View style={{alignItems: "center"}} className='gap-5'>

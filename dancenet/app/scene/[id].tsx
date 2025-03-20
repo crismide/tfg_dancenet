@@ -134,10 +134,12 @@ const Scene = () => {
                       keyExtractor={(item) => item.id.toString()}
                       horizontal={true}
                       renderItem={({item}) => (
-                        <Image 
-                          source={{ uri: `data:image/png;base64,${item.img}` }}
-                          style={{width: 200, height: 150, marginRight: 10}}
-                        />
+                        <Pressable onPress={() => router.push({ pathname: `/space/${item.id}`})}>
+                            <Image 
+                            source={{ uri: `data:image/png;base64,${item.img}` }}
+                            style={{width: 200, height: 150, marginRight: 10}}
+                          />
+                        </Pressable>
                       )}
                     />
                  </View>
