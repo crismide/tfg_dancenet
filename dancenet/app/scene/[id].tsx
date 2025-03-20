@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, Pressable, ScrollView, FlatList, Alert } from 'react-native'
+import { View, Text, ActivityIndicator, Pressable, ScrollView, FlatList, Alert, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -23,7 +23,7 @@ const Scene = () => {
     const [activeObjects, setActiveObjects] = useState(false)
     const [modalVisible, setModalVisible] = useState(false);
 
-    const { scene, people, ideas, loading } = useScene(database, id);
+    const { scene, people, ideas, loading, spaces } = useScene(database, id);
 
     const options = [
       { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: creativeProcessId, id_scene:id }} },
@@ -79,7 +79,7 @@ const Scene = () => {
     
 
     return (
-      <View className='p-10 gap-8'>
+      <View className='screen'>
           <Stack.Screen options={{ headerShown: false }} />
           <BackButton/>
           <View className='flex flex-row justify-between items-center'>
@@ -89,10 +89,11 @@ const Scene = () => {
             </Pressable>
           </View>
           <ScrollView >
-          <View>
+          <View className='gap-8'>
+              <View>
               <Pressable className='flex flex-row gap-3' onPress={() => setActiveIdeas(!activeIdeas)}>
                   {activeIdeas ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
-                  <Text className='text-2xl font-bold mb-7'>Ideas</Text>
+                  <Text className='text-2xl font-bold'>Ideas</Text>
               </Pressable>
               {activeIdeas && <View className='inside-category'>
                 <AddIdealButtonModal source={"scene"} id_process={creativeProcessId} id_scene={id}/>
@@ -111,6 +112,7 @@ const Scene = () => {
                   }
                   />
                 </View>}
+              </View>
               <Pressable className='flex flex-row gap-3' onPress={() => setActiveMove(!activeMove)}>
                   {activeMove ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
                   <Text className='text-2xl font-bold'>Pautas de movimiento</Text>
@@ -120,7 +122,27 @@ const Scene = () => {
                   {activeSpace ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
                   <Text className='text-2xl font-bold'>Recorrido espacial</Text>
               </Pressable>
-              {activeSpace && <Text className='mb-8'>Content</Text>}
+              {activeSpace && 
+                 <View>
+                    <Link href={{pathname: "/(forms)/FormSpace",params: { id_scene: id }}} className='mb-4'>
+                        <View className='border-2 p-2 w-1/2 border-[#828282]'>
+                            <Text className='text-lg text-[#828282]'>Añadir recorridos espaciales +</Text>
+                        </View>
+                    </Link>
+                    <FlatList
+                      data={spaces}
+                      keyExtractor={(item) => item.id.toString()}
+                      horizontal={true}
+                      renderItem={({item}) => (
+                        <Image 
+                          source={{ uri: `data:image/png;base64,${item.img}` }}
+                          style={{width: 200, height: 150, marginRight: 10}}
+                        />
+                      )}
+                    />
+                 </View>
+                  
+              }
 
 
               <Pressable className='flex flex-row gap-3' onPress={() => setActivePeople(!activePeople)}>
@@ -147,11 +169,7 @@ const Scene = () => {
                 }
                 </View>
               }
-              <Pressable className='flex flex-row gap-3' onPress={() => setActiveRehearsal(!activeRehearsal)}>
-                  {activeRehearsal ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
-                  <Text className='text-2xl font-bold'>Ensayos</Text>
-              </Pressable>
-              {activeRehearsal && <Text className='mb-8'>Content</Text>}
+            
               <Pressable className='flex flex-row gap-3' onPress={() => setActiveObjects(!activeObjects)}>
                   {activeObjects ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
                   <Text className='text-2xl font-bold'>Objetos</Text>

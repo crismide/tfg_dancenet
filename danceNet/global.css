@@ -32,6 +32,9 @@
         @apply border border-2 rounded-lg border-gray-300 p-4
     }
     .inside-category{
-        @apply gap-5
+        @apply p-4 gap-5
+    }
+    .screen{
+        @apply p-10 gap-8
     }
 }

@@ -5,6 +5,7 @@ const useScene = (database, id) => {
     const [scene, setScene] = useState(null);
     const [people, setPeople] = useState([]);
     const [ideas, setIdeas] = useState([]);
+    const [spaces, setSpaces] = useState([]);
     const [loading, setLoading] = useState(true);
     const [creativeprocessId, setCreativeprocessId] = useState("")
     useEffect(() => {
@@ -18,7 +19,7 @@ const useScene = (database, id) => {
               setScene(result[0]);
               setCreativeprocessId(result[0].creativeprocess_id);
 
-              const [peopleResult,ideasResult] = await Promise.all([database.getAllAsync(
+              const [peopleResult,ideasResult,spacesResult] = await Promise.all([database.getAllAsync(
                 ` SELECT people.* 
                   FROM people
                   JOIN scene_people ON people.id = scene_people.person_id
@@ -30,10 +31,14 @@ const useScene = (database, id) => {
                   JOIN scene_idea ON ideas.id = scene_idea.idea_id
                   WHERE scene_idea.scene_id = ?;
                   `, [id]
-                )])
+                , ),
+                database.getAllAsync(
+                  ` SELECT * FROM spaces WHERE scene_id = ?;`, [id])
+              ])
                 
               setPeople(peopleResult);
               setIdeas(ideasResult);
+              setSpaces(spacesResult);
           } else {
             console.log("No process found with the given ID");
           }
@@ -46,7 +51,7 @@ const useScene = (database, id) => {
   
       loadData();
     }, [id, database,people]);
-  return {scene,people,ideas,loading,creativeprocessId}
+  return {scene,people,ideas,loading,creativeprocessId,spaces}
 }
 
 export default useScene

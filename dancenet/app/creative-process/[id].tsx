@@ -86,11 +86,11 @@ const CreativeProcessDetail = () => {
   return (
     <View className='p-10 gap-8'>
     <Stack.Screen options={{ headerShown: false }} />
-    <BackButton/>
-    <View className='flex flex-row justify-between items-center'>
-      <Text className='screen-title'>{process.name}</Text>
+      <BackButton/>
+      <View className='flex flex-row justify-between items-center'>
+        <Text className='screen-title'>{process.name}</Text>
       <EditDeletebuttons typeObject={"creative-process"} table={"creativeprocesses"} id={id}/>
-    </View>
+      </View>
         <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <View>
         <Pressable className='flex flex-row gap-3' onPress={() => setActiveIdeas(!activeIdeas)}>
@@ -168,13 +168,6 @@ const CreativeProcessDetail = () => {
               }
           </View>
         }
-      </View>
-      <View>
-        <Pressable className='flex flex-row gap-3' onPress={() => setActiveRehearsal(!activeRehearsal)}>
-            {activeRehearsal ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
-            <Text className='text-2xl font-bold'>Ensayos</Text>
-        </Pressable>
-        {activeRehearsal && <Text>Content</Text>}
       </View>
         </ScrollView>
     </View>

@@ -36,7 +36,7 @@ export default function Layout() {
         }}
       />
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
               name="calendar"
               options={{
                 title: "Ensayos",
@@ -48,7 +48,7 @@ export default function Layout() {
                       solid={focused} />
                 ),
               }}
-            />
+            /> */}
       <Tabs.Screen
               name="people"
               options={{

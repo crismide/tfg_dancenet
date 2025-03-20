@@ -80,6 +80,14 @@ export default function Layout() {
         FOREIGN KEY (creativeprocess_id) REFERENCES creativeprocesses(id) ON DELETE CASCADE
       );
     `);
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS spaces (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        img TEXT NOT NULL,
+        scene_id INTEGER NOT NULL,
+        FOREIGN KEY (scene_id) REFERENCES scenes(id) ON DELETE CASCADE
+      );
+    `);
   }
 
   return (
