@@ -1,5 +1,5 @@
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Image,
@@ -19,6 +19,8 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import FormButtons from '@/components/FormButtons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useSQLiteContext } from 'expo-sqlite';
+import people from '../(tabs)/people';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const { height, width } = Dimensions.get('window');
 
@@ -30,6 +32,9 @@ const FormSpace = () => {
   const [selectedColor, setSelectedColor] = useState('#000000');
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [isEraserMode, setIsEraserMode] = useState(false);
+  const [showPeoplePicker, setShowPeoplePicker] = useState(false);
+  const [scenePeople, setScenePeople] = useState<Array<{id: number, name: string, img: string}>>([]);
+  const [loading, setLoading] = useState(true);
   const database = useSQLiteContext()
   const [droppedImages, setDroppedImages] = useState<Array<{
     uri: string;
@@ -39,20 +44,21 @@ const FormSpace = () => {
     height: number;
   }>>([]);
   const svgContainerRef = useRef<View>(null);
-  const handleDrop = useCallback((event: any, uri: string) => {
-    svgContainerRef.current?.measureInWindow((x, y) => {
-      const svgX = event.nativeEvent.pageX - x;
-      const svgY = event.nativeEvent.pageY - y;
-      
-      setDroppedImages(prev => [...prev, {
-        uri,
-        x: svgX,
-        y: svgY,
-        width: 100, // Default width
-        height: 100 // Default height
-      }]);
-    });
-  }, []);
+
+  useEffect(() => {
+    const loadPeople = async () => {
+      const result = await database.getAllAsync(
+        `SELECT p.id, p.name, p.img 
+         FROM people p
+         JOIN scene_people sp ON p.id = sp.person_id
+         WHERE sp.scene_id = ?`,
+        [id_scene]
+      );
+      setScenePeople(result);
+      setLoading(false)
+    };
+    loadPeople();
+  }, [id_scene]);
 
   const onTouchEnd = () => {
     if (currentPath.length > 0) {
@@ -102,6 +108,7 @@ const FormSpace = () => {
     }
   };
   
+  if (loading) { return <LoadingScreen/> }
 
   return (
     <View className='p-10 gap-8'>
@@ -113,6 +120,12 @@ const FormSpace = () => {
           style={{ backgroundColor: selectedColor }}
           onPress={() => setShowColorPicker(true)}
         />
+        <TouchableOpacity
+          className="p-2.5 bg-gray-300 rounded-md"
+          onPress={() => setShowPeoplePicker(true)}
+        >
+          <FontAwesome5 name="users" size={20} color="black" />
+        </TouchableOpacity>
         <TouchableOpacity
             className="p-2.5 bg-gray-300 rounded-md"
             onPress={() => setIsEraserMode(!isEraserMode)}
@@ -143,10 +156,27 @@ const FormSpace = () => {
 
       <ViewShot ref={ref} options={{ format: 'jpg', quality: 1 }}>
         <View
+          ref={svgContainerRef}
           className="h-[35vh] bg-white"
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
+          style={{ position: 'relative' }}
+          collapsable={false}
         >
+          {droppedImages.map((img, index) => (
+            <Image
+              key={`img-${index}`}
+              source={{ uri: img.uri }}
+              style={{
+                position: 'absolute',
+                left: img.x - img.width/2, // Center image on drop point
+                top: img.y - img.height/2,
+                width: img.width,
+                height: img.height,
+                zIndex: 2 // Ensure images appear above SVG
+              }}
+            />
+          ))}
           <Svg height={height * 0.7} width={width}>
             <Path
               d={currentPath.join('')}
@@ -171,22 +201,72 @@ const FormSpace = () => {
           </Svg>
         </View>
       </ViewShot>
-      <ScrollView 
-        horizontal 
-        className="h-[15vh] w-full bg-gray-300 p-2"
-        contentContainerStyle={{ alignItems: 'center' }}
-      >
+      <Modal visible={showPeoplePicker} transparent animationType="slide">
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="w-[90%] h-[70%] bg-white rounded-xl p-4">
+            <Text className="text-lg font-bold mb-4">Select a Person</Text>
+            <ScrollView>
+              <View className="flex-row flex-wrap justify-center">
+                {scenePeople.map((person) => (
+                  <TouchableOpacity
+                    key={person.id}
+                    className="m-2"
+                    onPress={() => {
+                      setDroppedImages(prev => [...prev, {
+                        uri: `data:image/png;base64,${person.img}`,
+                        x: width/2 - 50, // Start at center
+                        y: height/4 - 50,
+                        width: 100,
+                        height: 100
+                      }]);
+                      setShowPeoplePicker(false);
+                    }}
+                  >
+                    <View className='flex flex-row gap-4'>
+                        <Image 
+                            source={person.img ? { uri: person.img } : require('../../assets/default-img.png')}
+                            style={{width: 50, height: 50,borderRadius: 50}}/>
+                        <View className='flex flex-row justify-between items-center'>
+                            <Text className='text-xl align-middle'>{person.name}</Text>
+                        </View>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+            <TouchableOpacity
+              className="mt-4 p-2 bg-red-500 rounded self-center"
+              onPress={() => setShowPeoplePicker(false)}
+            >
+              <Text className="text-white">Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      {droppedImages.map((img, index) => (
         <Draggable
-            x={0}
-            y={0}
-            onDragRelease={(event) => handleDrop(event, 'https://placehold.co/100')}
+          key={`draggable-${index}`}
+          x={img.x}
+          y={img.y}
+          minX={0}
+          minY={0}
+          maxX={width - 100}
+          maxY={height * 0.7 - 100}
+          onDragRelease={(e, gesture) => {
+            setDroppedImages(prev => 
+              prev.map((item, i) => 
+                i === index ? {...item, x: gesture.moveX, y: gesture.moveY} : item
+              )
+            );
+          }}
         >
-            <Image
-            source={{ uri: 'https://placehold.co/100' }}
-            className="w-20 h-20 m-2 rounded-lg"
-            />
+          <Image
+            source={{ uri: img.uri }}
+            className="w-[100px] h-[100px]"
+            style={{ zIndex: 3 }}
+          />
         </Draggable>
-      </ScrollView>
+      ))}
       <FormButtons handleSave={handleSave}/>
     </View>
   );
