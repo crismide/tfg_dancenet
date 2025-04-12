@@ -75,7 +75,7 @@ const AddIdealButtonModal = ({source,id_process,id_scene}) => {
       {/* Floating "+" Button */}
       {source === 'general' ? <Pressable
         onPress={() => setModalVisible(true)}
-        className="bg-[#7B7474] w-20 h-20 rounded-xl justify-center items-center shadow-lg"
+        className="bg-[#7B7474] w-16 h-16 rounded-xl justify-center items-center shadow-lg"
       >
         <Text className="text-5xl text-[#C8C8C8]">+</Text>
       </Pressable> : 

@@ -32,22 +32,24 @@ const Index = () => {
         <GradientText text="DanceNet" fontSize={35} />
         <Text className='text-2xl'>Mis procesos creativos</Text>
       </View>
-      <ScrollView>
-      <FlatList
-        data={processes}
-        renderItem={({ item }) => <PreviewProcess name={item.name} img={item.img} id={item.id}/>}
-        numColumns={2}
-        keyExtractor={(item) => item.id.toString()}
-        columnWrapperStyle={{
-          justifyContent: 'space-between',
-          marginBottom: 10, // Adds gap between rows
-        }}
-        contentContainerStyle={{
-          paddingHorizontal: 20, // Reduces the horizontal space between columns
-        }}
-      />
-      </ScrollView>
-      <View className='justify-end'>
+      {processes.length < 1 ? <Text className='text-xl text-gray-400'>Añade ideas o procesos creativos con el botón + que aparece en la parte de abajo de la pantalla</Text> : 
+        <ScrollView>
+        <FlatList
+          data={processes}
+          renderItem={({ item }) => <PreviewProcess name={item.name} img={item.img} id={item.id}/>}
+          numColumns={2}
+          keyExtractor={(item) => item.id.toString()}
+          columnWrapperStyle={{
+            justifyContent: 'space-between',
+            marginBottom: 20,
+          }}
+          contentContainerStyle={{
+            paddingHorizontal: 20, 
+          }}
+        />
+        </ScrollView>
+      }
+      <View className='absolute bottom-10 right-10 z-10'>
         <AddIdealButtonModal source={'general'} id_process={undefined} id_scene={undefined}/>
       </View>
       

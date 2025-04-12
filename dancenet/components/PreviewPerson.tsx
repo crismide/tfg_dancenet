@@ -76,7 +76,7 @@ const PreviewPerson = ({name,img,id,source,id_process}) => {
                     <Image 
                         source={img ? { uri: img } : require('../assets/default-img.png')}
                         style={{width: 50, height: 50,borderRadius: 50}}/>
-                    <View className='flex flex-row justify-between items-center'>
+                    <View className='flex flex-row justify-between items-center gap-4'>
                         <Text className='text-xl align-middle'>{name}</Text>
                         {source !== 'people' ? <Pressable onPress={handleRemove}>
                             <FontAwesome5 name="ban" size={20} color="grey"/>

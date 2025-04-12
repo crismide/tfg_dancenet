@@ -108,6 +108,7 @@ const Scene = () => {
                         id={item.id}
                         source={'scene'}
                         id_process={creativeProcessId}/>
+                        id_scene={id}
                     </View>
                   }
                   />

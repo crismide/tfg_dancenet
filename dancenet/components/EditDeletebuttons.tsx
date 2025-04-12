@@ -36,7 +36,7 @@ const EditDeletebuttons = ({typeObject,table,id,editActive=true}) => {
     }
 
     return (
-        <View className='flex flex-row gap-10'>
+        <View className='flex flex-row gap-5'>
             {editActive && <Pressable onPress={() => router.push(`/${typeObject}/edit/${id}`)}>
                 <FontAwesome5 name="edit" size={20} color="grey"/>
             </Pressable>}

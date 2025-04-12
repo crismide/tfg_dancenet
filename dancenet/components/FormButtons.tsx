@@ -5,11 +5,42 @@ import { router } from 'expo-router'
 const FormButtons = ({handleSave}) => {
   return (
     <View className='flex flex-row justify-center gap-8'>
-        <Pressable className='form-button cancel-button' onPress={() => router.back()} >
-            <Text className='button-text'>Cancelar</Text>
+        <Pressable 
+          style={{ 
+            backgroundColor: '#5B5B5B',
+            padding: 12,
+            width: 134,
+            borderRadius: 12
+          }}
+          onPress={() => router.back()}
+        >
+           <Text style={{
+              color: 'white',
+              fontSize: 18,
+              textAlign: 'center',
+              fontWeight: '600', // Semi-bold
+              fontFamily: 'System', // Ensures consistent font
+              lineHeight: 24 // Better vertical alignment
+            }}>Cancelar</Text>
         </Pressable>
-        <Pressable className='form-button continue-button' onPress={handleSave}>
-            <Text className='button-text'>Crear</Text>
+
+        <Pressable 
+          style={{ 
+            backgroundColor: '#C286F1',
+            padding: 12,
+            width: 134,
+            borderRadius: 12
+          }}
+          onPress={handleSave}
+        >
+           <Text style={{
+            color: 'white',
+            fontSize: 18,
+            textAlign: 'center',
+            fontWeight: '600',
+            fontFamily: 'System',
+            lineHeight: 24
+          }}>Crear</Text>
         </Pressable>
     </View>
   )
