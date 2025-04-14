@@ -15,7 +15,7 @@ const PreviewIdea = ({ typeContent, data, id,source,id_process,id_scene}) => {
     if(source === 'process'){
       Alert.alert(
         "Quitando idea del proceso creativo",
-        "¿Estás segurx? Esto también la quitará de todas las escenas asociadas",
+        "¿Estás segurx de que quieres quitar esta idea del proceso creativo?",
         [
           {
             text: "Cancelar",
@@ -26,22 +26,14 @@ const PreviewIdea = ({ typeContent, data, id,source,id_process,id_scene}) => {
             onPress: async () => {
               try {
                 await database.runAsync(
-                  `BEGIN TRANSACTION;
+                  `
                    DELETE FROM idea_creativeprocess 
                    WHERE idea_id = ? AND creativeprocess_id = ?;
-                   
-                   DELETE FROM scene_ideas
-                   WHERE idea_id = ? 
-                     AND scene_id IN (
-                       SELECT id FROM scenes 
-                       WHERE creativeprocess_id = ?
-                     );
-                   COMMIT;`,
-                  [id, id_process, id, id_process]
+                   `,
+                  [id, id_process]
                 );
               } catch (error) {
                 console.error("Error al eliminar idea:", error);
-                await database.runAsync('ROLLBACK;');
               }
             },
           },
@@ -63,10 +55,11 @@ const PreviewIdea = ({ typeContent, data, id,source,id_process,id_scene}) => {
             onPress: async () => {
               try {
                 await database.runAsync(
-                  `DELETE FROM scene_ideas 
+                  `DELETE FROM scene_idea 
                    WHERE idea_id = ? AND scene_id = ?;`,
                   [id, id_scene] // Use id_scene instead of id_process here
                 );
+                console.log("idea eliminada")
               } catch (error) {
                 console.error("Error al eliminar idea:", error);
               }

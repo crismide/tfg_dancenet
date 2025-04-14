@@ -18,7 +18,6 @@ const EditCreativeProcess = () => {
 
   useEffect(() => {
     if (process) {
-      console.log("Process loaded:", process);
       if (process.img) {
         setImage(process.img);
         setBase64Image(process.img);

@@ -53,7 +53,7 @@ const useCreativeProcess = (database,id) => {
     };
 
     loadData();
-  }, [id, database]);
+  }, [id, database, process, scenes,people,ideas]);
 
   return { process, scenes, people, ideas, loading };
 };

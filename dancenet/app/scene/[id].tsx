@@ -10,6 +10,7 @@ import PreviewIdea from '@/components/PreviewIdea';
 import useScene from '@/hooks/useScene';
 import BackButton from '@/components/BackButton';
 import AddIdealButtonModal from '@/components/AddIdealButtonModal';
+import EditDeletebuttons from '@/components/EditDeletebuttons';
 
 const Scene = () => {
     const { id } = useLocalSearchParams();
@@ -30,49 +31,15 @@ const Scene = () => {
       { label: "Elegir ya existente", icon: "users", href: {pathname:"/person/selectPeople", params: {id_process: creativeProcessId, id_scene:id, source:'scene'
       }}},
     ];
-
-    const handleDelete = async () => {
-      Alert.alert(
-        "Borrando escena", // Title of the alert
-        "Estás segurx de que quieres borrar esta escena?", // Message in the alert
-        [
-          {
-            text: "Cancelar", // Button to cancel the action
-            style: "cancel", // Style for the cancel button
-          },
-          {
-            text: "Aceptar", // Button to confirm the deletion
-            onPress: async () => {
-              console.log("Deleting scene with ID:", id); // Debug log
-              try {
-                // Execute the delete query using runAsync
-                const result = await database.runAsync(`DELETE FROM scenes WHERE id = ?;`, [id]);
-                console.log("Delete result:", result); // Debug log
-      
-                // Verify the record was deleted
-                const checkResult = await database.getAllAsync(`SELECT * FROM scenes WHERE id = ?;`, [id]);
-                console.log("Scene still exists:", checkResult); // Debug log
-      
-                // Navigate back to the home screen or refresh the scene list
-                router.push(`/creative-process/${creativeProcessId}`)
-              } catch (error) {
-                console.error("Failed to delete scene:", error);
-              }
-            },
-          },
-        ],
-        { cancelable: true } // Allow the user to dismiss the alert by tapping outside
-      );
-    }
     
     if (loading) { <LoadingScreen/> }
     
       if (!scene) {
         // Handle the case where no process is found
         return (
-          <View>
+         <View className='p-10 gap-8'>
             <Stack.Screen options={{ headerShown: false }} />
-            <Text>No process found with the given ID.</Text>
+            <Text className='screen-title'>No se ha encontrado ninguna escena</Text>
           </View>
         );
       }
@@ -84,9 +51,7 @@ const Scene = () => {
           <BackButton/>
           <View className='flex flex-row justify-between items-center'>
             <Text className='screen-title'>{scene.name}</Text>
-            <Pressable onPress={handleDelete}>
-              <FontAwesome5 name="trash" size={20} color="grey"/>
-            </Pressable>
+            <EditDeletebuttons typeObject={"scene"} table={"scenes"} id={id}/>
           </View>
           <ScrollView >
           <View className='gap-8'>
@@ -97,28 +62,32 @@ const Scene = () => {
               </Pressable>
               {activeIdeas && <View className='inside-category'>
                 <AddIdealButtonModal source={"scene"} id_process={creativeProcessId} id_scene={id}/>
+                {ideas.length < 1 ? <Text className='text-lg text-gray-400'>Aún no tienes ideas asociadas a esta escena, crea una nueva o escoge una o varias existentes con el botón "Añadir idea +"</Text> : 
                 <FlatList
-                  data={ideas}
-                  horizontal={true}
-                  renderItem={({item}) => 
-                    <View className='mb-4'>
-                      <PreviewIdea 
-                        typeContent={item.typeContent} 
-                        data={item.data}
-                        id={item.id}
-                        source={'scene'}
-                        id_process={creativeProcessId}/>
-                        id_scene={id}
-                    </View>
-                  }
-                  />
+                data={ideas}
+                horizontal={true}
+                renderItem={({item}) => 
+                  <View className='mb-4'>
+                    <PreviewIdea 
+                      typeContent={item.typeContent} 
+                      data={item.data}
+                      id={item.id}
+                      source={'scene'}
+                      id_process={creativeProcessId}
+                      id_scene={id}
+                      />
+                      
+                  </View>
+                }
+                />
+                }
                 </View>}
               </View>
               <Pressable className='flex flex-row gap-3' onPress={() => setActiveMove(!activeMove)}>
                   {activeMove ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
                   <Text className='text-2xl font-bold'>Pautas de movimiento</Text>
               </Pressable>
-              {activeMove && <Text className='mb-8'>Content</Text>}
+              {activeMove && <Text className='text-lg text-gray-400'>Esta escena aún no tiene ninguna pauta de movimiento, añade una con el botón "Añadir pauta de movimiento +"</Text>}
               <Pressable className='flex flex-row gap-3' onPress={() => setActiveSpace(!activeSpace)}>
                   {activeSpace ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
                   <Text className='text-2xl font-bold'>Recorrido espacial</Text>
@@ -127,22 +96,24 @@ const Scene = () => {
                  <View>
                     <Link href={{pathname: "/(forms)/FormSpace",params: { id_scene: id }}} className='mb-4'>
                         <View className='border-2 p-2 w-1/2 border-[#828282]'>
-                            <Text className='text-lg text-[#828282]'>Añadir recorridos espaciales +</Text>
+                            <Text className='text-lg text-[#828282]'>Añadir recorrido espacial +</Text>
                         </View>
                     </Link>
+                    {spaces.length < 1 ? <Text className='text-lg text-gray-400'>Esta escena aún no tiene ningun recorrido espacial, añade uno con el botón "Añadir recorrido espacial +"</Text>:
                     <FlatList
-                      data={spaces}
-                      keyExtractor={(item) => item.id.toString()}
-                      horizontal={true}
-                      renderItem={({item}) => (
-                        <Pressable onPress={() => router.push({ pathname: `/space/${item.id}`})}>
-                            <Image 
-                            source={{ uri: `data:image/png;base64,${item.img}` }}
-                            style={{width: 200, height: 150, marginRight: 10}}
-                          />
-                        </Pressable>
-                      )}
-                    />
+                    data={spaces}
+                    keyExtractor={(item) => item.id.toString()}
+                    horizontal={true}
+                    renderItem={({item}) => (
+                      <Pressable onPress={() => router.push({ pathname: `/space/${item.id}`})}>
+                          <Image 
+                          source={{ uri: `data:image/png;base64,${item.img}` }}
+                          style={{width: 200, height: 150, marginRight: 10}}
+                        />
+                      </Pressable>
+                    )}
+                  />
+                    }
                  </View>
                   
               }
@@ -160,7 +131,7 @@ const Scene = () => {
                     </View>
                 </Pressable>
                 <CustomModal visible={modalVisible} onClose={() => setModalVisible(false)} options={options} />
-                {people.length > 0 &&
+                {people.length < 1 ? <Text className='text-lg text-gray-400'>Aún no tienes personas asociadas a esta escena, crea una nueva o escoge una o varias existente con el botón "Añadir participantes +"</Text> :
                   <FlatList
                     data={people}
                     keyExtractor={(item) => item.id.toString()}
@@ -178,9 +149,7 @@ const Scene = () => {
                   <Text className='text-2xl font-bold'>Objetos</Text>
               </Pressable>
               {activeObjects && 
-                  <View>
-                      <Text className='mb-8'>Content</Text>
-                  </View>
+                  <Text className='text-lg text-gray-400'>Esta escena aún no tiene ningún objeto, añade uno con el botón "Añadir objeto +"</Text>
               }
           </View>
           </ScrollView>

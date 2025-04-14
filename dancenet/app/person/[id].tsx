@@ -57,37 +57,7 @@ const Person = () => {
         loadData(); 
     }, [id, database]);
 
-    if (loading) {
-        return <LoadingScreen/>
-    }
-    
-    const handleDelete = async () => {
-        Alert.alert(
-          "Borrando persona", // Title of the alert
-          "Estás segurx de que quieres borrar a esta persona?", // Message in the alert
-          [
-            {
-              text: "Cancelar", // Button to cancel the action
-              style: "cancel", // Style for the cancel button
-            },
-            {
-              text: "Aceptar", // Button to confirm the deletion
-              onPress: async () => {
-                try {
-                  // Execute the delete query using runAsync
-                  const result = await database.runAsync(`DELETE FROM people WHERE id = ?;`, [id]);
-        
-                  // Navigate back to the home screen
-                  router.back()
-                } catch (error) {
-                  console.error("Failed to delete creative process:", error);
-                }
-              },
-            },
-          ],
-          { cancelable: true } // Allow the user to dismiss the alert by tapping outside
-        );
-      }
+    if (loading) {return <LoadingScreen/>}
 
     return (
         <View className='p-10 gap-8'>
@@ -107,24 +77,28 @@ const Person = () => {
             {source === 'people' ? 
                 <View className='mb-10'>
                     <Text className='text-xl mb-3 font-bold'>Procesos creativos en los que participa</Text>
-                    <FlatList
+                    {creativeProcesses.length < 1 ? <Text className='font-light italic text-gray-500'>Esta persona no participa en ningún proceso creativo</Text> : 
+                        <FlatList
                         data={creativeProcesses}
                         renderItem={({ item }) => <PreviewProcess name={item.name} id={item.id} img={item.img}/>}
                         horizontal={true}
                         contentContainerStyle={{ gap: 20 }}
                     />
+                    }
                 </View>
             : <View></View>}
 
             {source === 'creative-process' ? 
                 <View className='mb-10'>
                     <Text className='text-xl mb-3 font-bold'>Escenas en las que participa</Text>
-                    <FlatList
+                    {scenes.length < 1 ? <Text className='font-light italic text-gray-500'>Esta persona no participa en ninguna escena</Text> : 
+                        <FlatList
                         data={scenes}
                         renderItem={({ item }) => <PreviewScene name={item.name} id={item.id} id_process={id_process}/>}
                         horizontal={true}
                         contentContainerStyle={{ gap: 20 }}
                     />
+                    }
                 </View>
             : <View></View>}
 

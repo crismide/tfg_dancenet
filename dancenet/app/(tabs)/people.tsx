@@ -22,7 +22,7 @@ const people = () => {
         setLoading(false); // Set loading to false after the data is fetched
       }}
     loadData()
-  },[database,people])
+  },[people])
 
   if (loading) {
       // Show a loading indicator while the data is being fetched
@@ -45,12 +45,14 @@ const people = () => {
           </View>
         </Link>
       </View>
+      {people.length < 1 ? <Text className='text-xl text-gray-400'>Añade participantes para añadirlos a tus procesos creativos con el botón + que está arriba a la derecha</Text> : 
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-        <FlatList
-          data={people}
-          renderItem={({item}) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"people"} id_process={""}/>}
-        />
-      </ScrollView>
+      <FlatList
+        data={people}
+        renderItem={({item}) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"people"} id_process={""}/>}
+      />
+    </ScrollView>
+      }
     </View>
   )
 }

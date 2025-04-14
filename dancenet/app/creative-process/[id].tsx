@@ -67,21 +67,23 @@ const CreativeProcessDetail = () => {
                 <View className='gap-8'>
                   <AddIdealButtonModal source={'process'} id_process={id} id_scene={undefined}/>
                   <CustomModal visible={modalIdeasVisible} onClose={() => setModalIdeasVisible(false)} options={optionsIdeas} />
+                  {ideas.length < 1 ? <Text className='text-lg text-gray-400'>Aún no tienes ideas asociadas a este proceso creativo, crea una nueva o escoge una o varias existentes con el botón "Añadir idea +"</Text>:
                   <FlatList
-                    data={ideas}
-                    horizontal={true}
-                    renderItem={({item}) =>
-                      <View className='mb-4'>
-                        <PreviewIdea
-                          typeContent={item.typeContent}
-                          data={item.data}
-                          id={item.id}
-                          source={'process'}
-                          id_process={id}
-                          id_scene={null}/>
-                      </View>
-                    }
-                  />
+                  data={ideas}
+                  horizontal={true}
+                  renderItem={({item}) =>
+                    <View className='mb-4'>
+                      <PreviewIdea
+                        typeContent={item.typeContent}
+                        data={item.data}
+                        id={item.id}
+                        source={'process'}
+                        id_process={id}
+                        id_scene={null}/>
+                    </View>
+                  }
+                />
+                  }
                 </View>}
             </View>
             
@@ -94,10 +96,10 @@ const CreativeProcessDetail = () => {
                 <View className='gap-8'>
                   <Link href={{pathname: "/(forms)/FormEscena",params: { id_process: id }}} >
                     <View className='border-2 p-2 w-1/2 border-[#828282]'>
-                      <Text className='text-lg text-[#828282]'>Añadir escenas +</Text>
+                      <Text className='text-lg text-[#828282]'>Añadir escena +</Text>
                     </View>
                   </Link>
-                  {scenes.length > 0 &&
+                  {scenes.length < 1 ? <Text className='text-lg text-gray-400'>Este proceso creativo aún no tiene escenas, crea una con el botón "Añadir escena +"</Text> :
                     <FlatList
                       data={scenes}
                       renderItem={({ item }) => <PreviewScene name={item.name} id={item.id} id_process={id}/>}
@@ -121,7 +123,7 @@ const CreativeProcessDetail = () => {
                     </View>
                   </Pressable>
                   <CustomModal visible={modalPeopleVisible} onClose={() => setModalPeopleVisible(false)} options={optionsPeople} />
-                  {people.length > 0 &&
+                  {people.length < 1 ? <Text className='text-lg text-gray-400'>Aún no tienes personas asociadas a este proceso creativo, crea una nueva o escoge una o varias existente con el botón "Añadir participantes +"</Text> :
                   <FlatList
                     data={people}
                     renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"creative-process"} id_process={id}/>}
