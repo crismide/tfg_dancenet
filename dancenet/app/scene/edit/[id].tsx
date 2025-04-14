@@ -46,7 +46,7 @@ const EditEscena = () => {
           nameChanged.current = true // Mark as changed
         }}
       />
-      <FormButtons handleSave={handleSave}/>
+      <FormButtons handleSave={handleSave} textButton='Actualizar'/>
     </View>
   )
 }

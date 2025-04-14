@@ -91,7 +91,7 @@ const EditIdea = () => {
           </TouchableHighlight>
       </Link>
       </View>
-      <FormButtons handleSave={handleSave}/>
+      <FormButtons handleSave={handleSave} textButton='Actualizar'/>
     </View>
   )
 }

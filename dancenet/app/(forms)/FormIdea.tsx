@@ -135,11 +135,14 @@ const FormIdea = () => {
         </View> 
         : typeMedia === 'audio' ? 
         <View>
-            <Text className='screen-title'>Añadiendo un archivo de audio</Text>
-            <View className="p-10">
-              <AudioPickerRecorder/>
-            </View>
-        </View> : 
+        <Text className='screen-title'>Añadiendo un archivo de audio</Text>
+        <View className="p-10">
+          <AudioPickerRecorder 
+            onRecordingCreated={(uri) => setData(uri)}
+            onFileSelected={(uri) => setData(uri)}
+          />
+        </View>
+      </View> : 
         <View>
           <Text className='screen-title'>Añadiendo contenido de mi galería</Text>
           <View style={{ alignItems: 'center' }} className='mb-2'>

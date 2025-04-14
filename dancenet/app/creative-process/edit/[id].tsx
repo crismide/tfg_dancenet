@@ -56,7 +56,7 @@ const EditCreativeProcess = () => {
         onChangeText={setName}
         className='input-text-box'
       />
-      <FormButtons handleSave={handleSave}/>
+      <FormButtons handleSave={handleSave} textButton='Actualizar'/>
     </View>
   )
 }

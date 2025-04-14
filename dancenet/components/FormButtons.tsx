@@ -2,7 +2,12 @@ import { View, Text, Pressable } from 'react-native'
 import React from 'react'
 import { router } from 'expo-router'
 
-const FormButtons = ({handleSave}) => {
+interface FormButtonsProps {
+  handleSave: () => void;
+  textButton?: string;
+}
+
+const FormButtons = ({handleSave, textButton = 'Crear'}:FormButtonsProps) => {
   return (
     <View className='flex flex-row justify-center gap-8'>
         <Pressable 
@@ -40,7 +45,7 @@ const FormButtons = ({handleSave}) => {
             fontWeight: '600',
             fontFamily: 'System',
             lineHeight: 24
-          }}>Crear</Text>
+          }}>{textButton}</Text>
         </Pressable>
     </View>
   )

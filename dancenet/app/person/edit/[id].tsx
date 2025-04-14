@@ -139,7 +139,7 @@ const EditPerson = () => {
                 </TouchableHighlight>
             </Link>
 
-            <FormButtons handleSave={handleSave}/>
+            <FormButtons handleSave={handleSave} textButton='Actualizar'/>
             </View>
             </ScrollView>
         </View>
