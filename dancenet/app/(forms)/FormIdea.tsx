@@ -9,6 +9,8 @@ import { Video } from 'expo-av'
 import LoadingScreen from '@/components/LoadingScreen'
 import SelectScene from '@/components/SelectScene'
 import SelectProcess from '@/components/SelectProcess'
+import { useIsFocused } from '@react-navigation/native'
+import * as FileSystem from 'expo-file-system';
 
 const FormIdea = () => {
   const {typeMedia} = useLocalSearchParams()
@@ -25,6 +27,8 @@ const FormIdea = () => {
   const [scenes,setScenes] = useState([])
   const [height, setHeight] = useState(100);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedAudioUri, setSelectedAudioUri] = useState<string | null>(null);
+  const isScreenFocused = useIsFocused();
 
   useEffect(() => {
     const loadData = async () => {
@@ -63,13 +67,45 @@ const FormIdea = () => {
 
   const handleSave = async () => {
     try {
-      const result = await database.runAsync(
+      let finalData = data;
+      let result = null
+      
+      if(typeMedia === 'audio' && data) {
+        try {
+          const audioDir = `${FileSystem.documentDirectory}audio/`;
+          await FileSystem.makeDirectoryAsync(audioDir, { intermediates: true });
+          const timestamp = new Date().getTime();
+          
+          const fileExtension = data.startsWith('content://') ? 'mp3' : data.includes('.') ? data.split('.').pop() : 'wav';
+          const filename = `audio_${timestamp}.${fileExtension}`;
+          const newPath = `${audioDir}${filename}`;
+  
+          if (data.startsWith('content://')) {
+            await FileSystem.copyAsync({ from: data, to: newPath });
+          } else {
+            await FileSystem.moveAsync({ from: data, to: newPath });
+          }
+          
+          // Use newPath directly instead of relying on state update
+          finalData = newPath;
+          setData(newPath); // Update state for UI if needed
+
+          result = await database.runAsync(
+            "INSERT INTO ideas (typeContent, data) VALUES (?, ?);",
+            [typeMedia, finalData]
+          );
+  
+        } catch (error) {
+          console.error('Error saving audio file:', error);
+          throw error;
+        }
+      }
+    
+      else {result = await database.runAsync(
           "INSERT INTO ideas (typeContent, data) VALUES (?, ?);",
           [typeMedia, data]
-      );
+      );}
       const ideaId = result.lastInsertRowId;
-      console.log("idea id "+ideaId)
-      console.log("id process "+id_process)
       if(id_process){
         await database.runAsync("INSERT INTO idea_creativeprocess (idea_id, creativeprocess_id) VALUES (?, ?);",
           [ideaId, id_process]);
@@ -102,14 +138,13 @@ const FormIdea = () => {
           )
         ));
       }  
+
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
     setData("")
     router.back()
   }
-      
-  
 
   if(loading){ return <LoadingScreen/> }
 
@@ -138,8 +173,8 @@ const FormIdea = () => {
         <Text className='screen-title'>Añadiendo un archivo de audio</Text>
         <View className="p-10">
           <AudioPickerRecorder 
-            onRecordingCreated={(uri) => setData(uri)}
-            onFileSelected={(uri) => setData(uri)}
+            onAudioSelected={(uri) => setData(uri)}
+            isFocused={isScreenFocused}
           />
         </View>
       </View> : 

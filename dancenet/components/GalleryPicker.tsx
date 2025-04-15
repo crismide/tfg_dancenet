@@ -3,7 +3,7 @@ import { View, Image, Button, Alert, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Video, ResizeMode } from 'expo-av';
 
-const ImagePickerComponent = ({ image, setImage, setBase64Image, allowVideos = false }) => {
+const ImagePickerComponent = ({ image, setImage, setBase64Image, allowVideos = false}) => {
   const [mediaType, setMediaType] = useState(allowVideos ? 'both' : 'images');
   const [mediaDimensions, setMediaDimensions] = useState({ width: 100, height: 100 });
   const videoRef = useRef(null);
@@ -35,9 +35,11 @@ const ImagePickerComponent = ({ image, setImage, setBase64Image, allowVideos = f
   };
 
   return (
-    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-      {image ? (
-        mediaType === 'both' && image.endsWith('.mp4') ? (
+    <View>
+    <View style={{ justifyContent: 'center', alignItems: 'center',marginVertical: 20 }}>
+      {mediaType === 'both' ? (
+      image ? (
+        image.endsWith('.mp4') ? (
           <Video
             ref={videoRef}
             source={{ uri: image }}
@@ -54,14 +56,33 @@ const ImagePickerComponent = ({ image, setImage, setBase64Image, allowVideos = f
           />
         )
       ) : (
-        <View style={{ width: 100, height: 100, backgroundColor: '#D9D9D9', borderRadius: 10 }} />
-      )}
+        <View style={{ width: 200, height: 200, backgroundColor: '#D9D9D9' }} />
+      )
+    ) : (
+      image ? (
+        <Image
+          source={{ uri: image }}
+          style={{ width: 100, height: 100, borderRadius: 50 }}
+          resizeMode="contain"
+        />
+      ) : (
+        <View style={{ 
+          width: 100, 
+          height: 100, 
+          backgroundColor: '#D9D9D9', 
+          borderRadius: 50 
+        }} />
+      )
+    )}
+    </View>
 
+      <View>
       <Button
         title={mediaType === 'images' ? 'Elige una imagen' : 'Elige una imagen o video'}
         color="#F1A636"
         onPress={pickMedia}
       />
+      </View>
     </View>
   );
 };

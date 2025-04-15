@@ -1,5 +1,5 @@
 import { View, Text, Image, FlatList, Pressable, Button, TouchableOpacity, TouchableHighlight } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -9,11 +9,15 @@ import PreviewProcess from '@/components/PreviewProcess';
 import PreviewScene from '@/components/PreviewScene';
 import EditDeletebuttons from '@/components/EditDeletebuttons';
 import useIdea from '@/hooks/useIdea';
+import AudioPlayer from '@/components/AudioPlayer';
+import { useIsFocused } from '@react-navigation/native';
 
 const Idea = () => {
     const { id, source, id_process } = useLocalSearchParams();
     const database = useSQLiteContext();
     const { idea, data, processes, scenes, loading } = useIdea(database, id);
+    const isFocused = useIsFocused();
+    const audioPlayerRef = useRef<{ stop: () => void }>(null);
 
     if (loading) {
         return <LoadingScreen/>
@@ -45,6 +49,13 @@ const Idea = () => {
                 source={{ uri: idea.data }}
                 style={{ width: 200, height: 150, borderRadius: 10 }}
                 />}
+
+                {idea.typeContent === 'audio' && 
+                    <AudioPlayer 
+                    audioUri={data}
+                    isFocused={isFocused}
+                  />
+                }
                 {processes.length > 0 &&
                     <View>
                         <Text className='text-xl mb-3 font-bold'>Correspondiente a los procesos creativos...</Text>
@@ -56,6 +67,7 @@ const Idea = () => {
                     />
                     </View>
                 }
+                
                 {scenes.length > 0 &&
                     <View>
                         <Text className='text-xl mb-3 font-bold'>Correspondiente a las escenas...</Text>

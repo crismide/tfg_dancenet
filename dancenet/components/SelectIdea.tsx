@@ -1,8 +1,11 @@
 import { View, Text, Image, Pressable } from 'react-native';
 import React, { useState } from 'react';
 import { ResizeMode, Video } from 'expo-av';
+import { useIsFocused } from '@react-navigation/native';
+import AudioPlayer from './AudioPlayer';
 
 const SelectIdea = ({ typeContent, data, onPress, isSelected }) => {
+  const isScreenFocused = useIsFocused();
   return <Pressable
   style={{
     backgroundColor: isSelected ? 'rgb(169 169 169)' : 'rgb(217 217 217)',
@@ -31,6 +34,11 @@ onPress={onPress}>
     source={{ uri: data }}
     style={{ width: 200, height: 150, borderRadius: 10 }}
   />}
+  {typeContent === 'audio' && 
+    <AudioPlayer 
+      audioUri={data}
+      isFocused={isScreenFocused}
+    />}
 </Pressable>
 };
 

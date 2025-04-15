@@ -6,12 +6,15 @@ import useIdea from '@/hooks/useIdea';
 import { ResizeMode, Video } from 'expo-av';
 import LoadingScreen from '@/components/LoadingScreen';
 import FormButtons from '@/components/FormButtons';
+import AudioPlayer from '@/components/AudioPlayer';
+import { useIsFocused } from '@react-navigation/native';
 
 const EditIdea = () => {
   const { id } = useLocalSearchParams();
   const database = useSQLiteContext();
   const { idea, data, processes, scenes, loading } = useIdea(database, id);
   const [inputVal, setInputVal] = useState("")
+  const isScreenFocused = useIsFocused();
 
   useEffect(() => {
     if (data) {
@@ -61,6 +64,13 @@ const EditIdea = () => {
         source={{ uri: idea.data }}
         style={{ width: 200, height: 150, borderRadius: 10 }}
         />}
+
+      {idea.typeContent === 'audio' && 
+                <AudioPlayer 
+                audioUri={data}
+                isFocused={isScreenFocused}
+              />
+                }
       <View className='gap-4'>
       <Link
           href={{
