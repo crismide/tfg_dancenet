@@ -9,7 +9,7 @@ interface FormButtonsProps {
 
 const FormButtons = ({handleSave, textButton = 'Crear'}:FormButtonsProps) => {
   return (
-    <View className='flex flex-row justify-center gap-8'>
+    <View className='flex flex-row justify-center gap-6'>
         <Pressable 
           style={{ 
             backgroundColor: '#5B5B5B',

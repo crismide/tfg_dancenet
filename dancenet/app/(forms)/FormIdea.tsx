@@ -20,14 +20,12 @@ const FormIdea = () => {
   
   const database = useSQLiteContext()
   const [loading, setLoading] = useState(true)
-  const [note,setNote] = useState("")
   const [media, setMedia] = useState(null);
   const [data, setData] = useState("");
   const [processes,setProcesses] = useState([])
   const [scenes,setScenes] = useState([])
   const [height, setHeight] = useState(100);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [selectedAudioUri, setSelectedAudioUri] = useState<string | null>(null);
   const isScreenFocused = useIsFocused();
 
   useEffect(() => {

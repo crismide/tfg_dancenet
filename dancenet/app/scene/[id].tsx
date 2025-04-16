@@ -87,7 +87,16 @@ const Scene = () => {
                   {activeMove ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
                   <Text className='text-2xl font-bold'>Pautas de movimiento</Text>
               </Pressable>
-              {activeMove && <Text className='text-lg text-gray-400'>Esta escena aún no tiene ninguna pauta de movimiento, añade una con el botón "Añadir pauta de movimiento +"</Text>}
+              {activeMove && 
+                <View>
+                  <Link href={{pathname: "/(forms)/FormMovement",params: { id_scene: id, id_process: creativeProcessId }}} className='mb-4'>
+                      <View className='border-2 p-2 w-1/2 border-[#828282]'>
+                          <Text className='text-lg text-[#828282]'>Añadir pauta de movimiento +</Text>
+                      </View>
+                  </Link>
+                  <Text className='text-lg text-gray-400'>Esta escena aún no tiene ninguna pauta de movimiento, añade una con el botón "Añadir pauta de movimiento +"</Text>
+                </View>
+              }
               <Pressable className='flex flex-row gap-3' onPress={() => setActiveSpace(!activeSpace)}>
                   {activeSpace ? <FontAwesome5 name="caret-up" size={20} color="black"/> : <FontAwesome5 name="caret-down" size={20} color="black"/>}
                   <Text className='text-2xl font-bold'>Recorrido espacial</Text>

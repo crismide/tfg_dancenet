@@ -88,6 +88,28 @@ export default function Layout() {
         FOREIGN KEY (scene_id) REFERENCES scenes(id) ON DELETE CASCADE
       );
     `);
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS movements ( 
+        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        description TEXT NOT NULL, 
+        name TEXT NOT NULL, 
+        level TEXT NOT NULL CHECK(level IN ('bajo', 'medio', 'alto')), 
+        start_time INTEGER NOT NULL, 
+        end_time INTEGER NOT NULL, 
+        scene_id INTEGER NOT NULL, 
+        creativeprocess_id INTEGER NOT NULL, 
+        FOREIGN KEY (scene_id) REFERENCES scenes(id) ON DELETE CASCADE, 
+        FOREIGN KEY (creativeprocess_id) REFERENCES creativeprocesses(id) ON DELETE CASCADE ); `);
+    
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS person_movement ( 
+        person_id INTEGER NOT NULL, 
+        movement_id INTEGER NOT NULL, 
+        creativeprocess_id INTEGER NOT NULL, 
+        PRIMARY KEY (person_id, movement_id), 
+        FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE, 
+        FOREIGN KEY (movement_id) REFERENCES movements(id) ON DELETE CASCADE, 
+        FOREIGN KEY (creativeprocess_id) REFERENCES creativeprocesses(id) ON DELETE CASCADE ); `);
   }
 
   return (
