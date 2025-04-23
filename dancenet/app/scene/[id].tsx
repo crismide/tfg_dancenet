@@ -11,6 +11,7 @@ import useScene from '@/hooks/useScene';
 import BackButton from '@/components/BackButton';
 import AddIdealButtonModal from '@/components/AddIdealButtonModal';
 import EditDeletebuttons from '@/components/EditDeletebuttons';
+import Timeline from '@/components/TimeLine';
 
 const Scene = () => {
     const { id } = useLocalSearchParams();
@@ -20,11 +21,10 @@ const Scene = () => {
     const [activeMove, setActiveMove] = useState(false)
     const [activeSpace, setActiveSpace] = useState(false)
     const [activePeople, setActivePeople] = useState(false)
-    const [activeRehearsal, setActiveRehearsal] = useState(false)
     const [activeObjects, setActiveObjects] = useState(false)
     const [modalVisible, setModalVisible] = useState(false);
 
-    const { scene, people, ideas, loading, spaces } = useScene(database, id);
+    const { scene, people, ideas, loading, spaces, moves } = useScene(database, id);
 
     const options = [
       { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: creativeProcessId, id_scene:id }} },
@@ -53,7 +53,7 @@ const Scene = () => {
             <Text className='screen-title'>{scene.name}</Text>
             <EditDeletebuttons typeObject={"scene"} table={"scenes"} id={id}/>
           </View>
-          <ScrollView >
+          <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
           <View className='gap-8'>
               <View>
               <Pressable className='flex flex-row gap-3' onPress={() => setActiveIdeas(!activeIdeas)}>
@@ -94,7 +94,25 @@ const Scene = () => {
                           <Text className='text-lg text-[#828282]'>Añadir pauta de movimiento +</Text>
                       </View>
                   </Link>
-                  <Text className='text-lg text-gray-400'>Esta escena aún no tiene ninguna pauta de movimiento, añade una con el botón "Añadir pauta de movimiento +"</Text>
+                  {moves.length < 1 ? <Text className='text-lg text-gray-400'>Esta escena aún no tiene ninguna pauta de movimiento, añade una con el botón "Añadir pauta de movimiento +"</Text> : 
+                  <View className='gap-4'>
+                    <View className='gap-2 mt-3'>
+                      <View className='flex flex-row gap-2'>
+                        <View className='bg-[#B4F186] w-6 h-6'></View>
+                        <Text className='text-lg'>Nivel bajo</Text>
+                      </View>
+                      <View className='flex flex-row gap-2'>
+                        <View className='bg-[#868AF1] w-6 h-6'></View>
+                        <Text className='text-lg'>Nivel medio</Text>
+                      </View>
+                      <View className='flex flex-row gap-2'>
+                        <View className='bg-[#FF8282] w-6 h-6'></View>
+                        <Text className='text-lg'>Nivel alto</Text>
+                      </View>
+                    </View>
+                    <Timeline movements={moves}/>  
+                  </View>}
+                  
                 </View>
               }
               <Pressable className='flex flex-row gap-3' onPress={() => setActiveSpace(!activeSpace)}>
@@ -146,7 +164,6 @@ const Scene = () => {
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"scene"} id_process={id}/>}
                     horizontal={true}
-                    numColumns={Math.ceil(people.length / 2)}
                     contentContainerStyle={{ gap: 20 }}
                   />
                 }

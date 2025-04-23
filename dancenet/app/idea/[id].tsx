@@ -19,6 +19,8 @@ const Idea = () => {
     const isFocused = useIsFocused();
     const audioPlayerRef = useRef<{ stop: () => void }>(null);
 
+    useEffect(() => {console.log(database)},[])
+
     if (loading) {
         return <LoadingScreen/>
     }
