@@ -80,6 +80,8 @@ const FormMovement = () => {
         }
     };
 
+    if(loading){return <LoadingScreen/>}
+
     return (
         <View className='p-10'>
             <Stack.Screen options={{ headerShown: false }} />

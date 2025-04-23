@@ -53,7 +53,7 @@ const Movement = () => {
                 </View>
 
                 <View className='gap-6'>
-                    <Text className='text-xl font-bold'>¿Quién la hace?</Text>
+                    <Text className='text-xl font-bold'>Persona(s) que la realizan</Text>
                     <FlatList
                     data={people}
                     keyExtractor={(item) => item.id.toString()}
@@ -64,7 +64,7 @@ const Movement = () => {
                 </View>
 
                 <View className='gap-6'>
-                    <Text className='text-xl font-bold'>¿En qué nivel se hace?</Text>
+                    <Text className='text-xl font-bold'>Nivel en el que se hace</Text>
                     <View className='bg-gray-200 p-4'>
                     {movement.level === 'bajo' && 
                     <View className='flex-row gap-5'>

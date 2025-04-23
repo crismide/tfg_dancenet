@@ -4,8 +4,6 @@ import { SQLiteProvider, useSQLiteContext, type SQLiteDatabase } from 'expo-sqli
 
 export default function Layout() {
   const createDbIfNeeded = async (db:SQLiteDatabase) => {
-    
-    console.log("creating db if needed")
     await db.execAsync(
       `CREATE TABLE IF NOT EXISTS creativeprocesses (
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -111,12 +109,16 @@ export default function Layout() {
         FOREIGN KEY (movement_id) REFERENCES movements(id) ON DELETE CASCADE, 
         FOREIGN KEY (creativeprocess_id) REFERENCES creativeprocesses(id) ON DELETE CASCADE ); `);
       
-      await db.execAsync(`
-        CREATE TABLE IF NOT EXISTS objects (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          img TEXT
-        );
-      `);
+        await db.execAsync(`
+          CREATE TABLE IF NOT EXISTS objects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            img TEXT,
+            scene_id INTEGER NOT NULL,
+            creativeprocess_id INTEGER NOT NULL,
+            FOREIGN KEY (scene_id) REFERENCES scenes(id) ON DELETE CASCADE,
+            FOREIGN KEY (creativeprocess_id) REFERENCES creativeprocesses(id) ON DELETE CASCADE
+          );
+        `);
 
       await db.execAsync(`
         CREATE TABLE IF NOT EXISTS movement_object (

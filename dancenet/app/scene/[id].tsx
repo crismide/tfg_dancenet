@@ -175,7 +175,15 @@ const Scene = () => {
                   <Text className='text-2xl font-bold'>Objetos</Text>
               </Pressable>
               {activeObjects && 
+              <View className='gap-8'>
+                <Link href={{pathname: "/(forms)/FormObject",params: { id_scene: id }}} className='mb-4'>
+                        <View className='border-2 p-2 w-1/2 border-[#828282]'>
+                            <Text className='text-lg text-[#828282]'>Añadir objeto +</Text>
+                        </View>
+                    </Link>
                   <Text className='text-lg text-gray-400'>Esta escena aún no tiene ningún objeto, añade uno con el botón "Añadir objeto +"</Text>
+                </View>
+                
               }
           </View>
           </ScrollView>
