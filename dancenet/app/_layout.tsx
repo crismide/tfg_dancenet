@@ -110,6 +110,43 @@ export default function Layout() {
         FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE, 
         FOREIGN KEY (movement_id) REFERENCES movements(id) ON DELETE CASCADE, 
         FOREIGN KEY (creativeprocess_id) REFERENCES creativeprocesses(id) ON DELETE CASCADE ); `);
+      
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS objects (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          img TEXT
+        );
+      `);
+
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS movement_object (
+          movement_id INTEGER NOT NULL,
+          object_id INTEGER NOT NULL,
+          PRIMARY KEY (movement_id, object_id),
+          FOREIGN KEY (movement_id) REFERENCES movements(id) ON DELETE CASCADE,
+          FOREIGN KEY (object_id) REFERENCES objects(id) ON DELETE CASCADE
+        );
+      `);
+  
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS people_object_user (
+          person_id INTEGER NOT NULL,
+          object_id INTEGER NOT NULL,
+          PRIMARY KEY (person_id, object_id),
+          FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE,
+          FOREIGN KEY (object_id) REFERENCES objects(id) ON DELETE CASCADE
+        );
+      `);
+
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS people_object_responsible (
+          person_id INTEGER NOT NULL,
+          object_id INTEGER NOT NULL,
+          PRIMARY KEY (person_id, object_id),
+          FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE,
+          FOREIGN KEY (object_id) REFERENCES objects(id) ON DELETE CASCADE
+        );
+      `);
   }
 
   return (
