@@ -1,7 +1,7 @@
 
 import { View, Text, ScrollView, FlatList, Alert, TextInput } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { router, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
 import BackButton from '@/components/BackButton'
 import LoadingScreen from '@/components/LoadingScreen'
@@ -10,16 +10,8 @@ import { Picker } from '@react-native-picker/picker'
 import FormButtons from '@/components/FormButtons'
 import TimePicker from '@/components/TimePicker'
 
-const formatSeconds = (totalSeconds: number) => {
-  if (typeof totalSeconds !== 'number' || isNaN(totalSeconds)) return '--:--'
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-}
-
 const EditMovement = () => {
   const { id } = useLocalSearchParams()
-  const router = useRouter()
   const database = useSQLiteContext()
 
   const [loading, setLoading] = useState(true)
@@ -79,7 +71,6 @@ const EditMovement = () => {
         setSelectedPeople(selected.map((row: any) => row.person_id))
       } catch (error) {
         console.error('Error loading movement or people:', error)
-        Alert.alert('Error', 'Ocurrió un error al cargar los datos')
         router.back()
       } finally {
         setLoading(false)
