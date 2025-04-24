@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { useLocalSearchParams } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
 import LoadingScreen from '@/components/LoadingScreen'
 import FormButtons from '@/components/FormButtons'
@@ -56,7 +56,6 @@ const FormObject = () => {
    
 const saveObject = async () => {
     try {
-        setLoading(true);
 
         // Validate required fields
         if (!base64Image || !id_scene || !id_process) {
@@ -100,7 +99,7 @@ const saveObject = async () => {
 
     } catch (error) {
         console.error("Error saving object:", error);
-    } 
+    } finally{ router.back() }
 }
 
     
@@ -114,31 +113,34 @@ const saveObject = async () => {
             <View className='gap-8'>
                 <View className='gap-4'>
                     <Text className='text-xl'>¿Qué objeto es?</Text>
-                    <ImagePickerComponent image={image} setImage={setImage} setBase64Image={setBase64Image} allowVideos={true}/>
+                    <ImagePickerComponent image={image} setImage={setImage} setBase64Image={setBase64Image} isObject/>
                 </View>
                 <View className='gap-4'>
                     <Text className='text-xl'>¿Con qué pauta de movimiento está asociada?</Text>
+                    {movementList.length < 1 ? <Text className='italic text-gray-500'>Aún no hay personas asociadas a esta escena</Text> : 
                     <FlatList
-                        data={movementList}
-                        renderItem={({ item }) => (
-                                <SelectMove
-                                name={item.name}
-                                level={item.level}
-                                isSelected={selectedMovement.includes(item.id)}
-                                onPress={() => {
-                                    setSelectedMovement(prev => 
-                                        prev.includes(item.id) 
-                                            ? prev.filter(id => id !== item.id)
-                                            : [...prev, item.id]
-                                    )
-                                }}
-                            />
-                            
-                        )}
-                        keyExtractor={item => item.id.toString()}/>
+                    data={movementList}
+                    renderItem={({ item }) => (
+                            <SelectMove
+                            name={item.name}
+                            level={item.level}
+                            isSelected={selectedMovement.includes(item.id)}
+                            onPress={() => {
+                                setSelectedMovement(prev => 
+                                    prev.includes(item.id) 
+                                        ? prev.filter(id => id !== item.id)
+                                        : [...prev, item.id]
+                                )
+                            }}
+                        />
+                        
+                    )}
+                    keyExtractor={item => item.id.toString()}/>
+                    }
                 </View>
                 <View className='gap-4'>
                     <Text className='text-xl'>¿Quién interactúa con este objeto?</Text>
+                    {peopleList.length < 1 ? <Text className='italic text-gray-500'>Aún no hay personas asociadas a esta escena</Text> : 
                     <FlatList
                         data={peopleList}
                         renderItem={({ item }) => (
@@ -159,29 +161,32 @@ const saveObject = async () => {
                         )}
                         keyExtractor={item => item.id.toString()}
                     />
+                    }
+
                 </View>
                 <View className='gap-4'>
                     <Text className='text-xl'>¿Quién es la persona responsable de este objeto?</Text>
+                    {peopleList.length < 1 ? <Text className='italic text-gray-500'>Aún no hay personas asociadas a esta escena</Text> : 
                     <FlatList
-                        data={peopleList}
-                        renderItem={({ item }) => (
-                                <SelectPerson
-                                name={item.name}
-                                img={item.image}
-                                id={item.id}
-                                isSelected={selectedPeopleRes.includes(item.id)}
-                                onPress={() => {
-                                    setSelectedPeopleRes(prev => 
-                                        prev.includes(item.id) 
-                                            ? prev.filter(id => id !== item.id)
-                                            : [...prev, item.id]
-                                    )
-                                }}
-                            />
-                            
-                        )}
-                        keyExtractor={item => item.id.toString()}
-                    />
+                    data={peopleList}
+                    renderItem={({ item }) => (
+                            <SelectPerson
+                            name={item.name}
+                            img={item.image}
+                            id={item.id}
+                            isSelected={selectedPeopleRes.includes(item.id)}
+                            onPress={() => {
+                                setSelectedPeopleRes(prev => 
+                                    prev.includes(item.id) 
+                                        ? prev.filter(id => id !== item.id)
+                                        : [...prev, item.id]
+                                )
+                            }}
+                        />
+                        
+                    )}
+                    keyExtractor={item => item.id.toString()}
+                />}
                 </View>
                 <FormButtons handleSave={saveObject} />
             </View>
