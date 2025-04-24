@@ -6,6 +6,7 @@ const useScene = (database, id) => {
     const [ideas, setIdeas] = useState([]);
     const [spaces, setSpaces] = useState([]);
     const [moves, setMoves] = useState([]);
+    const [objects, setObjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [creativeprocessId, setCreativeprocessId] = useState("")
     useEffect(() => {
@@ -19,7 +20,7 @@ const useScene = (database, id) => {
               setScene(result[0]);
               setCreativeprocessId(result[0].creativeprocess_id);
 
-              const [peopleResult,ideasResult,spacesResult, movesResult] = await Promise.all([database.getAllAsync(
+              const [peopleResult,ideasResult,spacesResult, movesResult, objectsResult] = await Promise.all([database.getAllAsync(
                 ` SELECT people.* 
                   FROM people
                   JOIN scene_people ON people.id = scene_people.person_id
@@ -35,13 +36,16 @@ const useScene = (database, id) => {
                 database.getAllAsync(
                   ` SELECT * FROM spaces WHERE scene_id = ?;`, [id]),
                 database.getAllAsync(
-                  ` SELECT * FROM movements WHERE scene_id = ?;`, [id])
+                  ` SELECT * FROM movements WHERE scene_id = ?;`, [id]),
+                database.getAllAsync(
+                  ` SELECT * FROM objects WHERE scene_id = ?;`, [id])
               ])
                 
               setPeople(peopleResult);
               setIdeas(ideasResult);
               setSpaces(spacesResult);
               setMoves(movesResult);
+              setObjects(objectsResult)
           } else {
             console.log("No process found with the given ID");
           }
@@ -54,7 +58,7 @@ const useScene = (database, id) => {
   
       loadData();
     }, [id, database,people]);
-  return {scene,people,ideas,loading,creativeprocessId,spaces,moves}
+  return {scene,people,ideas,loading,creativeprocessId,spaces,moves,objects}
 }
 
 export default useScene

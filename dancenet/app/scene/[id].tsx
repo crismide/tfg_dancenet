@@ -12,6 +12,7 @@ import BackButton from '@/components/BackButton';
 import AddIdealButtonModal from '@/components/AddIdealButtonModal';
 import EditDeletebuttons from '@/components/EditDeletebuttons';
 import Timeline from '@/components/TimeLine';
+import PreviewObject from '@/components/PreviewObject';
 
 const Scene = () => {
     const { id } = useLocalSearchParams();
@@ -24,7 +25,7 @@ const Scene = () => {
     const [activeObjects, setActiveObjects] = useState(false)
     const [modalVisible, setModalVisible] = useState(false);
 
-    const { scene, people, ideas, loading, spaces, moves } = useScene(database, id);
+    const { scene, people, ideas, loading, spaces, moves, objects } = useScene(database, id);
 
     const options = [
       { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: creativeProcessId, id_scene:id }} },
@@ -32,7 +33,7 @@ const Scene = () => {
       }}},
     ];
     
-    if (loading) { <LoadingScreen/> }
+    if (loading) { return <LoadingScreen/> }
     
       if (!scene) {
         // Handle the case where no process is found
@@ -176,12 +177,20 @@ const Scene = () => {
               </Pressable>
               {activeObjects && 
               <View className='gap-8'>
-                <Link href={{pathname: "/(forms)/FormObject",params: { id_scene: id }}} className='mb-4'>
+                <Link href={{pathname: "/(forms)/FormObject",params: { id_scene: id, id_process: creativeProcessId }}} className='mb-4'>
                         <View className='border-2 p-2 w-1/2 border-[#828282]'>
                             <Text className='text-lg text-[#828282]'>Añadir objeto +</Text>
                         </View>
                     </Link>
-                  <Text className='text-lg text-gray-400'>Esta escena aún no tiene ningún objeto, añade uno con el botón "Añadir objeto +"</Text>
+                  {objects.length < 1 ? <Text className='text-lg text-gray-400'>Esta escena aún no tiene ningún objeto, añade uno con el botón "Añadir objeto +"</Text> : 
+                    <FlatList
+                      data={objects}
+                      keyExtractor={(item) => item.id.toString()}
+                      renderItem={({ item }) => <PreviewObject img={item.img} id={item.id} id_process={item.id_process} id_scene={item.id_scene}/>}
+                      horizontal={true}
+                      contentContainerStyle={{ gap: 20 }}
+                    />
+                  }
                 </View>
                 
               }

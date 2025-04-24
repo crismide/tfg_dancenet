@@ -50,6 +50,7 @@ const FormObject = () => {
             }
         };
         loadPeople();
+        console.log("id_process in useEffect: ",id_process)
     }, [id_scene]);
 
    
@@ -58,16 +59,14 @@ const saveObject = async () => {
         setLoading(true);
 
         // Validate required fields
-        if (!image || !id_scene || !id_process) {
-            alert("Por favor, selecciona una imagen y asegúrate de que la escena y el proceso están definidos.");
-            setLoading(false);
+        if (!base64Image || !id_scene || !id_process) {
             return;
         }
 
         // Insert new object
         const result = await database.runAsync(
             `INSERT INTO objects (img, scene_id, creativeprocess_id) VALUES (?, ?, ?)`,
-            [base64Image, Number(id_scene), Number(id_process)]
+            [base64Image, id_scene, id_process]
         );
 
         // Get the inserted object's id
@@ -98,15 +97,10 @@ const saveObject = async () => {
             );
         }
 
-        alert("Objeto guardado correctamente.");
-        // Optionally, navigate back or reset form here
 
     } catch (error) {
         console.error("Error saving object:", error);
-        alert("Error al guardar el objeto. Inténtalo de nuevo.");
-    } finally {
-        setLoading(false);
-    }
+    } 
 }
 
     
