@@ -18,6 +18,7 @@ interface Person {
 const EditObjectInfo = () => {
     const { id } = useLocalSearchParams()
     const database = useSQLiteContext()
+    const { object, movements, people, peopleRes } = useObjectInfo(database, id)
 
     const [image, setImage] = useState("")  
     const [base64Image, setBase64Image] = useState("")
@@ -28,11 +29,11 @@ const EditObjectInfo = () => {
     const [selectedPeopleRes, setSelectedPeopleRes] = useState<number[]>([])
     const [loading, setLoading] = useState(true)
     
-    const { object, movements, people, peopleRes } = useObjectInfo(database, id)
-
+    
     useEffect(() => {
+        let isMounted = true;
         const loadData = async () => {
-            if(object){
+            if(object && isMounted){
                 try {
                     setImage(object.img)
                     setBase64Image(object.img)
@@ -61,14 +62,13 @@ const EditObjectInfo = () => {
 
                 } catch (error) {
                     console.error("Error loading data: ", error)
-                } finally {
-                    setLoading(false)
-                }
+                } finally {setLoading(false)}
             }
         }
-        
         loadData()
-    }, [id, object, movements, people, peopleRes])
+        return () => {isMounted = false; };
+        
+    }, [object?.id])
 
     const updateObject = async () => {
         try {

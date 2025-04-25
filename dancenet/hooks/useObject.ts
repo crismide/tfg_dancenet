@@ -43,7 +43,8 @@ const useObjectInfo = (database,id) => {
             }
         }
         loadData()
-    },[id,database])
+    },[id,database,object,movements,people,peopleRes])
+    
     return {object,movements,people,peopleRes,loading}
 }
 

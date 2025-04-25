@@ -10,7 +10,7 @@ import FormButtons from '@/components/FormButtons';
 const EditCreativeProcess = () => {
   const { id } = useLocalSearchParams();
   const database = useSQLiteContext();
-  const { process, scenes, people, ideas, loading } = useCreativeProcess(database, id);
+  const { process, loading } = useCreativeProcess(database, id);
 
   const [image,setImage] = useState("")
   const [name,setName] = useState("")
