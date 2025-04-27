@@ -100,7 +100,7 @@ const AudioPickerRecorder = ({ isFocused, onAudioSelected }: AudioPickerRecorder
             color={permissionsGranted ? "#ef4444" : "#999"}
           />
           <Text className="mt-2 text-red-500">
-            {recording ? "Stop Recording" : "Start Recording"}
+            {recording ? "Parar grabación" : "Empezar grabación"}
           </Text>
         </TouchableOpacity>
 
@@ -109,7 +109,7 @@ const AudioPickerRecorder = ({ isFocused, onAudioSelected }: AudioPickerRecorder
           className="items-center p-4 bg-blue-100 rounded-lg"
         >
           <FontAwesome name="file-audio-o" size={32} color="#3b82f6" />
-          <Text className="mt-2 text-blue-500">Pick Audio File</Text>
+          <Text className="mt-2 text-blue-500">Elige un archivo de audio</Text>
         </TouchableOpacity>
       </View>
 
