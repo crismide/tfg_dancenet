@@ -163,7 +163,7 @@ const Scene = () => {
                   <FlatList
                     data={people}
                     keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"scene"} id_process={id}/>}
+                    renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"scene"} id_process={creativeProcessId}/>}
                     horizontal={true}
                     contentContainerStyle={{ gap: 20 }}
                   />

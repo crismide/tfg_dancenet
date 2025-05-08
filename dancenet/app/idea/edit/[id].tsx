@@ -12,13 +12,13 @@ import { useIsFocused } from '@react-navigation/native';
 const EditIdea = () => {
   const { id } = useLocalSearchParams();
   const database = useSQLiteContext();
-  const { idea, data, processes, scenes, loading } = useIdea(database, id);
+  const { idea, data, loading } = useIdea(database, id);
   const [inputVal, setInputVal] = useState("")
   const isScreenFocused = useIsFocused();
 
   useEffect(() => {
     if (data) {
-      setInputVal(data);  // Sync state when data is loaded
+      setInputVal(data);
     }
   }, [data]);
 

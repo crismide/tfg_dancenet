@@ -3,11 +3,13 @@ import React, { useEffect, useState } from 'react'
 import { useSQLiteContext } from 'expo-sqlite'
 import PreviewPerson from '@/components/PreviewPerson'
 import { Link, router, Stack } from 'expo-router'
+import { useIsFocused } from '@react-navigation/native'
 
 const people = () => {
   const [people, setPeople] = useState([])
   const [loading, setLoading] = useState(true);
   const database = useSQLiteContext()
+  const isFocused = useIsFocused()
 
   useEffect(() => {
     const loadData = async () => {
@@ -21,8 +23,8 @@ const people = () => {
       } finally {
         setLoading(false); // Set loading to false after the data is fetched
       }}
-    loadData()
-  },[people])
+      if (isFocused) { loadData() }
+  },[people,database,isFocused])
 
   if (loading) {
       // Show a loading indicator while the data is being fetched

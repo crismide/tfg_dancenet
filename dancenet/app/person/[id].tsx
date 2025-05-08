@@ -76,8 +76,8 @@ const Person = () => {
             
             {source === 'people' ? 
                 <View className='mb-10'>
-                    <Text className='text-xl mb-3 font-bold'>Procesos creativos en los que participa</Text>
-                    {creativeProcesses.length < 1 ? <Text className='font-light italic text-gray-500'>Esta persona no participa en ningún proceso creativo</Text> : 
+                    <Text className='text-2xl mb-3 font-bold'>Procesos creativos en los que participa</Text>
+                    {creativeProcesses.length < 1 ? <Text className='text-xl font-light italic text-gray-500'>Esta persona no participa en ningún proceso creativo</Text> : 
                         <FlatList
                         data={creativeProcesses}
                         renderItem={({ item }) => <PreviewProcess name={item.name} id={item.id} img={item.img}/>}
@@ -90,8 +90,8 @@ const Person = () => {
 
             {source === 'creative-process' ? 
                 <View className='mb-10'>
-                    <Text className='text-xl mb-3 font-bold'>Escenas en las que participa</Text>
-                    {scenes.length < 1 ? <Text className='font-light italic text-gray-500'>Esta persona no participa en ninguna escena</Text> : 
+                    <Text className='text-2xl mb-3 font-bold'>Escenas en las que participa</Text>
+                    {scenes.length < 1 ? <Text className='text-xl font-light italic text-gray-500'>Esta persona no participa en ninguna escena</Text> : 
                         <FlatList
                         data={scenes}
                         renderItem={({ item }) => <PreviewScene name={item.name} id={item.id} id_process={id_process}/>}
@@ -103,8 +103,8 @@ const Person = () => {
             : <View></View>}
 
             <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-            <Text className='text-xl mb-3 font-bold'>Notas y limitaciones</Text>
-            {person.notes ? <Text>{person.notes}</Text> : <Text className='font-light italic text-gray-500'>Aún no has introducido nada en este campo</Text>}
+            <Text className='text-2xl mb-3 font-bold'>Notas y limitaciones</Text>
+            {person.notes ? <Text className='text-xl'>{person.notes}</Text> : <Text className='text-xl font-light italic text-gray-500'>Aún no has introducido nada en este campo</Text>}
             </ScrollView>
         </View>
     )

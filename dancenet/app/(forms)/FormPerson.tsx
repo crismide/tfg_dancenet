@@ -8,6 +8,7 @@ import LoadingScreen from '@/components/LoadingScreen';
 import SelectScene from '@/components/SelectScene';
 import FormButtons from '@/components/FormButtons';
 import GalleryPicker from '@/components/GalleryPicker';
+import SelectProcess from '@/components/SelectProcess';
 
 const FormPerson = () => {
     // State declarations
@@ -168,12 +169,12 @@ const FormPerson = () => {
                             horizontal={true}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item }) => (
-                                <SelectScene
+                                <SelectProcess
                                     name={item.name}
                                     id={item.id}
                                     isSelected={selectedProcessIds.includes(item.id)}
-                                    onPress={() => handleProcessSelect(item.id)}
-                                />
+                                    onPress={() => handleProcessSelect(item.id)} 
+                                    image={item.img}                                />
                             )}
                         />
                     </View>

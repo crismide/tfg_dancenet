@@ -121,17 +121,15 @@ const FormSpace = () => {
           onPress={() => setShowColorPicker(true)}
         />
         <TouchableOpacity
-          className="p-2.5 bg-gray-300 rounded-md"
-          onPress={() => setShowPeoplePicker(true)}
-        >
-          <FontAwesome5 name="users" size={20} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity
             className="p-2.5 bg-gray-300 rounded-md"
             onPress={() => setIsEraserMode(!isEraserMode)}
-            style={{ backgroundColor: isEraserMode ? '#ff4444' : '#ddd' }}
+            style={{ backgroundColor: '#ddd' }}
           >
-            <Text>{isEraserMode ? 'Eraser Active' : 'Toggle Eraser'}</Text>
+            <FontAwesome5
+            name={isEraserMode ? "pencil-alt" : "eraser"}
+            size={24}
+            color="#C286F1"
+          />
           </TouchableOpacity>
       </View>
 

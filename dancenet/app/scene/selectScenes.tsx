@@ -1,4 +1,4 @@
-import { View, Text, Pressable, FlatList } from 'react-native'
+import { View, Text, Pressable, FlatList, Alert } from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
 import { useSQLiteContext } from 'expo-sqlite';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
@@ -12,23 +12,57 @@ import SelectScene from '@/components/SelectScene';
 const selectScenes = () => {
   const database = useSQLiteContext();
   const { id,object,tableJoined } = useLocalSearchParams(); 
-  const { scenes, loading } = object === 'idea' ? useIdea(database, id) : usePerson(database, id);
-  const { allScenes } = useAllScenes(database, object === "person" ? id : undefined, object === "idea" ? id : undefined);
-
+  const { scenes } = object === 'idea' ? useIdea(database, id) : usePerson(database, id);
+  const [loading, setLoading] = useState(true)
   const [selectedIds, setSelectedIds] = useState([]);
   const [tempSelectedIds, setTempSelectedIds] = useState([]);
-  
-  const hasInitialized = useRef(false); // Track if initial selection is set
+  const [errorFetching, setErrorFetching] = useState(false)
+  const hasInitialized = useRef(false);
+  const [allScenes, setAllScenes] = useState([]);
 
   useEffect(() => {
-    console.log("select processes "+scenes)
-    if (!hasInitialized.current && scenes.length>0 && allScenes.length>0) {
-      const initialSelectedIds = scenes.map((scene) => scene.id);
-      setSelectedIds(initialSelectedIds);
-      setTempSelectedIds(initialSelectedIds);
-      hasInitialized.current = true; 
+    const loadData = async () => {
+      try {
+        if (!hasInitialized.current) {
+          let query = '';
+          let params: (string | number)[] = [id];
+            if (object === 'person') {
+                query = `
+                    SELECT s.* FROM scenes s
+                    JOIN scene_people sp ON s.id = sp.scene_id
+                    WHERE sp.person_id = ?;
+                `;
+            } else if (object === 'idea') {
+                query = `
+                    SELECT s.* FROM scenes s
+                    JOIN scene_idea si ON s.id = si.scene_id
+                    WHERE si.idea_id = ?;
+                `;
+            } else {
+                console.warn("Invalid object type provided to useAllScenes hook:", object);
+                setAllScenes([]);
+                return;
+            }
+
+          const result = await database.getAllAsync(query, params);
+          setAllScenes(result || []); 
+
+          if(scenes.length > 0){
+            const initialSelectedIds = scenes.map((scene) => scene.id);
+            setSelectedIds(initialSelectedIds);
+            setTempSelectedIds(initialSelectedIds);
+            hasInitialized.current = true; 
+            setLoading(false)
+          }
+        }
+      } catch (error) {
+        setErrorFetching(true)
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [scenes, allScenes]);
+    loadData()
+  }, [scenes, id]);
 
   const handleSelect = (id) => {
     setTempSelectedIds((prev) => 
@@ -101,7 +135,8 @@ const selectScenes = () => {
     <View className="p-10 gap-8 mb-10">
       <Stack.Screen options={{ headerShown: false }} />
       <BackButton />
-      <View>
+      {!errorFetching &&
+        <View>
         <View className="flex flex-row justify-between items-center">
           <Text className="screen-title">Seleccionando escenas</Text>
           <Pressable onPress={handleModifyProcesses}>
@@ -123,6 +158,8 @@ const selectScenes = () => {
           keyExtractor={(item) => item.id.toString()}
         />
       </View>
+      }
+      {errorFetching && <Text>Lo sentimos, ha ocurrido un fallo</Text>}
     </View>
   );
 };

@@ -146,7 +146,7 @@ const saveObject = async () => {
                         renderItem={({ item }) => (
                                 <SelectPerson
                                 name={item.name}
-                                img={item.image}
+                                img={item.img}
                                 id={item.id}
                                 isSelected={selectedPeople.includes(item.id)}
                                 onPress={() => {
@@ -172,7 +172,7 @@ const saveObject = async () => {
                     renderItem={({ item }) => (
                             <SelectPerson
                             name={item.name}
-                            img={item.image}
+                            img={item.img}
                             id={item.id}
                             isSelected={selectedPeopleRes.includes(item.id)}
                             onPress={() => {

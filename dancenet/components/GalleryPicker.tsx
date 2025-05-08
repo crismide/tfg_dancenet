@@ -5,7 +5,6 @@ import { Video, ResizeMode } from 'expo-av';
 
 const ImagePickerComponent = ({ image, setImage, setBase64Image, allowVideos = false, isObject = false}) => {
   const [mediaType, setMediaType] = useState(allowVideos ? 'both' : 'images');
-  const [mediaDimensions, setMediaDimensions] = useState({ width: 100, height: 100 });
   const videoRef = useRef(null);
 
   const pickMedia = async () => {

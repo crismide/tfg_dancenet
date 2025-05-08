@@ -5,12 +5,14 @@ import LoadingScreen from '@/components/LoadingScreen'
 import PreviewIdea from '@/components/PreviewIdea'
 import ButtonMainAddIdea from '@/components/AddIdealButtonModal'
 import AddIdealButtonModal from '@/components/AddIdealButtonModal'
+import { useIsFocused } from '@react-navigation/native'
 
 
 const Ideas = () => {
   const [ideas, setIdeas] = useState([])
   const [loading, setLoading] = useState(true);
   const database = useSQLiteContext()
+  const isFocused = useIsFocused()
 
   useEffect(() => {
     
@@ -25,8 +27,8 @@ const Ideas = () => {
       } finally {
         setLoading(false); // Set loading to false after the data is fetched
       }}
-    loadData()
-  },[ideas])
+      if (isFocused) { loadData() }
+  },[ideas,database,isFocused])
 
   if(loading){ return <LoadingScreen/> }
 

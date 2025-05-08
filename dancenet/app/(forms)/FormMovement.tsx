@@ -165,7 +165,7 @@ const FormMovement = () => {
                             renderItem={({ item }) => (
                                     <SelectPerson
                                     name={item.name}
-                                    img={item.image}
+                                    img={item.img}
                                     id={item.id}
                                     isSelected={selectedPeople.includes(item.id)}
                                     onPress={() => {
