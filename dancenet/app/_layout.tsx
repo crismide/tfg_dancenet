@@ -112,7 +112,7 @@ export default function Layout() {
         await db.execAsync(`
           CREATE TABLE IF NOT EXISTS objects (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            img TEXT,
+            img TEXT NOT NULL,
             scene_id INTEGER NOT NULL,
             creativeprocess_id INTEGER NOT NULL,
             FOREIGN KEY (scene_id) REFERENCES scenes(id) ON DELETE CASCADE,

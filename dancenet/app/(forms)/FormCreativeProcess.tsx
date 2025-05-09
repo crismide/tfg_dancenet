@@ -1,25 +1,32 @@
-import { View, Text, TextInput, Image } from 'react-native'
+import { View, Text, TextInput, Image, Alert } from 'react-native'
 import React, { useState } from 'react'
-import { Link, router, Stack, useNavigation } from 'expo-router'
+import { router, Stack } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
-import useImageToBase64 from '@/hooks/useImageToBase64'
 import FormButtons from '@/components/FormButtons'
 import GalleryPicker from '@/components/GalleryPicker'
 
+
 const FormCreativeProcess = () => {
   const [name,setName] = useState("")
+  const [nameError,setNameError] = useState("")
   const [image, setImage] = useState(null);
   const [base64Image, setBase64Image] = useState("");
-
   const database = useSQLiteContext()
+
   const handleSave = async () => {
-    try {
+    if(name.trim() === ""){
+      setNameError("El nombre es obligatorio para crear un proceso creativo")
+    }
+    else {
+      setNameError("")
+      try {
       const result = await database.runAsync("INSERT INTO creativeprocesses (name,img) VALUES (?,?);",[name,base64Image])
       const lastInsertId = result.lastInsertRowId;
       router.push(`/creative-process/${lastInsertId}`);
       setName("")
-    } catch (error) {
-      console.error(error)
+    } catch {
+       Alert.alert("Error", "Hubo un problema al guardar el proceso creativo.");
+    }
     }
   }
 
@@ -30,10 +37,11 @@ const FormCreativeProcess = () => {
       <GalleryPicker image={image} setImage={setImage} setBase64Image={setBase64Image}/>
       <TextInput 
         className='border border-2 rounded-lg border-gray-300 p-4' 
-        placeholder="Dale un nombre"
+        placeholder="Dale un nombre (campo obligatorio)"
         value={name}
         onChangeText={(text) => setName(text)}
       ></TextInput>
+      <Text className='errorMessage'>{nameError}</Text>
       <FormButtons handleSave={handleSave}/>
     </View>
   )

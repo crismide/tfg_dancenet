@@ -11,122 +11,102 @@ import SelectScene from '@/components/SelectScene';
 
 const selectScenes = () => {
   const database = useSQLiteContext();
-  const { id,object,tableJoined } = useLocalSearchParams(); 
+  const { id, object, tableJoined } = useLocalSearchParams<{ id: string; object: 'person' | 'idea'; tableJoined: string }>();
+
   const { scenes } = object === 'idea' ? useIdea(database, id) : usePerson(database, id);
+  
   const [loading, setLoading] = useState(true)
   const [selectedIds, setSelectedIds] = useState([]);
   const [tempSelectedIds, setTempSelectedIds] = useState([]);
   const [errorFetching, setErrorFetching] = useState(false)
-  const hasInitialized = useRef(false);
   const [allScenes, setAllScenes] = useState([]);
+  const hasInitializedSelectedIds = useRef(false);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        if (!hasInitialized.current) {
-          let query = '';
-          let params: (string | number)[] = [id];
-            if (object === 'person') {
-                query = `
-                    SELECT s.* FROM scenes s
-                    JOIN scene_people sp ON s.id = sp.scene_id
-                    WHERE sp.person_id = ?;
-                `;
-            } else if (object === 'idea') {
-                query = `
-                    SELECT s.* FROM scenes s
-                    JOIN scene_idea si ON s.id = si.scene_id
-                    WHERE si.idea_id = ?;
-                `;
-            } else {
-                console.warn("Invalid object type provided to useAllScenes hook:", object);
-                setAllScenes([]);
-                return;
-            }
+        let query = '';
+        const queryParams = [Number(id)];
 
-          const result = await database.getAllAsync(query, params);
-          setAllScenes(result || []); 
-
-          if(scenes.length > 0){
-            const initialSelectedIds = scenes.map((scene) => scene.id);
-            setSelectedIds(initialSelectedIds);
-            setTempSelectedIds(initialSelectedIds);
-            hasInitialized.current = true; 
-            setLoading(false)
-          }
+        if (object === 'person') {
+          query = `
+            SELECT s.* FROM scenes s
+            WHERE s.creativeprocess_id IN (
+              SELECT pcp.creativeprocess_id
+              FROM person_creativeprocess pcp
+              WHERE pcp.person_id = ?
+            );
+          `;
+        } else if (object === 'idea') {
+          query = `
+            SELECT s.* FROM scenes s
+            WHERE s.creativeprocess_id IN (
+              SELECT icp.creativeprocess_id
+              FROM idea_creativeprocess icp
+              WHERE icp.idea_id = ?
+            );
+          `;
+        } else {
+          console.warn("Invalid object type provided:", object);
+          setAllScenes([]);
+          setErrorFetching(true);
+          setLoading(false);
+          return;
         }
+
+        const result = await database.getAllAsync<any>(query, queryParams); // Specify Scene type if available
+        setAllScenes(result);
+        if (!hasInitializedSelectedIds.current) {
+        const initialIds = scenes.map((scene) => scene.id); // Specify Scene type
+        setSelectedIds(initialIds);
+        setTempSelectedIds(initialIds);
+        hasInitializedSelectedIds.current = true;
+    }
       } catch (error) {
-        setErrorFetching(true)
+        console.error(`Error fetching all scenes for ${object} ${id}:`, error);
+        setErrorFetching(true);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    loadData()
-  }, [scenes, id]);
+    if (scenes.length > 0) {loadData()}
+  }, [allScenes,scenes]);
 
-  const handleSelect = (id) => {
-    setTempSelectedIds((prev) => 
-      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+  const handleSelect = (sceneId: number) => {
+    setTempSelectedIds((prev) =>
+      prev.includes(sceneId) ? prev.filter((selectedId) => selectedId !== sceneId) : [...prev, sceneId]
     );
   };
 
   const handleModifyProcesses = async () => {
     try {
-      const scenesToAdd = tempSelectedIds.filter(id => !selectedIds.includes(id));
-      const scenesToRemove = selectedIds.filter(id => !tempSelectedIds.includes(id));
-  
-      // Add new scenes
-      await Promise.all(
-        scenesToAdd.map(async (id_scene) => {
-          // Fetch the creativeprocess_id for the scene
-          const sceneResult = await database.getAllAsync(
-            `SELECT creativeprocess_id FROM scenes WHERE id = ?;`,
-            [id_scene]
-          );
-  
-          if (sceneResult.length > 0) {
-            const creativeprocessId = sceneResult[0].creativeprocess_id;
-  
-            // Insert into the joined table
-            await database.runAsync(
+      const scenesToAdd = tempSelectedIds.filter(sceneId => !selectedIds.includes(sceneId));
+      const scenesToRemove = selectedIds.filter(sceneId => !tempSelectedIds.includes(sceneId));
+
+      // Add new scene links
+      await Promise.all(scenesToAdd.map((sceneId) => {
+          const sceneDetails = allScenes.find(s => s.id === sceneId);
+          if (sceneDetails) {
+           database.runAsync(
               `INSERT INTO ${tableJoined} (${object}_id, scene_id, creativeprocess_id) VALUES (?, ?, ?);`,
-              [id, id_scene, creativeprocessId]
+              [id, sceneId, sceneDetails.creativeprocess_id]
             );
-          } else {
-            console.warn(`No creativeprocess_id found for scene ${id_scene}`);
-          }
+          } 
         })
       );
-  
-      // Remove scenes
-      await Promise.all(
-        scenesToRemove.map(async (id_scene) => {
-          // Fetch the creativeprocess_id for the scene
-          const sceneResult = await database.getAllAsync(
-            `SELECT creativeprocess_id FROM scenes WHERE id = ?;`,
-            [id_scene]
-          );
-  
-          if (sceneResult.length > 0) {
-            const creativeprocessId = sceneResult[0].creativeprocess_id;
-  
-            // Delete from the joined table
-            await database.runAsync(
-              `DELETE FROM ${tableJoined} WHERE ${object}_id = ? AND scene_id = ? AND creativeprocess_id = ?;`,
-              [id, id_scene, creativeprocessId]
+
+      await Promise.all(scenesToRemove.map((sceneId) => {
+          const sceneDetails = allScenes.find(s => s.id === sceneId);
+          if (sceneDetails) {
+           database.runAsync(
+              `DELETE FROM ${tableJoined} WHERE ${object}_id = ? AND scene_id = ?;`,[id, sceneId]
             );
-          } else {
-            console.warn(`No creativeprocess_id found for scene ${id_scene}`);
-          }
+          } 
         })
       );
-  
-      // Update selectedIds state
       setSelectedIds(tempSelectedIds);
-      router.back(); // Navigate back
-    } catch (error) {
-      console.error("Error updating scene:", error);
-    }
+      router.back()
+    } catch { Alert.alert("Ha ocurrido un error modificando las escenas") }
   };
 
   if (loading) return <LoadingScreen />;
@@ -145,7 +125,6 @@ const selectScenes = () => {
         </View>
         <FlatList
           data={allScenes}
-          numColumns={2}
           contentContainerStyle={{ marginBottom: 80 }}
           renderItem={({ item }) => (
             <SelectScene

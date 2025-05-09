@@ -22,6 +22,7 @@ const FormObject = () => {
     const [selectedPeople, setSelectedPeople] = useState<number[]>([])
     const [peopleResList, setPeopleResList] = useState([])
     const [selectedPeopleRes, setSelectedPeopleRes] = useState<number[]>([])
+    const [errorMessage, setErrorMessage] = useState("")
 
     useEffect(() => {
         const loadPeople = async () => {
@@ -55,12 +56,14 @@ const FormObject = () => {
 
    
 const saveObject = async () => {
-    try {
+    if (!base64Image || !id_scene || !id_process) {
+            setErrorMessage("Es necesario que se aporte una imagen para crear el objeto")
+        }
+    else {
+        try {
 
         // Validate required fields
-        if (!base64Image || !id_scene || !id_process) {
-            return;
-        }
+        
 
         // Insert new object
         const result = await database.runAsync(
@@ -100,6 +103,7 @@ const saveObject = async () => {
     } catch (error) {
         console.error("Error saving object:", error);
     } finally{ router.back() }
+    }
 }
 
     
@@ -188,6 +192,7 @@ const saveObject = async () => {
                     keyExtractor={item => item.id.toString()}
                 />}
                 </View>
+                <Text className='errorMessage'>{errorMessage}</Text>
                 <FormButtons handleSave={saveObject} />
             </View>
         </ScrollView>

@@ -22,6 +22,7 @@ const FormIdea = () => {
   const [loading, setLoading] = useState(true)
   const [media, setMedia] = useState(null);
   const [data, setData] = useState("");
+  const [dataError, setDataError] = useState("")
   const [processes,setProcesses] = useState([])
   const [scenes,setScenes] = useState([])
   const [height, setHeight] = useState(100);
@@ -64,7 +65,13 @@ const FormIdea = () => {
   
 
   const handleSave = async () => {
-    try {
+    if(data.trim() === ""){
+      setDataError("Es obligatorio dar algún contenido para crear la idea")
+    }
+    else {
+      setDataError("")
+      let ideaId = null
+      try {
       let finalData = data;
       let result = null
       
@@ -103,7 +110,7 @@ const FormIdea = () => {
           "INSERT INTO ideas (typeContent, data) VALUES (?, ?);",
           [typeMedia, data]
       );}
-      const ideaId = result.lastInsertRowId;
+      ideaId = result.lastInsertRowId;
       if(id_process){
         await database.runAsync("INSERT INTO idea_creativeprocess (idea_id, creativeprocess_id) VALUES (?, ?);",
           [ideaId, id_process]);
@@ -141,7 +148,8 @@ const FormIdea = () => {
       console.error(error);
     }
     setData("")
-    router.back()
+    router.push(`/idea/${ideaId}`);
+    }
   }
 
   if(loading){ return <LoadingScreen/> }
@@ -218,6 +226,7 @@ const FormIdea = () => {
               />
             </View>}
         </View>
+        <Text className='errorMessage'>{dataError}</Text>
         <FormButtons handleSave={handleSave}/>
       </View>
     </ScrollView>

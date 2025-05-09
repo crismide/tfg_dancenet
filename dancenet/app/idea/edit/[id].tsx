@@ -97,7 +97,7 @@ const EditIdea = () => {
           style={{ backgroundColor: '#F1A636', padding: 10, borderRadius: 5 }}
           underlayColor="#D98E2B"
           >
-          <Text style={{ color: '#FFF', textAlign: 'center' }}>Modificar escena</Text>
+          <Text style={{ color: '#FFF', textAlign: 'center' }}>Modificar escenas</Text>
           </TouchableHighlight>
       </Link>
       </View>

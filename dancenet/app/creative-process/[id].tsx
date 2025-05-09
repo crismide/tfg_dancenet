@@ -104,7 +104,7 @@ const CreativeProcessDetail = () => {
                       data={scenes}
                       renderItem={({ item }) => <PreviewScene name={item.name} id={item.id} id_process={id}/>}
                       horizontal={true}
-                      contentContainerStyle={{ gap: 20 }}/>
+                      contentContainerStyle={{ gap: 15 }}/>
                   }
                 </View>   
               }

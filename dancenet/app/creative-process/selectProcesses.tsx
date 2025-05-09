@@ -80,7 +80,6 @@ const selectProcesses = () => {
         </View>
         <FlatList
           data={allProcesses}
-          numColumns={2}
           contentContainerStyle={{ marginBottom: 80 }}
           renderItem={({ item }) => (
             <SelectProcess

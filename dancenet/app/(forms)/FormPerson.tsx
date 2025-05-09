@@ -18,15 +18,13 @@ const FormPerson = () => {
         image: null,
         base64Image: ""
     });
-    const [errors, setErrors] = useState({ name: false });
+    const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(true);
     const [scenes, setScenes] = useState([]);
     const [selectedIds, setSelectedIds] = useState([]);
     const [height, setHeight] = useState(100);
     const [creativeProcesses, setCreativeProcesses] = useState([]);
     const [selectedProcessIds, setSelectedProcessIds] = useState([]);
-    
-    // Get params and database context
     const { id_process = "", id_scene = "" } = useLocalSearchParams();
     const database = useSQLiteContext();
 
@@ -57,11 +55,12 @@ const FormPerson = () => {
     // Handle form submission
     const handleSave = async () => {
         if (!formData.name) {
-            setErrors({ ...errors, name: true });
-            return;
+            setErrorMessage("Es obligatorio un nombre para crear a una persona")
         }
 
-        try {
+        else {
+            setErrorMessage("")
+            try {
             const result = await database.runAsync(
                 "INSERT INTO people (name, img, notes) VALUES (?, ?, ?);",
                 [formData.name, formData.base64Image, formData.notes]
@@ -110,10 +109,10 @@ const FormPerson = () => {
                 image: null,
                 base64Image: ""
             });
-            router.back();
+            router.push(`/person/${personId}`);
         } catch (error) {
-            Alert.alert("Error", "An error occurred. Please try again.");
-            console.error(error);
+            Alert.alert("Ha ocurrido un error creando la persona");
+        }
         }
     };
 
@@ -131,7 +130,6 @@ const FormPerson = () => {
     // Handle text input changes
     const handleChange = (field, value) => {
         setFormData({ ...formData, [field]: value });
-        if (field === "name" && value) setErrors({ ...errors, name: false });
     };
 
     if (loading) return <LoadingScreen />;
@@ -158,7 +156,6 @@ const FormPerson = () => {
                         value={formData.name}
                         onChangeText={(text) => handleChange("name", text)}
                     />
-                    {errors.name && <Text className='text-xl text-red-700'>Es obligatorio introducir un nombre</Text>}
                 </View>
 
                 {!id_process && !id_scene && (
@@ -213,7 +210,7 @@ const FormPerson = () => {
                         placeholder="Escribe notas o limitaciones que quieras incluir"
                     />
                 </View>
-                
+                 <Text className='errorMessage'>{errorMessage}</Text>
                 <FormButtons handleSave={handleSave} />
             </ScrollView>
         </View>

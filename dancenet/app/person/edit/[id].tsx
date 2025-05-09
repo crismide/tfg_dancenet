@@ -97,7 +97,7 @@ const EditPerson = () => {
                     onChangeText={setName}
                     className='input-text-box'
                 />
-                {errorName && <Text className='text-xl text-red-700'>Es obligatorio introducir un nombre</Text>}
+                {errorName && <Text className='errorMessage'>Es obligatorio introducir un nombre</Text>}
             </View>
 
             <View>

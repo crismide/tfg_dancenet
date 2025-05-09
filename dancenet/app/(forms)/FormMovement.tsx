@@ -23,7 +23,7 @@ const FormMovement = () => {
     const [level, setLevel] = useState("")
     const [peopleList, setPeopleList] = useState([]);
     const [selectedPeople, setSelectedPeople] = useState<number[]>([]);
-
+    const [errorMessage, setErrorMessage] = useState("")
     const [height, setHeight] = useState(100);
 
     useEffect(() => {
@@ -48,12 +48,14 @@ const FormMovement = () => {
     }, [id_scene]);
 
     const saveMovement = async () => {
-        try {
-            // Convert time to total seconds
+        if(!description || !name || !level){
+            setErrorMessage("Es necesario especificar una descripción, un nombre y un nivel del proceso creativo")
+        }else {
+            setErrorMessage("")
+            try {
             const startSeconds = (start.minutes * 60) + start.seconds;
             const endSeconds = (end.minutes * 60) + end.seconds;
     
-            // Insert movement
             const result = await database.runAsync(
                 `INSERT INTO movements 
                  (name, description, start_time, end_time, level, creativeprocess_id,scene_id) 
@@ -61,10 +63,8 @@ const FormMovement = () => {
                 [name, description, startSeconds, endSeconds, level, id_process,id_scene]
             );
             
-            // Get the inserted movement ID
             const movementId = result.lastInsertRowId;
     
-            // Insert person-movement relationships
             for (const personId of selectedPeople) {
                 await database.runAsync(
                     `INSERT INTO person_movement 
@@ -77,6 +77,7 @@ const FormMovement = () => {
         } catch (error) {
             console.error("Error saving movement:", error);
             alert("Ocurrió un error al guardar la pauta");
+        }
         }
     };
 
@@ -182,6 +183,7 @@ const FormMovement = () => {
                             
                         />
                     </View>
+                    <Text className='errorMessage'>{errorMessage}</Text>
                     <FormButtons handleSave={saveMovement}/>
                 </View>
             </ScrollView>

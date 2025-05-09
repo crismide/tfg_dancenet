@@ -103,7 +103,7 @@ const FormSpace = () => {
             [base64Data, id_scene]);
           router.back()
         },
-        error => console.error('Snapshot failed', error)
+        error => Alert.alert("Ha ocurrido un error guardando el recorrido espcial")
       );
     }
   };
