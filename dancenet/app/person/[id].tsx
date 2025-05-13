@@ -73,7 +73,7 @@ const Person = () => {
                     style={{width: 100, height: 100,borderRadius: 50}}/>
                 <Text className='screen-title'>{person.name}</Text>
             </View>
-            
+            <Text>id process is {id_process}</Text>
             {source === 'people' ? 
                 <View className='mb-10'>
                     <Text className='text-2xl mb-3 font-bold'>Procesos creativos en los que participa</Text>
@@ -94,7 +94,11 @@ const Person = () => {
                     {scenes.length < 1 ? <Text className='text-xl font-light italic text-gray-500'>Esta persona no participa en ninguna escena</Text> : 
                         <FlatList
                         data={scenes}
-                        renderItem={({ item }) => <PreviewScene name={item.name} id={item.id} id_process={id_process}/>}
+                        renderItem={({ item }) => 
+                        <PreviewScene 
+                            name={item.name} 
+                            id={item.id} 
+                            id_process={id_process}/>}
                         horizontal={true}
                         contentContainerStyle={{ gap: 15 }}
                     />

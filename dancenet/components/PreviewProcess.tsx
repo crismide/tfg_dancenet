@@ -1,8 +1,9 @@
-import { router, useNavigation } from 'expo-router';
-import React, { useEffect } from 'react';
-import { View, Text, Image, Pressable } from 'react-native';
+import { router } from 'expo-router';
+import { Text, Image, Pressable } from 'react-native';
 
-const PreviewProcess = ({ name, img,id }) => {
+type ProcessType = {name:string, img:string,id:number,}
+
+const PreviewProcess = ({ name, img,id }:ProcessType) => {
   const handlePress = () => {
     router.push(`/creative-process/${id}`)
   }

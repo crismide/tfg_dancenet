@@ -22,7 +22,6 @@ const CreativeProcessDetail = () => {
   const [activeIdeas, setActiveIdeas] = useState(false)
   const [activeScenes, setActiveScenes] = useState(false)
   const [activePeople, setActivePeople] = useState(false)
-  const [activeRehearsal, setActiveRehearsal] = useState(false)
 
   const optionsPeople = [
     { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: id, id_scene:"" }} },
@@ -102,7 +101,11 @@ const CreativeProcessDetail = () => {
                   {scenes.length < 1 ? <Text className='text-lg text-gray-400'>Este proceso creativo aún no tiene escenas, crea una con el botón "Añadir escena +"</Text> :
                     <FlatList
                       data={scenes}
-                      renderItem={({ item }) => <PreviewScene name={item.name} id={item.id} id_process={id}/>}
+                      renderItem={({ item }) => 
+                      <PreviewScene 
+                        name={item.name} 
+                        id={item.id} 
+                        id_process={id}/>}
                       horizontal={true}
                       contentContainerStyle={{ gap: 15 }}/>
                   }

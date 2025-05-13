@@ -1,8 +1,6 @@
 import { View, Text, TextInput, Pressable, Button, Image, Alert, ScrollView, FlatList } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import * as ImagePicker from "expo-image-picker";
-import { FontAwesome5 } from "@expo/vector-icons";
 import { useSQLiteContext } from 'expo-sqlite';
 import LoadingScreen from '@/components/LoadingScreen';
 import SelectScene from '@/components/SelectScene';
@@ -14,10 +12,10 @@ const FormPerson = () => {
     // State declarations
     const [formData, setFormData] = useState({
         name: "",
-        notes: "",
-        image: null,
-        base64Image: ""
+        notes: ""
     });
+    const [image, setImage] = useState(null);
+    const [base64Image, setBase64Image] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(true);
     const [scenes, setScenes] = useState([]);
@@ -63,7 +61,7 @@ const FormPerson = () => {
             try {
             const result = await database.runAsync(
                 "INSERT INTO people (name, img, notes) VALUES (?, ?, ?);",
-                [formData.name, formData.base64Image, formData.notes]
+                [formData.name, base64Image, formData.notes]
             );
             const personId = result.lastInsertRowId;
 
@@ -106,9 +104,9 @@ const FormPerson = () => {
             setFormData({
                 name: "",
                 notes: "",
-                image: null,
-                base64Image: ""
             });
+            setImage(null)
+            setBase64Image("")
             router.push(`/person/${personId}`);
         } catch (error) {
             Alert.alert("Ha ocurrido un error creando la persona");
@@ -142,9 +140,9 @@ const FormPerson = () => {
             <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
                 <View style={{ alignItems: "center" }} className='mb-10'>
                     <GalleryPicker 
-                        image={formData.image} 
-                        setImage={(image) => handleChange("image", image)} 
-                        setBase64Image={(base64) => handleChange("base64Image", base64)} 
+                        image={image} 
+                        setImage={setImage} 
+                        setBase64Image={setBase64Image} 
                     />
                 </View>
                 

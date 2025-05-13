@@ -3,7 +3,7 @@ import { View, Image, Button, Alert, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Video, ResizeMode } from 'expo-av';
 
-const ImagePickerComponent = ({ image, setImage, setBase64Image, allowVideos = false, isObject = false}) => {
+const GalleryPicker = ({ image, setImage, setBase64Image, allowVideos = false, isObject = false}) => {
   const [mediaType, setMediaType] = useState(allowVideos ? 'both' : 'images');
   const videoRef = useRef(null);
 
@@ -100,4 +100,4 @@ const ImagePickerComponent = ({ image, setImage, setBase64Image, allowVideos = f
   );
 };
 
-export default ImagePickerComponent;
+export default GalleryPicker;
