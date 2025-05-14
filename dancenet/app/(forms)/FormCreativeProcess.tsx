@@ -4,14 +4,20 @@ import { router, Stack } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
 import FormButtons from '@/components/FormButtons'
 import GalleryPicker from '@/components/GalleryPicker'
+import { useCreativeProcessStore } from '@/store/creativeProcessStore'
 
+interface CreativeProcessParams {
+  name: string;
+  img?: string;
+}
 
 const FormCreativeProcess = () => {
   const [name,setName] = useState("")
   const [nameError,setNameError] = useState("")
   const [image, setImage] = useState(null);
   const [base64Image, setBase64Image] = useState("");
-  const database = useSQLiteContext()
+  const db = useSQLiteContext()
+  const { createCreativeProcess } = useCreativeProcessStore()
 
   const handleSave = async () => {
     if(name.trim() === ""){
@@ -19,14 +25,18 @@ const FormCreativeProcess = () => {
     }
     else {
       setNameError("")
+      const creativeProcess:CreativeProcessParams = {name: name, img: base64Image}
       try {
-      const result = await database.runAsync("INSERT INTO creativeprocesses (name,img) VALUES (?,?);",[name,base64Image])
-      const lastInsertId = result.lastInsertRowId;
-      router.push(`/creative-process/${lastInsertId}`);
-      setName("")
-    } catch {
-       Alert.alert("Error", "Hubo un problema al guardar el proceso creativo.");
-    }
+        const newCreativeProcessId = await createCreativeProcess(db, creativeProcess)
+        if (newCreativeProcessId) {
+          router.push(`/creative-process/${newCreativeProcessId}`);
+          setName("")
+        } else {
+          Alert.alert("Error", "Hubo un problema al guardar el proceso creativo");
+        }
+      } catch {
+        Alert.alert("Error", "Hubo un problema al guardar el proceso creativo.");
+      }
     }
   }
 
