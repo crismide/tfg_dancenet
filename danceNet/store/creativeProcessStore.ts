@@ -1,122 +1,70 @@
-import { SQLiteDatabase, useSQLiteContext } from "expo-sqlite";
-import create from 'zustand';
+import { create } from 'zustand';
+import { SQLiteDatabase } from 'expo-sqlite';
+import { CreativeProcess,CreativeProcessParams,CreativeProcessState } from "@/interfaces/interfaceCreativeProcess"
 
-const db = useSQLiteContext()
 
-interface CreativeProcess {
-  id: number;
-  name: string;
-  img?: string;
-}
+export const useCreativeProcessStore = create<CreativeProcessState>((set, get) => ({
+  creativeProcesses: [],
+  loading: false,
+  error: null,
 
-interface CreativeProcessState {
-  currentCreativeProcessId: number | null;
-  creativeProcesses: CreativeProcess[];
-  loading: boolean;
-  error: string | null;
-  setCurrentCreativeProcess: (id: number) => void;
-  clearCurrentCreativeProcess: () => void;
-  loadCreativeProcesses: (db: SQLiteDatabase) => Promise<void>;
-  createCreativeProcess: (db: SQLiteDatabase, process: Omit<CreativeProcess, 'id'>) => Promise<void>;
-  updateCreativeProcess: (db: SQLiteDatabase, process: CreativeProcess) => Promise<void>;
-  deleteCreativeProcess: (db: SQLiteDatabase, id: number) => Promise<void>;
-  getCurrentCreativeProcess: () => CreativeProcess | null;
-}
+  getCreativeProcessById: (id: number) => {
+  const { creativeProcesses } = get();
+  return creativeProcesses.find(cp => cp.id === id) || null;
+  },
 
-export const useCreativeProcessStore = create((set, get) => ({
-    currentCreativeProcessId: null,
-    creativeProcesses: [],
-    loading: false,
-    error: null,
 
-    // Set the current creative process
-    setCurrentCreativeProcess: (id: number) => {
-      set({ currentCreativeProcessId: id });
-    },
+  loadCreativeProcesses: async (db: SQLiteDatabase) => {
+    set({ loading: true, error: null });
+    try {
+      const result = await db.getAllAsync<CreativeProcess>(
+        'SELECT * FROM creativeprocesses ORDER BY name ASC;'
+      );
+      set({ creativeProcesses: result, loading: false });
+    } catch (error: any) {
+      set({ error: error?.message || String(error), loading: false });
+    }
+  },
 
-    // Clear the current creative process
-    clearCurrentCreativeProcess: () => {
-      set({ currentCreativeProcessId: null });
-    },
+  createCreativeProcess: async (db: SQLiteDatabase, process: CreativeProcessParams) => {
+    set({ loading: true, error: null });
+    try {
+      const result = await db.runAsync(
+        'INSERT INTO creativeprocesses (name, img) VALUES (?, ?);',
+        [process.name, process.img || null]
+      );
+      const lastInsertId = result.lastInsertRowId;
+      await get().loadCreativeProcesses(db);
+      set({ loading: false });
+      return lastInsertId;
+    } catch (error: any) {
+      set({ error: error?.message || String(error), loading: false });
+      throw error;
+    }
+  },
 
-    // Get the current creative process object
-    getCurrentCreativeProcess: (): CreativeProcess | null => {
-      const { currentCreativeProcessId, creativeProcesses } = get();
-      if (!currentCreativeProcessId) return null;
-      return creativeProcesses.find(p => p.id === currentCreativeProcessId) || null;
-    },
+  updateCreativeProcess: async (db: SQLiteDatabase,process: CreativeProcess) => {
+    set({ loading: true, error: null });
+    try {
+      await db.runAsync(
+        'UPDATE creativeprocesses SET name = ?, img = ? WHERE id = ?;',
+        [process.name, process.img || null, process.id]
+      );
+      await get().loadCreativeProcesses(db);
+    } catch (error: any) {
+      set({ error: error?.message || String(error), loading: false });
+      throw error;
+    }
+  },
 
-    // Load all creative processes
-    loadCreativeProcesses: async () => {
-      set({ loading: true, error: null });
-      try {
-        const result = await db.getAllAsync<CreativeProcess>(
-          'SELECT * FROM creativeprocesses ORDER BY name ASC;'
-        );
-        set({ creativeProcesses: result, loading: false });
-      } catch (error) {
-        set({ error: error.message, loading: false });
-      }
-    },
-
-    // Create a new creative process
-    createCreativeProcess: async (process: Omit<CreativeProcess, 'id'>) => {
-      set({ loading: true, error: null });
-      try {
-        await db.runAsync(
-          'INSERT INTO creativeprocesses (name, img) VALUES (?, ?);',
-          [process.name, process.img || null]
-        );
-        
-        // Refresh the list
-        await get().loadCreativeProcesses(db);
-      } catch (error) {
-        set({ error: error.message, loading: false });
-        throw error;
-      }
-    },
-
-    // Update a creative process
-    updateCreativeProcess: async (process: CreativeProcess) => {
-      set({ loading: true, error: null });
-      try {
-        await db.runAsync(
-          'UPDATE creativeprocesses SET name = ?, img = ? WHERE id = ?;',
-          [process.name, process.img || null, process.id]
-        );
-        
-        // Refresh the list
-        await get().loadCreativeProcesses(db);
-        
-        // If we're updating the current process, ensure our local state is updated
-        const { currentCreativeProcessId } = get();
-        if (currentCreativeProcessId === process.id) {
-          set({ currentCreativeProcessId: process.id });
-        }
-      } catch (error) {
-        set({ error: error.message, loading: false });
-        throw error;
-      }
-    },
-
-    // Delete a creative process
-    deleteCreativeProcess: async (id: number) => {
-      set({ loading: true, error: null });
-      try {
-        await db.runAsync('DELETE FROM creativeprocesses WHERE id = ?;', [id]);
-        
-        // Refresh the list
-        await get().loadCreativeProcesses(db);
-        
-        // If we're deleting the current process, clear it
-        const { currentCreativeProcessId } = get();
-        if (currentCreativeProcessId === id) {
-          set({ currentCreativeProcessId: null });
-        }
-      } catch (error) {
-        set({ error: error.message, loading: false });
-        throw error;
-      }
-    },
-  })
-);
+  deleteCreativeProcess: async (db: SQLiteDatabase,id: number) => {
+    set({ loading: true, error: null });
+    try {
+      await db.runAsync('DELETE FROM creativeprocesses WHERE id = ?;', [id]);
+      await get().loadCreativeProcesses(db);
+    } catch (error: any) {
+      set({ error: error?.message || String(error), loading: false });
+      throw error;
+    }
+  },
+}));

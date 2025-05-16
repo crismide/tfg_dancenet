@@ -5,7 +5,6 @@ import GradientText from '../../components/GradientText'
 import { useSQLiteContext } from 'expo-sqlite'
 import PreviewProcess from '@/components/PreviewProcess'
 import LoadingScreen from '@/components/LoadingScreen'
-import ButtonMainAddIdea from '@/components/AddIdealButtonModal'
 import AddIdealButtonModal from '@/components/AddIdealButtonModal'
 
 type ProcessType = {id:number, name:string}
