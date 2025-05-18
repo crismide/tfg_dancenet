@@ -1,5 +1,5 @@
-import { Link, Stack, useLocalSearchParams } from 'expo-router';
-import React, {  useState } from 'react';
+import { Link, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import React, {  useEffect, useState } from 'react';
 import { View, Text, Pressable, FlatList, ScrollView } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -12,16 +12,75 @@ import BackButton from '@/components/BackButton';
 import PreviewIdea from '@/components/PreviewIdea';
 import AddIdealButtonModal from '@/components/AddIdealButtonModal';
 import EditDeletebuttons from '@/components/EditDeletebuttons';
+import { useCreativeProcessStore } from '@/store/creativeProcessStore';
+import ErrorScreen from '@/components/ErrorScreen';
+import { Scene } from '@/interfaces/interfaceScene';
+import { Person } from '@/interfaces/interfacePerson';
+import { Idea } from '@/interfaces/interfaceIdea';
+import { useSceneStore } from '@/store/scenesStore';
+import { CreativeProcess } from '@/interfaces/interfaceCreativeProcess';
+import { PersonInCreativeProcess } from '@/interfaces/interfacepersonCreativeProcess';
+import { usePersonCreativeProcessStore } from '@/store/personCreativeProcessStore';
+import { usePersonStore } from '@/store/personStore';
+import { IdeaInCreativeProcess } from '@/interfaces/interfaceIdeaCreativeProcess';
+import { useIdeaCreativeProcessStore } from '@/store/ideaCreativeProcessStore';
+import { useIdeaStore } from '@/store/ideaStore';
 
 const CreativeProcessDetail = () => {
   const { id } = useLocalSearchParams();
   const database = useSQLiteContext();
   const [modalPeopleVisible, setModalPeopleVisible] = useState(false);
   const [modalIdeasVisible, setModalIdeasVisible] = useState(false);
-  const { process, scenes, people, ideas, loading } = useCreativeProcess(database, id);
+  // const { scenes, people, ideas } = useCreativeProcess(database, id);
+  const [ creativeProcess, setCreativeProcess ] = useState<CreativeProcess|null>()
+  const [ scenes, setScenes ] = useState<Scene[]>([])
+  const [ people, setPeople ] = useState<Person[]>([])
+  const [ ideas, setIdeas ] = useState<Idea[]>([])
   const [activeIdeas, setActiveIdeas] = useState(false)
   const [activeScenes, setActiveScenes] = useState(false)
   const [activePeople, setActivePeople] = useState(false)
+  const { deleteCreativeProcess } = useCreativeProcessStore()
+  const [ error, setError ] = useState(null)
+  const [ loading, setLoading ] = useState(false)
+  const { getScenesOfCreativeProcess } = useSceneStore()
+  const { getCreativeProcessById } = useCreativeProcessStore()
+  const { getPeopleOfCreativeProcess } = usePersonCreativeProcessStore()
+  const { getPersonById } = usePersonStore()
+  const { getIdeasOfCreativeProcess } = useIdeaCreativeProcessStore()
+  const { getIdeaById } = useIdeaStore()
+ 
+  // useEffect(() => {
+  
+  // },[id])
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true;
+      const loadData = () => {
+          try {
+          setLoading(true)
+          const cp = getCreativeProcessById(Number(id));
+          const sc = getScenesOfCreativeProcess(Number(id));
+          const pairsPeopleAndCreativeProcess:PersonInCreativeProcess[] = getPeopleOfCreativeProcess(Number(id));
+          const ppl = pairsPeopleAndCreativeProcess
+            .map(pair => getPersonById(pair.person_id))
+            .filter((person): person is Person => person !== null);
+
+          const pairsIdeasAndCreativeProcess:IdeaInCreativeProcess[] = getIdeasOfCreativeProcess(Number(id))
+          const ideas = pairsIdeasAndCreativeProcess.map(pair => getIdeaById(pair.idea_id)).filter((idea): idea is Idea => idea !== null);
+          
+          setCreativeProcess(cp);
+          setScenes(sc);
+          setPeople(ppl);
+          setIdeas(ideas)
+
+        } catch (error:any) {
+          setError(error.message)
+        } finally { setLoading(false) }
+      };
+      loadData();
+      return () => { isActive = false; };
+    }, [id, getCreativeProcessById, getScenesOfCreativeProcess, getPeopleOfCreativeProcess, getPersonById])
+  );
 
   const optionsPeople = [
     { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: id, id_scene:"" }} },
@@ -36,23 +95,15 @@ const CreativeProcessDetail = () => {
   ];
 
   if (loading) { return <LoadingScreen/> }
-
-  if (!process) {
-    return (
-      <View className='p-10 gap-8'>
-        <Stack.Screen options={{ headerShown: false }} />
-        <Text className='screen-title'>No se ha encontrado ningún proceso creativo</Text>
-      </View>
-    );
-  }
+  if(error) {return <ErrorScreen error={error}/> }
 
   return (
     <View className='p-10 gap-8'>
     <Stack.Screen options={{ headerShown: false }} />
       <BackButton/>
       <View className='flex flex-row justify-between items-center'>
-        <Text className='screen-title'>{process.name}</Text>
-      <EditDeletebuttons typeObject={"creative-process"} table={"creativeprocesses"} id={id}/>
+        {creativeProcess && <Text className='screen-title'>{creativeProcess.name}</Text>}
+      <EditDeletebuttons typeObject={"creative-process"} deleteFunction={deleteCreativeProcess} id={Number(id)}/>
       </View>
         <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
           <View className='gap-8'>
@@ -77,8 +128,8 @@ const CreativeProcessDetail = () => {
                         data={item.data}
                         id={item.id}
                         source={'process'}
-                        id_process={id}
-                        id_scene={null}/>
+                        id_process={Number(id)}
+                        id_scene={undefined}/>
                     </View>
                   }
                 />

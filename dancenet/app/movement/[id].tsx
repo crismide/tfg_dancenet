@@ -7,6 +7,7 @@ import useMovement from '@/hooks/useMovement';
 import LoadingScreen from '@/components/LoadingScreen';
 import EditDeletebuttons from '@/components/EditDeletebuttons';
 import PreviewPerson from '@/components/PreviewPerson';
+import { useMovementStore } from '@/store/movementStore';
 
 const formatSeconds = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);
@@ -19,6 +20,7 @@ const Movement = () => {
     const { id } = useLocalSearchParams();
     const database = useSQLiteContext();
     const {movement, loading, people} = useMovement(database,id)
+    const { deleteMovement } = useMovementStore()
 
     if (loading) {return <LoadingScreen/>}
 
@@ -27,7 +29,7 @@ const Movement = () => {
             <Stack.Screen options={{ headerShown: false }} />
             <View className='flex flex-row justify-between items-center'>
                 <BackButton/>
-                <EditDeletebuttons typeObject={"movement"} table={"movements"} id={id}/>
+                <EditDeletebuttons typeObject={"movement"} deleteFunction={deleteMovement} id={Number(id)}/>
             </View>
             <Text className='screen-title'>{movement.name}</Text>
             <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>

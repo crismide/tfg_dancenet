@@ -9,11 +9,13 @@ import LoadingScreen from '@/components/LoadingScreen'
 import PreviewMove from '@/components/PreviewMove'
 import useObjectInfo from '@/hooks/useObject'
 import PreviewPerson from '@/components/PreviewPerson'
+import { useObjectStore } from '@/store/objectStore'
 
 const objectDetail = () => {
     const { id } = useLocalSearchParams();
     const database = useSQLiteContext();
     const {object,movements,people,peopleRes,loading} = useObjectInfo(database,id)
+    const { deleteObject } = useObjectStore()
     
     if (loading) {return <LoadingScreen/>}
 
@@ -23,7 +25,7 @@ const objectDetail = () => {
             <BackButton/>
             <View className='flex flex-row justify-between items-center'>
                 <Text className='screen-title'>Objeto</Text>
-                <EditDeletebuttons typeObject={"object"} table={"objects"} id={id}/>
+                <EditDeletebuttons typeObject={"object"} deleteFunction={deleteObject} id={Number(id)}/>
             </View>
             <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
                 <View className='gap-8'>

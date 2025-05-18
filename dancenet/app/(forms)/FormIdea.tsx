@@ -1,68 +1,48 @@
 import { View, Text, ScrollView, TextInput, Image, FlatList } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { router, Stack, useLocalSearchParams } from 'expo-router'
 import FormButtons from '@/components/FormButtons'
 import AudioPickerRecorder from '@/components/AudioPickerRecorder'
 import { useSQLiteContext } from 'expo-sqlite'
 import GalleryPicker from '@/components/GalleryPicker'
-import { Video } from 'expo-av'
-import LoadingScreen from '@/components/LoadingScreen'
 import SelectScene from '@/components/SelectScene'
 import SelectProcess from '@/components/SelectProcess'
 import { useIsFocused } from '@react-navigation/native'
-import * as FileSystem from 'expo-file-system';
+import { useCreativeProcessStore } from '@/store/creativeProcessStore'
+import { useSceneStore } from '@/store/scenesStore'
+import { getPathAudioFile } from '@/utils/useSaveAudioFile'
+import { IdeaParams } from '@/interfaces/interfaceIdea'
+import { useIdeaStore } from '@/store/ideaStore'
+import { useIdeaCreativeProcessStore } from '@/store/ideaCreativeProcessStore'
+import { useSceneIdeaStore } from '@/store/sceneIdeaStore'
+import LoadingScreen from '@/components/LoadingScreen'
+import ErrorScreen from '@/components/ErrorScreen'
+import { useSelection } from '@/utils/useSelection';
+
 
 const FormIdea = () => {
-  const {typeMedia} = useLocalSearchParams()
-  const {source} = useLocalSearchParams()
-  const {id_process} = useLocalSearchParams()
-  const {id_scene} = useLocalSearchParams()
-  
-  const database = useSQLiteContext()
-  const [loading, setLoading] = useState(true)
+  const {typeMedia, source, id_process, id_scene} = useLocalSearchParams()
+  const typeMediaStr = Array.isArray(typeMedia) ? typeMedia[0] : typeMedia ?? "";
+  const id_processNum = Array.isArray(id_process)
+  ? Number(id_process[0])
+  : Number(id_process ?? -1);
+  const id_sceneNum = Array.isArray(id_scene)
+  ? Number(id_scene[0])
+  : Number(id_scene ?? -1);
+  const db = useSQLiteContext()
   const [media, setMedia] = useState(null);
   const [data, setData] = useState("");
   const [dataError, setDataError] = useState("")
-  const [processes,setProcesses] = useState([])
-  const [scenes,setScenes] = useState([])
   const [height, setHeight] = useState(100);
-  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedIds, handleSelect] = useSelection<number>([]);
   const isScreenFocused = useIsFocused();
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        if(source==='general'){
-          const processesResult = await database.getAllAsync("SELECT * FROM creativeprocesses;"); 
-          setProcesses(processesResult)
-        }
-        else if(source==='process'){
-          const scenesResult = await database.getAllAsync(
-            "SELECT * FROM scenes WHERE creativeprocess_id = ?;",
-            [id_process]); 
-          setScenes(scenesResult)
-          console.log(scenes)
-        }
-        else{console.log("nothing in theory")}
-      } catch (error) {
-        
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadData()
-  },[])
-
-  const handleSelect = (id) => {
-    setSelectedIds((prevSelectedIds) => {
-      if (prevSelectedIds.includes(id)) {
-        return prevSelectedIds.filter((selectedId) => selectedId !== id);
-      } else {
-        return [...prevSelectedIds, id];
-      }
-    });
-  };
-  
+  const { creativeProcesses } = useCreativeProcessStore()
+  const { scenes } = useSceneStore()
+  const { createIdea } = useIdeaStore()
+  const { putIdeaInCreativeProcess, getCreativeProcessesOfIdea } = useIdeaCreativeProcessStore()
+  const { putIdeaInScene } = useSceneIdeaStore()
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   const handleSave = async () => {
     if(data.trim() === ""){
@@ -70,92 +50,41 @@ const FormIdea = () => {
     }
     else {
       setDataError("")
-      let ideaId = null
+      setLoading(true)
       try {
-      let finalData = data;
-      let result = null
-      
-      if(typeMedia === 'audio' && data) {
-        try {
-          const audioDir = `${FileSystem.documentDirectory}audio/`;
-          await FileSystem.makeDirectoryAsync(audioDir, { intermediates: true });
-          const timestamp = new Date().getTime();
-          
-          const fileExtension = data.startsWith('content://') ? 'mp3' : data.includes('.') ? data.split('.').pop() : 'wav';
-          const filename = `audio_${timestamp}.${fileExtension}`;
-          const newPath = `${audioDir}${filename}`;
-  
-          if (data.startsWith('content://')) {
-            await FileSystem.copyAsync({ from: data, to: newPath });
-          } else {
-            await FileSystem.moveAsync({ from: data, to: newPath });
+        if(typeMedia === 'audio'){ setData(await getPathAudioFile(data)) }
+        const idea: IdeaParams = { typeContent: typeMediaStr, data: data }
+        const idea_id = await createIdea(db, idea)
+        if(id_process && idea_id){
+          await putIdeaInCreativeProcess(db, idea_id, Number(id_process))
+          switch (source) {
+            case 'process':
+              selectedIds.map(async scene_id => await putIdeaInScene(db,idea_id,id_processNum,scene_id))
+              break;
+            case 'scene':
+              await putIdeaInScene(db, idea_id, id_processNum, id_sceneNum)
+              break;
           }
-          
-          // Use newPath directly instead of relying on state update
-          finalData = newPath;
-          setData(newPath); // Update state for UI if needed
-
-          result = await database.runAsync(
-            "INSERT INTO ideas (typeContent, data) VALUES (?, ?);",
-            [typeMedia, finalData]
-          );
-  
-        } catch (error) {
-          console.error('Error saving audio file:', error);
-          throw error;
-        }
-      }
-    
-      else {result = await database.runAsync(
-          "INSERT INTO ideas (typeContent, data) VALUES (?, ?);",
-          [typeMedia, data]
-      );}
-      ideaId = result.lastInsertRowId;
-      if(id_process){
-        await database.runAsync("INSERT INTO idea_creativeprocess (idea_id, creativeprocess_id) VALUES (?, ?);",
-          [ideaId, id_process]);
-        if(selectedIds.length > 0){
-          if(source ==='process'){
-            await Promise.all(selectedIds.map(id_scene =>
-              database.runAsync(
-                `INSERT INTO scene_idea (idea_id, creativeprocess_id, scene_id) VALUES (?, ?, ?);`,
-                [ideaId, id_process, id_scene]
-              )
-            ));
+        } else {
+          if(idea_id){
+            selectedIds.map(async creativeprocess_id => await putIdeaInCreativeProcess(db,idea_id,creativeprocess_id))
           }
         }
+        setData("")
+        router.back();
+      } catch (error:any) {
+        setError(error.message)
+      } finally {
+        setLoading(false)
       }
-      if(source==='scene'){
-        
-        database.runAsync(
-          `INSERT INTO scene_idea (idea_id, creativeprocess_id, scene_id) VALUES (?, ?, ?);`,
-          [ideaId, id_process, id_scene]
-        )
-        await database.runAsync("INSERT INTO idea_creativeprocess (idea_id, creativeprocess_id) VALUES (?, ?);",
-          [ideaId, id_process]);
-      }
-      if(source==='general' && selectedIds.length > 0){
-        console.log("flag")
-        await Promise.all(selectedIds.map(process =>
-          database.runAsync(
-            `INSERT INTO idea_creativeprocess (idea_id, creativeprocess_id) VALUES (?, ?);`,
-            [ideaId, process]
-          )
-        ));
-      }  
-
-    } catch (error) {
-      console.error(error);
-    }
-    setData("")
-    router.push(`/idea/${ideaId}`);
     }
   }
 
-  if(loading){ return <LoadingScreen/> }
+  if(loading){return <LoadingScreen/>}
+  if(error) {return <ErrorScreen error={error}/> }
 
   return (
-    <View className='p-10'>
+    <View className='screen'>
       <Stack.Screen options={{ headerShown: false }} />
      <ScrollView>
       <View className='gap-5'>
@@ -166,7 +95,7 @@ const FormIdea = () => {
                 multiline={true}
                 value = {data}
                 className='input-text-box' 
-                onChangeText={(text) => setData(text)}
+                onChangeText={setData}
                 onContentSizeChange={(e) => {
                     setHeight(e.nativeEvent.contentSize.height);
                 }}
@@ -179,7 +108,7 @@ const FormIdea = () => {
         <Text className='screen-title'>Añadiendo un archivo de audio</Text>
         <View className="p-10">
           <AudioPickerRecorder 
-            onAudioSelected={(uri) => setData(uri)}
+            onAudioSelected={setData}
             isFocused={isScreenFocused}
           />
         </View>
@@ -194,7 +123,7 @@ const FormIdea = () => {
           {source==='general' && <View>
             <Text className='text-xl mb-2'> Elige el proceso o procesos al que quieres asignar la idea (opcional)</Text>
             <FlatList
-                data={processes}
+                data={creativeProcesses}
                 horizontal={true}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({item}) => (

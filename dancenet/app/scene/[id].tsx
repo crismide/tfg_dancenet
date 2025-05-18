@@ -13,8 +13,9 @@ import AddIdealButtonModal from '@/components/AddIdealButtonModal';
 import EditDeletebuttons from '@/components/EditDeletebuttons';
 import Timeline from '@/components/TimeLine';
 import PreviewObject from '@/components/PreviewObject';
+import { useSceneStore } from '@/store/scenesStore';
 
-const Scene = () => {
+const SceneDetails = () => {
     const { id } = useLocalSearchParams();
     const { creativeProcessId } = useLocalSearchParams();
     const database = useSQLiteContext();
@@ -24,6 +25,7 @@ const Scene = () => {
     const [activePeople, setActivePeople] = useState(false)
     const [activeObjects, setActiveObjects] = useState(false)
     const [modalVisible, setModalVisible] = useState(false);
+    const { deleteScene } = useSceneStore()
 
     const { scene, people, ideas, loading, spaces, moves, objects } = useScene(database, id);
 
@@ -38,7 +40,7 @@ const Scene = () => {
       if (!scene) {
         // Handle the case where no process is found
         return (
-         <View className='p-10 gap-8'>
+         <View className='screen'>
             <Stack.Screen options={{ headerShown: false }} />
             <Text className='screen-title'>No se ha encontrado ninguna escena</Text>
           </View>
@@ -52,7 +54,7 @@ const Scene = () => {
           <BackButton/>
           <View className='flex flex-row justify-between items-center'>
             <Text className='screen-title'>{scene.name}</Text>
-            <EditDeletebuttons typeObject={"scene"} table={"scenes"} id={id}/>
+            <EditDeletebuttons typeObject={"scene"} deleteFunction={deleteScene} id={Number(id)}/>
           </View>
           <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
           <View className='gap-8'>
@@ -200,4 +202,4 @@ const Scene = () => {
     )
 }
 
-export default Scene
+export default SceneDetails

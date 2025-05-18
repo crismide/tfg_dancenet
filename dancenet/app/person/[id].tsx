@@ -9,6 +9,7 @@ import Divider from '@/components/Divider';
 import PreviewScene from '@/components/PreviewScene';
 import BackButton from '@/components/BackButton';
 import EditDeletebuttons from '@/components/EditDeletebuttons';
+import { usePersonStore } from '@/store/personStore';
 
 const Person = () => {
     const { id, source, id_process } = useLocalSearchParams();
@@ -17,6 +18,7 @@ const Person = () => {
     const [creativeProcesses, setCreativeProcesses] = useState(null)
     const [scenes, setScenes] = useState(null)
     const [loading, setLoading] = useState(true);
+    const { deletePerson } = usePersonStore()
 
     useEffect(() => {
     const loadData = async () => {
@@ -64,7 +66,7 @@ const Person = () => {
             <Stack.Screen options={{ headerShown: false }} />
             <View className='flex flex-row justify-between items-center'>
                 <BackButton/>
-                <EditDeletebuttons typeObject={"person"} table={"people"} id={id}/>
+                <EditDeletebuttons typeObject={"person"} deleteFunction={ deletePerson } id={Number(id)}/>
         </View>
             
             <View style={{alignItems: "center"}} className='gap-5'>
@@ -73,7 +75,6 @@ const Person = () => {
                     style={{width: 100, height: 100,borderRadius: 50}}/>
                 <Text className='screen-title'>{person.name}</Text>
             </View>
-            <Text>id process is {id_process}</Text>
             {source === 'people' ? 
                 <View className='mb-10'>
                     <Text className='text-2xl mb-3 font-bold'>Procesos creativos en los que participa</Text>

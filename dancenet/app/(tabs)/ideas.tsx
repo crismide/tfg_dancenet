@@ -3,34 +3,13 @@ import React, { useEffect, useState } from 'react'
 import { useSQLiteContext } from 'expo-sqlite'
 import LoadingScreen from '@/components/LoadingScreen'
 import PreviewIdea from '@/components/PreviewIdea'
-import ButtonMainAddIdea from '@/components/AddIdealButtonModal'
 import AddIdealButtonModal from '@/components/AddIdealButtonModal'
-import { useIsFocused } from '@react-navigation/native'
+import { useIdeaStore } from '@/store/ideaStore'
+import ErrorScreen from '@/components/ErrorScreen'
 
 
 const Ideas = () => {
-  const [ideas, setIdeas] = useState([])
-  const [loading, setLoading] = useState(true);
-  const database = useSQLiteContext()
-  const isFocused = useIsFocused()
-
-  useEffect(() => {
-    
-    const loadData = async () => {
-      try {
-        const result = await database.getAllAsync("SELECT * FROM ideas;")
-        if(result.length > 0){
-          setIdeas(result)
-        }
-      } catch (error) {
-        console.error("Error fetching ideas:", error);
-      } finally {
-        setLoading(false); // Set loading to false after the data is fetched
-      }}
-      if (isFocused) { loadData() }
-  },[ideas,database,isFocused])
-
-  if(loading){ return <LoadingScreen/> }
+  const { ideas } = useIdeaStore()
 
   return (
     <View className='p-10 gap-8'>

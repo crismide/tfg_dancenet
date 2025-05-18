@@ -1,43 +1,42 @@
 import { View, Text, Pressable, Alert } from 'react-native'
 import React from 'react'
 import { FontAwesome5 } from '@expo/vector-icons'
-import { router } from 'expo-router'
+import { router, Href } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
+import { EditDeleteButtonsProps } from '@/interfaces/interfaceComponents'
 
-const EditDeletebuttons = ({typeObject,table,id,editActive=true}) => {
-    const database = useSQLiteContext();
+const EditDeletebuttons = ({typeObject,deleteFunction,id,editActive=true}:EditDeleteButtonsProps) => {
+    const db = useSQLiteContext();
     
     const handleDelete = async () => {
     Alert.alert(
-        "Borrando", // Title of the alert
-        "Estás segurx de que quieres borrar?", // Message in the alert
+        "Borrando",
+        "Estás segurx de que quieres borrar?", 
         [
         {
-            text: "Cancelar", // Button to cancel the action
-            style: "cancel", // Style for the cancel button
+            text: "Cancelar",
+            style: "cancel",
         },
         {
-            text: "Aceptar", // Button to confirm the deletion
+            text: "Aceptar",
             onPress: async () => {
             try {
-                // Execute the delete query using runAsync
-                const result = await database.runAsync(`DELETE FROM ${table} WHERE id = ?;`, [id]);
-    
-                // Navigate back to the home screen
+                await deleteFunction(db,id)
                 router.back()
             } catch (error) {
-                console.error("Failed to delete:", error);
+                Alert.alert("Ha sucedido algún error al borrar")
             }
             },
         },
         ],
-        { cancelable: true } // Allow the user to dismiss the alert by tapping outside
+        { cancelable: true }
     );
     }
 
     return (
         <View className='flex flex-row gap-5'>
-            {editActive && <Pressable onPress={() => router.push(`/${typeObject}/edit/${id}`)}>
+            {editActive && 
+            <Pressable onPress={() => router.navigate(`/${typeObject}/edit/${String(id)}` as Href)}>
                 <FontAwesome5 name="edit" size={20} color="grey"/>
             </Pressable>}
             <Pressable onPress={handleDelete}>

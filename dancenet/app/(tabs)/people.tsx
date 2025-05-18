@@ -4,41 +4,13 @@ import { useSQLiteContext } from 'expo-sqlite'
 import PreviewPerson from '@/components/PreviewPerson'
 import { Link, router, Stack } from 'expo-router'
 import { useIsFocused } from '@react-navigation/native'
+import { usePersonStore } from '@/store/personStore'
 
 const people = () => {
-  const [people, setPeople] = useState([])
-  const [loading, setLoading] = useState(true);
-  const database = useSQLiteContext()
-  const isFocused = useIsFocused()
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const result = await database.getAllAsync("SELECT * FROM people;")
-        if(result.length > 0){
-          setPeople(result)
-        }
-      } catch (error) {
-        console.error("Error fetching people:", error);
-      } finally {
-        setLoading(false); // Set loading to false after the data is fetched
-      }}
-      if (isFocused) { loadData() }
-  },[people,database,isFocused])
-
-  if (loading) {
-      // Show a loading indicator while the data is being fetched
-      return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Stack.Screen options={{ headerShown: false }} />
-          <ActivityIndicator size="large" color="#C286F1" />
-        </View>
-      );
-    }
-  
+  const { people } = usePersonStore()
 
   return (
-    <View className='p-10 gap-8'>
+    <View className='screen'>
       <View className='flex flex-row justify-between items-center'>
         <Text className='screen-title'>Participantes registrados</Text>
         <Link href={{pathname: "/(forms)/FormPerson",params: { id_process: "", id_scene:"" }}}>

@@ -1,87 +1,81 @@
-import { View, Text, ScrollView, TextInput, Button, TouchableHighlight, FlatList } from 'react-native'
+import { View, Text, ScrollView, TextInput, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Link, router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router'
+import {  router, Stack, useLocalSearchParams } from 'expo-router'
 import FormButtons from '@/components/FormButtons'
 import { useSQLiteContext } from 'expo-sqlite'
 import LoadingScreen from '@/components/LoadingScreen'
 import TimePicker from '@/components/TimePicker'
 import { Picker } from '@react-native-picker/picker'
-import PreviewPerson from '@/components/PreviewPerson'
 import SelectPerson from '@/components/SelectPerson'
+import { useScenePersonStore } from '@/store/scenePeopleStore'
+import { PersonInScene } from '@/interfaces/interfaceScenePeople'
+import { Person } from '@/interfaces/interfacePerson'
+import { usePersonStore } from '@/store/personStore'
+import { MovementParams } from '@/interfaces/interfaceMovement'
+import { useMovementStore } from '@/store/movementStore'
+import ErrorScreen from '@/components/ErrorScreen'
+import { usePersonMovementStore } from '@/store/personMovementStore'
+import { useSelection } from '@/utils/useSelection'
 
 
 const FormMovement = () => {
     const {id_process} = useLocalSearchParams()
     const {id_scene} = useLocalSearchParams()
-    const database = useSQLiteContext()
+    const db = useSQLiteContext()
     const [loading, setLoading] = useState(true)
     
     const [name, setName] = useState("")
+    const [ error, setError ] = useState(null)
+    const [ errorMessage, setErrorMessage ] = useState("")
     const [description, setDecription] = useState("")
     const [start, setStart] = useState({ minutes: 0, seconds: 0 })
     const [end, setEnd] = useState({ minutes: 0, seconds: 0 })
     const [level, setLevel] = useState("")
-    const [peopleList, setPeopleList] = useState([]);
-    const [selectedPeople, setSelectedPeople] = useState<number[]>([]);
-    const [errorMessage, setErrorMessage] = useState("")
+    const [peopleList, setPeopleList] = useState<Person[]>([]);
     const [height, setHeight] = useState(100);
+    const { getPeopleOfScene } = useScenePersonStore()
+    const { getPersonById } = usePersonStore()
+    const { createMovement } = useMovementStore()
+    const { putPersonWithMovement } = usePersonMovementStore()
+    const [selectedPeople, handleSelectPerson] = useSelection<number>([]);
 
     useEffect(() => {
-        const loadPeople = async () => {
-            try {
-                const results = await database.getAllAsync(
-                    `SELECT people.* 
-                     FROM people
-                     JOIN scene_people ON people.id = scene_people.person_id
-                     WHERE scene_people.scene_id = ?;`,
-                    [id_scene]
-                );
-                setPeopleList(results);
-            } catch (error) {
-                console.error("Error loading people:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        
-        loadPeople();
+        try {
+            const pairsPeopleOfScene:PersonInScene[] = getPeopleOfScene(Number(id_scene))
+            const peopleInScene:Person[] = pairsPeopleOfScene.map(pair => getPersonById(pair.person_id)).filter((person): person is Person => person !== null);
+            setPeopleList(peopleInScene);
+        } catch (error:any) {
+            setError(error.message)
+        } finally {
+            setLoading(false);
+        }
     }, [id_scene]);
 
     const saveMovement = async () => {
         if(!description || !name || !level){
             setErrorMessage("Es necesario especificar una descripción, un nombre y un nivel del proceso creativo")
-        }else {
+        } else {
+            setLoading(true)
             setErrorMessage("")
             try {
-            const startSeconds = (start.minutes * 60) + start.seconds;
-            const endSeconds = (end.minutes * 60) + end.seconds;
-    
-            const result = await database.runAsync(
-                `INSERT INTO movements 
-                 (name, description, start_time, end_time, level, creativeprocess_id,scene_id) 
-                 VALUES (?, ?, ?, ?, ?, ?,?)`,
-                [name, description, startSeconds, endSeconds, level, id_process,id_scene]
-            );
-            
-            const movementId = result.lastInsertRowId;
-    
-            for (const personId of selectedPeople) {
-                await database.runAsync(
-                    `INSERT INTO person_movement 
-                     (person_id, movement_id, creativeprocess_id) 
-                     VALUES (?, ?, ?)`,
-                    [personId, movementId, id_process]
-                );
-            }
-            router.back();
-        } catch (error) {
-            console.error("Error saving movement:", error);
-            alert("Ocurrió un error al guardar la pauta");
-        }
+                const startSeconds = (start.minutes * 60) + start.seconds;
+                const endSeconds = (end.minutes * 60) + end.seconds;
+                
+                const movement:MovementParams = {
+                    description, name, level, start_time: startSeconds, end_time: endSeconds, scene_id:Number(id_scene), creativeprocess_id:Number(id_process)
+                }
+                const id_movement = await createMovement(db, movement)
+                if(id_movement){
+                    selectedPeople.map(async person_id => await putPersonWithMovement(db, person_id, id_movement, Number(id_process)))
+                }
+                router.back();
+            } catch (error:any) { setError(error.message)
+            } finally { setLoading(false) }
         }
     };
 
     if(loading){return <LoadingScreen/>}
+    if(error) {return <ErrorScreen error={error}/> }
 
     return (
         <View className='p-10'>
@@ -169,13 +163,7 @@ const FormMovement = () => {
                                     img={item.img}
                                     id={item.id}
                                     isSelected={selectedPeople.includes(item.id)}
-                                    onPress={() => {
-                                        setSelectedPeople(prev => 
-                                            prev.includes(item.id) 
-                                                ? prev.filter(id => id !== item.id)
-                                                : [...prev, item.id]
-                                        )
-                                    }}
+                                    onPress={() => handleSelectPerson(item.id)}
                                 />
                                 
                             )}

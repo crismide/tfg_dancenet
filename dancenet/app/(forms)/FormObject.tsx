@@ -7,51 +7,56 @@ import FormButtons from '@/components/FormButtons'
 import ImagePickerComponent from '@/components/GalleryPicker'
 import SelectPerson from '@/components/SelectPerson'
 import SelectMove from '@/components/SelectMove'
+import { useMovementStore } from '@/store/movementStore'
+import { Movement } from '@/interfaces/interfaceMovement'
+import { useScenePersonStore } from '@/store/scenePeopleStore'
+import { PersonInScene } from '@/interfaces/interfaceScenePeople'
+import { Person } from '@/interfaces/interfacePerson'
+import { usePersonStore } from '@/store/personStore'
+import ErrorScreen from '@/components/ErrorScreen'
+import { useObjectStore } from '@/store/objectStore'
+import { ObjectParams } from '@/interfaces/interfaceObject'
+import { useMovementObjectsStore } from '@/store/movementObjectStore'
+import { usePeopleObjectUserStore } from '@/store/peopleObjetUserStore'
+import { usePeopleObjectResponsibleStore } from '@/store/peopleObjectResponsibleStore'
+import { useSelection } from '@/utils/useSelection'
 
 const FormObject = () => {
-    const [] = useState(true)
     const {id_scene, id_process} = useLocalSearchParams()
-    const database = useSQLiteContext()
+    const db = useSQLiteContext()
     const [loading, setLoading] = useState(true)
 
     const [image, setImage] = useState(null);
     const [base64Image, setBase64Image] = useState("");
-    const [movementList, setMovementList] = useState([])
-    const [selectedMovement, setSelectedMovement] = useState<number[]>([])
-    const [peopleList, setPeopleList] = useState([])
-    const [selectedPeople, setSelectedPeople] = useState<number[]>([])
-    const [peopleResList, setPeopleResList] = useState([])
-    const [selectedPeopleRes, setSelectedPeopleRes] = useState<number[]>([])
+    const [movementList, setMovementList] = useState<Movement[]>([])
+    const [selectedMovement, handleSelectMovement] = useSelection<number>([])
+    const [selectedPeople, handleSelectPeople] = useSelection<number>([])
+    const [selectedPeopleRes, handleSelectPeopleRes] = useSelection<number>([])
+    const [peopleList, setPeopleList] = useState<Person[]>([])
     const [errorMessage, setErrorMessage] = useState("")
+    const { getMovementsOfScene } = useMovementStore()
+    const { getPeopleOfScene } = useScenePersonStore()
+    const { getPersonById } = usePersonStore()
+    const [ error, setError ] = useState(null)
+    const { createObject } = useObjectStore()
+    const { putObjectOfMovement } = useMovementObjectsStore()
+    const { putObjectOfPerson } = usePeopleObjectUserStore()
+    const { putObjectOfResponsiblePerson } = usePeopleObjectResponsibleStore()
 
     useEffect(() => {
-        const loadPeople = async () => {
-            try {
-                const resultsMovements = await database.getAllAsync(
-                    `SELECT movements.* 
-                        FROM movements
-                        WHERE scene_id = ?;`,
-                    [id_scene]
-                )
-                setMovementList(resultsMovements)
-
-                const resultsPeople = await database.getAllAsync(
-                    `SELECT people.* 
-                        FROM people
-                        JOIN scene_people ON people.id = scene_people.person_id
-                        WHERE scene_people.scene_id = ?;`,
-                    [id_scene]
-                );
-                setPeopleList(resultsPeople);
-                setPeopleResList(resultsPeople);
-            } catch (error) {
-                console.error("Error loading people:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadPeople();
-        console.log("id_process in useEffect: ",id_process)
+        try {
+            // MOVEMENTS OF THE SCENE
+            const movementsOfScene:Movement[] = getMovementsOfScene(Number(id_scene))
+            setMovementList(movementsOfScene)
+            // PEOPLE OF SCENE
+            const pairsPeopleOfScene:PersonInScene[] = getPeopleOfScene(Number(id_scene))
+            const peopleInScene:Person[] = pairsPeopleOfScene.map(pair => getPersonById(pair.person_id)).filter((person): person is Person => person !== null);
+            setPeopleList(peopleInScene);
+        } catch (error:any) {
+            setError(error.message)
+        } finally {
+            setLoading(false);
+        }
     }, [id_scene]);
 
    
@@ -61,54 +66,28 @@ const saveObject = async () => {
         }
     else {
         try {
-
-        // Validate required fields
-        
-
-        // Insert new object
-        const result = await database.runAsync(
-            `INSERT INTO objects (img, scene_id, creativeprocess_id) VALUES (?, ?, ?)`,
-            [base64Image, id_scene, id_process]
-        );
-
-        // Get the inserted object's id
-        // For expo-sqlite, result.lastInsertRowId gives the new id
-        const objectId = result.lastInsertRowId;
-
-        // Insert into movement_object for each selected movement
-        for (const movementId of selectedMovement) {
-            await database.runAsync(
-                `INSERT INTO movement_object (movement_id, object_id) VALUES (?, ?)`,
-                [movementId, objectId]
-            );
-        }
-
-        // Insert into people_object_user for each selected user
-        for (const personId of selectedPeople) {
-            await database.runAsync(
-                `INSERT INTO people_object_user (person_id, object_id) VALUES (?, ?)`,
-                [personId, objectId]
-            );
-        }
-
-        // Insert into people_object_responsible for each selected responsible person
-        for (const personId of selectedPeopleRes) {
-            await database.runAsync(
-                `INSERT INTO people_object_responsible (person_id, object_id) VALUES (?, ?)`,
-                [personId, objectId]
-            );
-        }
-
-
-    } catch (error) {
-        console.error("Error saving object:", error);
-    } finally{ router.back() }
+            setLoading(true)
+            const object:ObjectParams = {img: base64Image, scene_id: Number(id_scene), creativeprocess_id: Number(id_process)}
+            const id_object = await createObject(db, object)
+            if(id_object){
+                // INSERT THE OBJECTS IN MOVEMENTS
+                selectedMovement.map(async id_movement => await putObjectOfMovement(db, id_movement,id_object))
+                // INSERT OBJECTS IN PEOPLE
+                selectedPeople.map(async id_person => await putObjectOfPerson(db, id_person, id_object))
+                // INSERT OBJECTS IN RESPONSIBLE PEOPLE
+                selectedPeopleRes.map(async id_person_res => await putObjectOfResponsiblePerson(db, id_person_res, id_object))
+            }
+            router.back()
+        } catch (error:any) {
+            setError(error.message)
+        } finally{ setLoading(false) }
     }
 }
 
     
 
     if(loading){return <LoadingScreen/>}
+    if(error) {return <ErrorScreen error={error}/> }
 
     return (
         <View className='p-10 gap-6'>
@@ -129,13 +108,7 @@ const saveObject = async () => {
                             name={item.name}
                             level={item.level}
                             isSelected={selectedMovement.includes(item.id)}
-                            onPress={() => {
-                                setSelectedMovement(prev => 
-                                    prev.includes(item.id) 
-                                        ? prev.filter(id => id !== item.id)
-                                        : [...prev, item.id]
-                                )
-                            }}
+                            onPress={() => handleSelectMovement(item.id)}
                         />
                         
                     )}
@@ -153,13 +126,7 @@ const saveObject = async () => {
                                 img={item.img}
                                 id={item.id}
                                 isSelected={selectedPeople.includes(item.id)}
-                                onPress={() => {
-                                    setSelectedPeople(prev => 
-                                        prev.includes(item.id) 
-                                            ? prev.filter(id => id !== item.id)
-                                            : [...prev, item.id]
-                                    )
-                                }}
+                                onPress={() => handleSelectPeople(item.id)}
                             />
                             
                         )}
@@ -179,13 +146,7 @@ const saveObject = async () => {
                             img={item.img}
                             id={item.id}
                             isSelected={selectedPeopleRes.includes(item.id)}
-                            onPress={() => {
-                                setSelectedPeopleRes(prev => 
-                                    prev.includes(item.id) 
-                                        ? prev.filter(id => id !== item.id)
-                                        : [...prev, item.id]
-                                )
-                            }}
+                            onPress={() => handleSelectPeopleRes(item.id)}
                         />
                         
                     )}

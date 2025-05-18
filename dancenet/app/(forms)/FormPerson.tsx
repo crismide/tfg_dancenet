@@ -7,6 +7,15 @@ import SelectScene from '@/components/SelectScene';
 import FormButtons from '@/components/FormButtons';
 import GalleryPicker from '@/components/GalleryPicker';
 import SelectProcess from '@/components/SelectProcess';
+import { useCreativeProcessStore } from '@/store/creativeProcessStore';
+import { useSceneStore } from '@/store/scenesStore';
+import { Scene } from '@/interfaces/interfaceScene';
+import ErrorScreen from '@/components/ErrorScreen';
+import { PersonParams } from '@/interfaces/interfacePerson';
+import { usePersonStore } from '@/store/personStore';
+import { usePersonCreativeProcessStore } from '@/store/personCreativeProcessStore';
+import { useScenePersonStore } from '@/store/scenePeopleStore';
+import { useSelection } from '@/utils/useSelection';
 
 const FormPerson = () => {
     // State declarations
@@ -18,36 +27,27 @@ const FormPerson = () => {
     const [base64Image, setBase64Image] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(true);
-    const [scenes, setScenes] = useState([]);
-    const [selectedIds, setSelectedIds] = useState([]);
+    const [scenes, setScenes] = useState<Scene[]>([]);
     const [height, setHeight] = useState(100);
-    const [creativeProcesses, setCreativeProcesses] = useState([]);
-    const [selectedProcessIds, setSelectedProcessIds] = useState([]);
-    const { id_process = "", id_scene = "" } = useLocalSearchParams();
-    const database = useSQLiteContext();
+    const { creativeProcesses } = useCreativeProcessStore()
+    const { id_process , id_scene } = useLocalSearchParams();
+    const db = useSQLiteContext();
+    const { getScenesOfCreativeProcess } = useSceneStore()
+    const [ error, setError ] = useState(null)
+    const { createPerson } = usePersonStore()
+    const { putPersonInCreativeProcess } = usePersonCreativeProcessStore()
+    const { putPersonInScene } = useScenePersonStore()
+    const [selectedSceneIds, handleSceneSelect] = useSelection<number>();
+    const [selectedProcessIds, handleProcessSelect] = useSelection<number>();
 
-    // Load data based on params
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                if (!id_process && !id_scene) {
-                    const processes = await database.getAllAsync("SELECT * FROM creativeprocesses;");
-                    setCreativeProcesses(processes);
-                } else if (id_process && !id_scene) {
-                    const scenesResult = await database.getAllAsync(
-                        "SELECT * FROM scenes WHERE creativeprocess_id = ?;",
-                        [id_process]
-                    );
-                    setScenes(scenesResult);
-                }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            } finally {
-                setLoading(false);
+        try {
+            if (id_process && !id_scene) {
+                setScenes(getScenesOfCreativeProcess(Number(id_process)));
             }
-        };
+        } catch (error:any) { setError(error.message)
+        } finally { setLoading(false) }
         
-        loadData();
     }, []);
 
     // Handle form submission
@@ -58,80 +58,49 @@ const FormPerson = () => {
 
         else {
             setErrorMessage("")
+            setLoading(true)
             try {
-            const result = await database.runAsync(
-                "INSERT INTO people (name, img, notes) VALUES (?, ?, ?);",
-                [formData.name, base64Image, formData.notes]
-            );
-            const personId = result.lastInsertRowId;
+                const person:PersonParams = { name: formData.name, img: base64Image, notes:formData.notes }
+                const id_person = await createPerson(db, person)
 
-            // Handle process associations
-            if (selectedProcessIds.length > 0) {
-                await Promise.all(selectedProcessIds.map(processId =>
-                    database.runAsync(
-                        `INSERT INTO person_creativeprocess 
-                        (person_id, creativeprocess_id) VALUES (?, ?);`,
-                        [personId, processId]
-                    )
-                ));
-            }
-
-            // Handle scene associations
-            if (id_process) {
-                await database.runAsync(
-                    "INSERT INTO person_creativeprocess (person_id, creativeprocess_id) VALUES (?, ?);",
-                    [personId, id_process]
-                );
-
-                if (scenes.length > 0) {
-                    await Promise.all(selectedIds.map(sceneId =>
-                        database.runAsync(
-                            `INSERT INTO scene_people (person_id, creativeprocess_id, scene_id) VALUES (?, ?, ?);`,
-                            [personId, id_process, sceneId]
-                        )
+                // Handle process associations
+                if (selectedProcessIds.length > 0 && id_person) {
+                    (selectedProcessIds.map(async processId => await putPersonInCreativeProcess(db, Number(id_person), processId)
                     ));
                 }
 
-                if (id_scene) {
-                    await database.runAsync(
-                        "INSERT INTO scene_people (person_id, scene_id, creativeprocess_id) VALUES (?, ?, ?);",
-                        [personId, id_scene, id_process]
-                    );
+                // Handle scene associations
+                if (id_process && id_person) {
+                    await putPersonInCreativeProcess(db, Number(id_person), Number(id_process))
+
+                    if (scenes.length > 0) {
+                        selectedSceneIds.map(async sceneId => await putPersonInScene(db, Number(id_person), Number(id_process), sceneId))
+                    }
+                    if (id_scene) {
+                        await putPersonInScene(db, Number(id_person), Number(id_process), Number(id_scene))
+                    }
                 }
-            }
-
-            // Reset form and navigate back
-            setFormData({
-                name: "",
-                notes: "",
-            });
-            setImage(null)
-            setBase64Image("")
-            router.push(`/person/${personId}`);
-        } catch (error) {
-            Alert.alert("Ha ocurrido un error creando la persona");
-        }
+                setFormData({
+                    name: "",
+                    notes: "",
+                });
+                setImage(null)
+                setBase64Image("")
+                router.back();
+            } catch (error) {
+                Alert.alert("Ha ocurrido un error creando la persona");
+            } finally { setLoading(false) }
         }
     };
-
-    // Toggle selection helpers
-    const toggleSelection = (id, setter) => {
-        setter(prev => prev.includes(id) 
-            ? prev.filter(selectedId => selectedId !== id) 
-            : [...prev, id]
-        );
-    };
-
-    const handleProcessSelect = (id) => toggleSelection(id, setSelectedProcessIds);
-    const handleSceneSelect = (id) => toggleSelection(id, setSelectedIds);
 
     // Handle text input changes
-    const handleChange = (field, value) => {
+    const handleChange = (field: string, value: string) => {
         setFormData({ ...formData, [field]: value });
     };
 
     if (loading) return <LoadingScreen />;
-
+    if(error) {return <ErrorScreen error={error}/> }
+    
     return (
         <View className='p-10 gap-12'>
             <Stack.Screen options={{ headerShown: false }} />
@@ -186,7 +155,7 @@ const FormPerson = () => {
                                 <SelectScene
                                     name={item.name}
                                     id={item.id}
-                                    isSelected={selectedIds.includes(item.id)}
+                                    isSelected={selectedSceneIds.includes(item.id)}
                                     onPress={() => handleSceneSelect(item.id)}
                                 />
                             )}

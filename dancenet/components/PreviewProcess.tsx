@@ -1,9 +1,8 @@
 import { router } from 'expo-router';
 import { Text, Image, Pressable } from 'react-native';
+import {CreativeProcess} from "@/interfaces/interfaceCreativeProcess"
 
-type ProcessType = {name:string, img:string,id:number,}
-
-const PreviewProcess = ({ name, img,id }:ProcessType) => {
+const PreviewProcess = ({ name, img, id }:CreativeProcess) => {
   const handlePress = () => {
     router.push(`/creative-process/${id}`)
   }

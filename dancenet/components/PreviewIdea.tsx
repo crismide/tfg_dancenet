@@ -1,66 +1,74 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, Image, Pressable, Alert } from 'react-native';
-import { Audio, ResizeMode, Video } from 'expo-av';
-import { router } from 'expo-router';
+import { ResizeMode, Video } from 'expo-av';
+import { router, Href } from 'expo-router';
 import { useIsFocused } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
-import Slider from '@react-native-community/slider';
 import FontAwesome5 from '@expo/vector-icons/build/FontAwesome5';
 import AudioPlayer from './AudioPlayer';
+import {PreviewIdeaProps} from '@/interfaces/interfaceComponents' 
+import { useIdeaCreativeProcessStore } from '@/store/ideaCreativeProcessStore';
+import { useSceneIdeaStore } from '@/store/sceneIdeaStore';
 
-const PreviewIdea = ({ typeContent, data, id, source, id_process, id_scene }) => {
-  const database = useSQLiteContext();
+const PreviewIdea = ({ typeContent, data, id, source, id_process, id_scene }:PreviewIdeaProps) => {
+  const db = useSQLiteContext();
   const isScreenFocused = useIsFocused();
+  const { deleteIdeaFromCreativeProcess } = useIdeaCreativeProcessStore()
+  const { deleteIdeasFromScenesOfCreativeProcess, deleteIdeaFromScene } = useSceneIdeaStore()
   
   const handlePress = () => {
     router.push({ 
       pathname: `/idea/${id}`, 
       params: { source, id_process } 
-    });
+    } as Href);
   };
 
   const handleRemove = async () => {
-    const alertConfig = {
-      process: {
-        title: "Quitando idea del proceso creativo",
-        message: "¿Estás segurx de que quieres quitar esta idea del proceso creativo?",
-        query: `DELETE FROM idea_creativeprocess 
-                WHERE idea_id = ? AND creativeprocess_id = ?;`,
-        params: [id, id_process]
-      },
-      scene: {
-        title: "Quitando idea de la escena",
-        message: "¿Estás segurx de que quieres quitar esta idea de la escena?",
-        query: `DELETE FROM scene_idea 
-                WHERE idea_id = ? AND scene_id = ?;`,
-        params: [id, id_scene]
-      }
-    };
-
-    const config = alertConfig[source];
-    if (!config) return;
-
-    Alert.alert(
-      config.title,
-      config.message,
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Aceptar",
-          onPress: async () => {
-            try {
-              await database.runAsync(config.query, config.params);
-            } catch (error) {
-              console.error("Error al eliminar idea:", error);
-            }
+    switch (source) {
+      case "process":
+        Alert.alert("Eliminando idea de proceso creativo",
+          "Estás segurx de que quieres eliminar esta idea del proceso creativo (la idea aún seguirá existiendo en la sección Ideas)",
+          [{
+            text: "Cancelar",
+            style: "cancel"
           },
-        },
-      ],
-      { cancelable: true }
-    );
+        {
+          text: "Confirmar",
+          onPress: async() => {
+            try {
+              const id_process_idea:number = id_process ? id_process : -1
+              await deleteIdeaFromCreativeProcess(db,id,id_process_idea)
+              await deleteIdeasFromScenesOfCreativeProcess(db,id,id_process_idea)
+            } catch (error) {
+              Alert.alert("Ha habido algún problema eliminando esta idea del proceso creativo")
+            }
+          }
+        }],{ cancelable: true }
+        )
+        break;
+      
+      case "scene":
+        Alert.alert("Eliminando idea de escena",
+          "Estás segurx de que quieres eliminar esta idea de la escena (la idea aún seguirá existiendo en el proceso creativo)",
+          [{
+            text: "Cancelar",
+            style: "cancel"
+          },
+        {
+          text: "Confirmar",
+          onPress: async() => {
+            try {
+              const id_scene_idea:number = id_scene ? id_scene : -1
+              await deleteIdeaFromScene(db,id,id_scene_idea)
+            } catch (error) {
+              Alert.alert("Ha habido algún problema eliminando esta idea de la escena")
+            }
+          }
+        }],{ cancelable: true }
+        )
+      default:
+        break;
+    }
   };
 
   const renderRemoveButton = () => (
