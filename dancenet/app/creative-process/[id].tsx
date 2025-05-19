@@ -49,9 +49,6 @@ const CreativeProcessDetail = () => {
   const { getIdeasOfCreativeProcess } = useIdeaCreativeProcessStore()
   const { getIdeaById } = useIdeaStore()
  
-  // useEffect(() => {
-  
-  // },[id])
   useFocusEffect(
     React.useCallback(() => {
       let isActive = true;

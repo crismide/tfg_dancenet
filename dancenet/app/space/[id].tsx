@@ -17,9 +17,7 @@ const SpaceDetails = () => {
 
     useEffect(() => {
         const space:Space | null = getSpaceById(Number(id))
-        if (space){
-            setBase64(space.img)
-        }
+        if (space){ setBase64(space.img) }
     },[id])
 
     if (loading) { return <LoadingScreen/> }

@@ -3,133 +3,105 @@ import React, { useEffect, useState } from 'react'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
 import LoadingScreen from '@/components/LoadingScreen'
-import useObjectInfo from '@/hooks/useObject'
 import FormButtons from '@/components/FormButtons'
 import GalleryPicker from '@/components/GalleryPicker'
 import SelectPerson from '@/components/SelectPerson'
 import SelectMove from '@/components/SelectMove'
-
-interface Person {
-  id: number
-  name: string
-  image: string | null
-}
+import { Person } from '@/interfaces/interfacePerson'
+import { Object } from '@/interfaces/interfaceObject' 
+import { Movement } from '@/interfaces/interfaceMovement'
+import { useObjectStore } from '@/store/objectStore'
+import { useScenePersonStore } from '@/store/scenePeopleStore'
+import { usePersonStore } from '@/store/personStore'
+import { ObjectOfPerson } from '@/interfaces/interfacePeopleObjectUser'
+import { PersonInScene } from '@/interfaces/interfaceScenePeople'
+import { usePeopleObjectUserStore } from '@/store/peopleObjetUserStore'
+import { useSelection } from '@/utils/useSelection'
+import { ObjectOfResponsiblePerson } from '@/interfaces/interfacePeopleObjectResponsible'
+import { usePeopleObjectResponsibleStore } from '@/store/peopleObjectResponsibleStore'
+import { useMovementStore } from '@/store/movementStore'
+import { useMovementObjectsStore } from '@/store/movementObjectStore'
+import { ObjectOfMovement } from '@/interfaces/interfaceMovementObjects'
+import ErrorScreen from '@/components/ErrorScreen'
 
 const EditObjectInfo = () => {
     const { id } = useLocalSearchParams()
-    const database = useSQLiteContext()
-    const { object, movements, people, peopleRes } = useObjectInfo(database, id)
-
+    const db = useSQLiteContext()
+    const [object , setObject] = useState<Object | null>()
+    const [movements, setMovements] = useState<Movement[]>([])
+    const [people, setPeople] = useState<Person[]>([])
     const [image, setImage] = useState("")  
     const [base64Image, setBase64Image] = useState("")
-    const [movementsList, setMovementsList] = useState<any[]>([])
-    const [selectedMovements, setSelectedMovements] = useState<number[]>([])
-    const [peopleList, setPeopleList] = useState<Person[]>([])
-    const [selectedPeople, setSelectedPeople] = useState<number[]>([])
-    const [selectedPeopleRes, setSelectedPeopleRes] = useState<number[]>([])
+    const [selectedMovements, handleSelectMovement] = useSelection<number>([])
+    const [selectedPeople, handleSelectPerson] = useSelection<number>([])
+    const [selectedPeopleRes, handleSelectPersonRes] = useSelection<number>([])
     const [loading, setLoading] = useState(true)
-    
+    const [error, setError] = useState(null)
+
+    const { getObjectById, updateObject } = useObjectStore()
+    const { getPeopleOfScene } = useScenePersonStore()
+    const { getPersonById } = usePersonStore()
+    const { getPeopleOfObject } = usePeopleObjectUserStore()
+    const { getResponsiblePeopleOfObject } = usePeopleObjectResponsibleStore()
+    const { getMovementsOfScene } = useMovementStore()
+    const { getMovementsOfObjects } = useMovementObjectsStore() 
+    const { updateMovementsForObject } = useMovementObjectsStore();
+    const { updatePeopleForObject } = usePeopleObjectUserStore()
+    const { updateResPeopleForObject } = usePeopleObjectResponsibleStore();
     
     useEffect(() => {
-        let isMounted = true;
-        const loadData = async () => {
-            if(object && isMounted){
-                try {
-                    setImage(object.img)
-                    setBase64Image(object.img)
+        try {
+            const ob = getObjectById(Number(id))
+            if(ob){
+                setObject(ob)
+                setImage(ob.img)
+                setBase64Image(ob.img)
 
-                    // Load scene people
-                    const scenePeople = await database.getAllAsync<Person>(
-                        `SELECT people.* 
-                         FROM people
-                         JOIN scene_people ON people.id = scene_people.person_id
-                         WHERE scene_people.scene_id = ?;`,
-                        [object.scene_id]
-                    )
-                    setPeopleList(scenePeople)
+                const pairsScenePeople:PersonInScene[] = getPeopleOfScene(ob.scene_id)
+                setPeople(pairsScenePeople.map(pair => getPersonById(Number(id))).filter((p): p is Person => p !== null))
 
-                    // Set initial selections from object relations
-                    setSelectedPeople(people.map(person => person.id))
-                    setSelectedPeopleRes(peopleRes.map(person => person.id))
+                const pairsPeopleObject:ObjectOfPerson[] = getPeopleOfObject(Number(id))
+                const initialSelectedPeople = pairsPeopleObject.map((pair:ObjectOfPerson) => pair.person_id)
+                initialSelectedPeople.forEach(id => handleSelectPerson(id))
+                
+                const pairsPeopleResObject:ObjectOfResponsiblePerson[] = getResponsiblePeopleOfObject(Number(id)) 
+                const initialSelectedResPeople = pairsPeopleResObject.map((pair:ObjectOfResponsiblePerson) => pair.person_id)
+                initialSelectedResPeople.forEach(id => handleSelectPersonRes(id))
 
-                    // Load scene movements
-                    const sceneMovements = await database.getAllAsync(
-                        `SELECT * FROM movements WHERE scene_id = ?;`,
-                        [object.scene_id]
-                    )
-                    setMovementsList(sceneMovements)
-                    setSelectedMovements(movements.map(movement => movement.id))
+                setMovements(getMovementsOfScene(ob.scene_id))
 
-                } catch (error) {
-                    console.error("Error loading data: ", error)
-                } finally {setLoading(false)}
+                const pairsMovementObjects:ObjectOfMovement[] = getMovementsOfObjects(Number(id))
+                const initialSelectedMovements = pairsMovementObjects.map((pair:ObjectOfMovement) => pair.movement_id)
+                initialSelectedMovements.forEach(id => handleSelectMovement(id))
+            }
+        } catch (error: any) {
+            setError(error)
+        } finally {
+            setLoading(false)
+        }
+        
+    }, [id])
+
+    const handleUpdateObject = async () => {
+        if(object){
+            try {
+                setLoading(true)
+                const ob:Object = { id: object.id, img: base64Image, scene_id: 0, creativeprocess_id: 0}
+                await updateObject(db, ob)
+                await updateMovementsForObject(db, object.id, selectedMovements);
+                await updatePeopleForObject(db, object.id, selectedPeople);
+                await updateResPeopleForObject(db, object.id, selectedPeopleRes);
+                router.back()
+            } catch (error: any) {
+                setError(error)
+            } finally {
+                setLoading(false)
             }
         }
-        loadData()
-        return () => {isMounted = false; };
-        
-    }, [object?.id])
-
-    const updateObject = async () => {
-        try {
-          await database.runAsync(
-            `UPDATE objects SET img = ? WHERE id = ?`,
-            [base64Image, id]
-          )
-      
-          await database.runAsync(
-            `DELETE FROM movement_object WHERE object_id = ?`,
-            [id]
-          )
-          await Promise.all(
-            selectedMovements.map(movementId => 
-              database.runAsync(
-                `INSERT INTO movement_object (movement_id, object_id)
-                 VALUES (?, ?)`,
-                [movementId, id]
-              )
-            )
-          )
-      
-          // Update user relations
-          await database.runAsync(
-            `DELETE FROM people_object_user WHERE object_id = ?`,
-            [id]
-          )
-          await Promise.all(
-            selectedPeople.map(userId => 
-              database.runAsync(
-                `INSERT INTO people_object_user (person_id, object_id)
-                 VALUES (?, ?)`,
-                [userId, id]
-              )
-            )
-          )
-      
-          // Update responsible relations
-          await database.runAsync(
-            `DELETE FROM people_object_responsible WHERE object_id = ?`,
-            [id]
-          )
-          await Promise.all(
-            selectedPeopleRes.map(responsibleId => 
-              database.runAsync(
-                `INSERT INTO people_object_responsible (person_id, object_id)
-                 VALUES (?, ?)`,
-                [responsibleId, id]
-              )
-            )
-          )
-          router.back()
-        } catch (error) {
-          console.error("Error updating object:", error)
-          Alert.alert('Error', 'No se pudo actualizar el objeto')
-        }
-      }
-
-    if(loading) {
-        return <LoadingScreen/>
     }
+
+    if(loading) { return <LoadingScreen/> }
+    if(error) {return <ErrorScreen error={error}/> }
 
     return (
         <View className='screen'>
@@ -145,21 +117,15 @@ const EditObjectInfo = () => {
 
                     <View className='gap-4'>
                         <Text className='text-xl'>¿Con qué pauta de movimiento está asociada?</Text>
-                        {movementsList.length < 1 ? <Text className='italic text-gray-500'>Aún no hay personas asociadas a esta escena</Text> : 
+                        {movements.length < 1 ? <Text className='italic text-gray-500'>Aún no hay personas asociadas a esta escena</Text> : 
                         <FlatList
-                        data={movementsList}
+                        data={movements}
                         renderItem={({ item }) => (
                                 <SelectMove
                                 name={item.name}
                                 level={item.level}
                                 isSelected={selectedMovements.includes(item.id)}
-                                onPress={() => {
-                                    setSelectedMovements(prev => 
-                                        prev.includes(item.id) 
-                                            ? prev.filter(id => id !== item.id)
-                                            : [...prev, item.id]
-                                    )
-                                }}
+                                onPress={() => handleSelectMovement(item.id)}
                             />
                             
                         )}
@@ -170,24 +136,18 @@ const EditObjectInfo = () => {
                     {/* People Selection */}
                     <View className='gap-4'>
                         <Text className='text-xl'>¿Quién interactúa con este objeto?</Text>
-                        {peopleList.length === 0 ? (
+                        {people.length === 0 ? (
                             <Text className='italic text-gray-500'>Aún no hay personas asociadas a esta escena</Text>
                         ) : (
                             <FlatList
-                                data={peopleList}
+                                data={people}
                                 renderItem={({ item }) => (
                                     <SelectPerson
                                         name={item.name}
-                                        img={item.image}
+                                        img={item.img}
                                         id={item.id}
                                         isSelected={selectedPeople.includes(item.id)}
-                                        onPress={() => {
-                                            setSelectedPeople(prev => 
-                                                prev.includes(item.id) 
-                                                    ? prev.filter(id => id !== item.id)
-                                                    : [...prev, item.id]
-                                            )
-                                        }}
+                                        onPress={() => handleSelectPerson(item.id) }
                                     />
                                 )}
                                 keyExtractor={item => item.id.toString()}
@@ -198,24 +158,18 @@ const EditObjectInfo = () => {
                     {/* Responsible Selection */}
                     <View className='gap-4'>
                         <Text className='text-xl'>¿Quién es la persona responsable de este objeto?</Text>
-                        {peopleList.length === 0 ? (
+                        {people.length === 0 ? (
                             <Text className='italic text-gray-500'>Aún no hay personas asociadas a esta escena</Text>
                         ) : (
                             <FlatList
-                                data={peopleList}
+                                data={people}
                                 renderItem={({ item }) => (
                                     <SelectPerson
                                         name={item.name}
-                                        img={item.image}
+                                        img={item.img}
                                         id={item.id}
                                         isSelected={selectedPeopleRes.includes(item.id)}
-                                        onPress={() => {
-                                            setSelectedPeopleRes(prev => 
-                                                prev.includes(item.id) 
-                                                    ? prev.filter(id => id !== item.id)
-                                                    : [...prev, item.id]
-                                            )
-                                        }}
+                                        onPress={() => handleSelectPersonRes(item.id)}
                                     />
                                 )}
                                 keyExtractor={item => item.id.toString()}
@@ -225,7 +179,7 @@ const EditObjectInfo = () => {
                 </View>
                 
                 <FormButtons 
-                    handleSave={updateObject} 
+                    handleSave={handleUpdateObject} 
                     textButton='Actualizar'
                 />
             </ScrollView>

@@ -3,36 +3,48 @@ import React, { useEffect, useState, useRef } from 'react' // Added useRef
 import { router, Stack, useLocalSearchParams } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
 import FormButtons from '@/components/FormButtons'
-import useScene from '@/hooks/useScene'
 import LoadingScreen from '@/components/LoadingScreen'
+import ErrorScreen from '@/components/ErrorScreen'
+import { useSceneStore } from '@/store/scenesStore'
+import { Scene } from '@/interfaces/interfaceScene'
 
 const EditEscena = () => {
   const { id } = useLocalSearchParams()
-  const database = useSQLiteContext()
-  const { scene, loading } = useScene(database, id)
-  const [name, setName] = useState('')
-  const nameChanged = useRef(false) // Track manual changes
+  const db = useSQLiteContext()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [name, setName] = useState<string>('')
+  const { getSceneById, updateScene } = useSceneStore()
+  const [scene, setScene] = useState<Scene>()
 
   useEffect(() => {
-    if (scene?.name && !nameChanged.current) {
-      setName(scene.name)
+    try {
+      const scene:Scene | null = getSceneById(Number(id))
+      if(scene) {
+        setScene(scene)
+        setName(scene.name)
+      }
+    } catch (error: any) {
+      setError(error)
+    } finally {
+      setLoading(false)
     }
-  }, [scene])
+  }, [id])
 
   const handleSave = async () => {
-    try {
-      await database.runAsync(
-        "UPDATE scenes SET name = ? WHERE id = ?;", 
-        [name, id]
-      )
-      nameChanged.current = true // Prevent reset
-      router.back()
-    } catch (error) {
-      console.error(error)
+    if(scene){
+      try {
+        const sc:Scene = { id: Number(id), name: name, creativeprocess_id: scene.creativeprocess_id}
+        await updateScene(db, sc)
+        router.back()
+      } catch (error) {
+        console.error(error)
+      }
     }
   }
 
-  if(loading || !scene) return <LoadingScreen/>
+  if(loading) return <LoadingScreen/>
+  if (error) {return <ErrorScreen error = {error}/>}
 
   return (
     <View className='p-10 gap-8'>
@@ -41,10 +53,7 @@ const EditEscena = () => {
       <TextInput 
         className='input-text-box' 
         value={name}
-        onChangeText={(text) => {
-          setName(text)
-          nameChanged.current = true // Mark as changed
-        }}
+        onChangeText={setName}
       />
       <FormButtons handleSave={handleSave} textButton='Actualizar'/>
     </View>

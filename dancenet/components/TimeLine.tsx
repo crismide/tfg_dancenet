@@ -1,17 +1,10 @@
-import { router } from 'expo-router'
+import { Movement } from '@/interfaces/interfaceMovement'
+import { Href, router } from 'expo-router'
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native'
+import { TimelineProps } from "@/interfaces/interfaceComponents"
 
 const timelineHeight = 400
 const interval = 0.2
-
-interface Movement {
-    name: string
-    start_time: number
-    end_time: number
-    level: string,
-    id:number,
-    id_scene:number
-}
 
 const isOverlapping = (a, b) => a.start < b.end && b.start < a.end
 
@@ -53,15 +46,14 @@ function assignColumns(events) {
 
   return result
 }
-
-export default function Timeline({movements}: {movements: Movement[]}) {
-    const processedMovements = movements.map(movement => ({
+const Timeline = ({movements}:TimelineProps) => {
+  const processedMovements = movements.map(movement => ({
         title: movement.name,
         start: movement.start_time / 60,  // Convert seconds to minutes
         end: movement.end_time / 60,
         color: getColorByLevel(movement.level),
         id: movement.id,
-        id_scene: movement.id_scene
+        id_scene: movement.scene_id
     }))
 
     const events = assignColumns(processedMovements)
@@ -104,7 +96,7 @@ export default function Timeline({movements}: {movements: Movement[]}) {
             return (
               <Pressable
                 key={index}
-                onPress={() => router.push({ pathname: `/movement/${item.id}` })}
+                onPress={() => router.push({ pathname: `/movement/${item.id}` } as Href)}
                 style={[
                   styles.movement,
                   {
@@ -125,6 +117,8 @@ export default function Timeline({movements}: {movements: Movement[]}) {
     </ScrollView>
   )
 }
+
+export default Timeline
 
 const styles = StyleSheet.create({
   scrollContainer: {

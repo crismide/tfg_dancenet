@@ -1,24 +1,36 @@
-import { View, Text, ActivityIndicator, Pressable, ScrollView, FlatList, Alert, Image } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
+import { View, Text, Pressable, ScrollView, FlatList, Image } from 'react-native'
+import React, { useState } from 'react'
+import { Href, Link, router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PreviewPerson from '@/components/PreviewPerson';
 import CustomModal from '@/components/CustomModal';
 import LoadingScreen from '@/components/LoadingScreen';
 import PreviewIdea from '@/components/PreviewIdea';
-import useScene from '@/hooks/useScene';
 import BackButton from '@/components/BackButton';
 import AddIdealButtonModal from '@/components/AddIdealButtonModal';
 import EditDeletebuttons from '@/components/EditDeletebuttons';
 import Timeline from '@/components/TimeLine';
 import PreviewObject from '@/components/PreviewObject';
 import { useSceneStore } from '@/store/scenesStore';
+import ErrorScreen from '@/components/ErrorScreen';
+import { Person } from '@/interfaces/interfacePerson';
+import { Idea } from '@/interfaces/interfaceIdea';
+import { Movement } from '@/interfaces/interfaceMovement';
+import { Object } from '@/interfaces/interfaceObject'
+import { Scene } from '@/interfaces/interfaceScene';
+import { useSpaceStore } from '@/store/spaceStore';
+import { Space } from '@/interfaces/interfaceSpace';
+import { useMovementStore } from '@/store/movementStore';
+import { useObjectStore } from '@/store/objectStore';
+import { useSceneIdeaStore } from '@/store/sceneIdeaStore';
+import { useIdeaStore } from '@/store/ideaStore';
+import { useScenePersonStore } from '@/store/scenePeopleStore';
+import { usePersonStore } from '@/store/personStore';
+import { IdeaInScene } from '@/interfaces/interfaceSceneIdea';
+import { PersonInScene } from '@/interfaces/interfaceScenePeople';
 
 const SceneDetails = () => {
-    const { id } = useLocalSearchParams();
-    const { creativeProcessId } = useLocalSearchParams();
-    const database = useSQLiteContext();
+    const { id, creativeProcessId } = useLocalSearchParams();
     const [activeIdeas, setActiveIdeas] = useState(false)
     const [activeMove, setActiveMove] = useState(false)
     const [activeSpace, setActiveSpace] = useState(false)
@@ -26,8 +38,52 @@ const SceneDetails = () => {
     const [activeObjects, setActiveObjects] = useState(false)
     const [modalVisible, setModalVisible] = useState(false);
     const { deleteScene } = useSceneStore()
+    const [ error, setError ] = useState(null)
+    const [loading, setLoading] = useState(false)
 
-    const { scene, people, ideas, loading, spaces, moves, objects } = useScene(database, id);
+    const [scene, setScene] = useState<Scene | null>()
+    const [people, setPeople] = useState<Person[]>([])
+    const [ideas, setIdeas] = useState<Idea[]>([]);
+    const [spaces, setSpaces] = useState<Space[]>();
+    const [movements, setMovements] = useState<Movement[]>([])
+    const [objects, setObjects] = useState<Object[]>([])
+
+    const { getSceneById } = useSceneStore()
+    const { getIdeasOfScene } = useSceneIdeaStore()
+    const { getIdeaById } = useIdeaStore()
+    const { getPeopleOfScene } = useScenePersonStore()
+    const { getPersonById } = usePersonStore()
+    const { getSpacesOfScene } = useSpaceStore()
+    const { getMovementsOfScene } = useMovementStore()
+    const { getObjectsOfScene } = useObjectStore()
+
+    useFocusEffect(
+      React.useCallback(() => {
+        let isActive = true;
+        try {
+              setLoading(true)
+              const sc:Scene | null = getSceneById(Number(id))
+              const pairsIdeaScene:IdeaInScene[] = getIdeasOfScene(Number(id))
+              const ids:Idea[] = pairsIdeaScene.map(pair => getIdeaById(pair.idea_id)).filter((i): i is Idea => i !== null);  
+              const pairsPeopleScene:PersonInScene[] = getPeopleOfScene(Number(id))
+              const pl:Person[] = pairsPeopleScene.map(pair => getPersonById(pair.person_id)).filter((p): p is Person => p !== null); 
+              const spcs:Space[] = getSpacesOfScene(Number(id))
+              const mvs:Movement[] = getMovementsOfScene(Number(id))
+              const objs:Object[] = getObjectsOfScene(Number(id))
+
+              setScene(sc)
+              setIdeas(ids)
+              setPeople(pl)
+              setSpaces(spcs)
+              setMovements(mvs)
+              setObjects(objs)
+              
+          } catch (error:any) {
+              setError(error.message)
+          } finally { setLoading(false) }
+        return () => { isActive = false; };
+      }, [id])
+    );
 
     const options = [
       { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: creativeProcessId, id_scene:id }} },
@@ -36,24 +92,14 @@ const SceneDetails = () => {
     ];
     
     if (loading) { return <LoadingScreen/> }
-    
-      if (!scene) {
-        // Handle the case where no process is found
-        return (
-         <View className='screen'>
-            <Stack.Screen options={{ headerShown: false }} />
-            <Text className='screen-title'>No se ha encontrado ninguna escena</Text>
-          </View>
-        );
-      }
-    
+    if(error) {return <ErrorScreen error={error}/> }
 
     return (
       <View className='screen'>
           <Stack.Screen options={{ headerShown: false }} />
           <BackButton/>
           <View className='flex flex-row justify-between items-center'>
-            <Text className='screen-title'>{scene.name}</Text>
+            {scene && <Text className='screen-title'>{scene.name}</Text>}
             <EditDeletebuttons typeObject={"scene"} deleteFunction={deleteScene} id={Number(id)}/>
           </View>
           <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
@@ -76,8 +122,8 @@ const SceneDetails = () => {
                       data={item.data}
                       id={item.id}
                       source={'scene'}
-                      id_process={creativeProcessId}
-                      id_scene={id}
+                      id_process={Number(creativeProcessId)}
+                      id_scene={Number(id)}
                       />
                       
                   </View>
@@ -97,7 +143,7 @@ const SceneDetails = () => {
                           <Text className='text-lg text-[#828282]'>Añadir pauta de movimiento +</Text>
                       </View>
                   </Link>
-                  {moves.length < 1 ? <Text className='text-lg text-gray-400'>Esta escena aún no tiene ninguna pauta de movimiento, añade una con el botón "Añadir pauta de movimiento +"</Text> : 
+                  {movements.length < 1 ? <Text className='text-lg text-gray-400'>Esta escena aún no tiene ninguna pauta de movimiento, añade una con el botón "Añadir pauta de movimiento +"</Text> : 
                   <View className='gap-4'>
                     <View className='gap-2 mt-3'>
                       <View className='flex flex-row gap-2'>
@@ -113,7 +159,7 @@ const SceneDetails = () => {
                         <Text className='text-lg'>Nivel alto</Text>
                       </View>
                     </View>
-                    <Timeline movements={moves}/>  
+                    <Timeline movements={movements}/>  
                   </View>}
                   
                 </View>
@@ -129,13 +175,13 @@ const SceneDetails = () => {
                             <Text className='text-lg text-[#828282]'>Añadir recorrido espacial +</Text>
                         </View>
                     </Link>
-                    {spaces.length < 1 ? <Text className='text-lg text-gray-400'>Esta escena aún no tiene ningun recorrido espacial, añade uno con el botón "Añadir recorrido espacial +"</Text>:
+                    {spaces && spaces.length < 1 ? <Text className='text-lg text-gray-400'>Esta escena aún no tiene ningun recorrido espacial, añade uno con el botón "Añadir recorrido espacial +"</Text>:
                     <FlatList
                     data={spaces}
                     keyExtractor={(item) => item.id.toString()}
                     horizontal={true}
                     renderItem={({item}) => (
-                      <Pressable onPress={() => router.push({ pathname: `/space/${item.id}`})}>
+                      <Pressable onPress={() => router.push({ pathname: `/space/${item.id}`} as Href)}>
                           <Image 
                           source={{ uri: `data:image/png;base64,${item.img}` }}
                           style={{width: 200, height: 150, marginRight: 10}}
@@ -188,7 +234,7 @@ const SceneDetails = () => {
                     <FlatList
                       data={objects}
                       keyExtractor={(item) => item.id.toString()}
-                      renderItem={({ item }) => <PreviewObject img={item.img} id={item.id} id_process={item.id_process} id_scene={item.id_scene}/>}
+                      renderItem={({ item }) => <PreviewObject img={item.img} id={item.id} id_process={item.creativeprocess_id} id_scene={item.scene_id}/>}
                       horizontal={true}
                       contentContainerStyle={{ gap: 20 }}
                     />

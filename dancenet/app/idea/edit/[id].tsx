@@ -8,33 +8,43 @@ import LoadingScreen from '@/components/LoadingScreen';
 import FormButtons from '@/components/FormButtons';
 import AudioPlayer from '@/components/AudioPlayer';
 import { useIsFocused } from '@react-navigation/native';
+import { Idea, IdeaParams } from '@/interfaces/interfaceIdea';
+import ErrorScreen from '@/components/ErrorScreen';
+import { useIdeaStore } from '@/store/ideaStore';
 
 const EditIdea = () => {
   const { id } = useLocalSearchParams();
-  const database = useSQLiteContext();
-  const { idea, data, loading } = useIdea(database, id);
+  const db = useSQLiteContext();
+  const [idea, setIdea] = useState<Idea | null>()
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null) 
   const [inputVal, setInputVal] = useState("")
   const isScreenFocused = useIsFocused();
+  const { getIdeaById, updateIdea } = useIdeaStore()
 
   useEffect(() => {
-    if (data) {
-      setInputVal(data);
+    const idea:Idea | null = getIdeaById(Number(id))
+    if(idea) { 
+      setIdea(idea)
+      setInputVal(idea.data) 
     }
-  }, [data]);
+    setLoading(false)
+  }, [id]);
 
 
   if(loading) {return <LoadingScreen/>}
+  if (error) {return <ErrorScreen error = {error}/>}
 
   const handleSave = async () => {
-  try {
-      await database.runAsync(
-          "UPDATE ideas SET data = ? WHERE id = ?;",
-          [inputVal, id]
-        );
+    if(idea){
+      try {
+        setLoading(true)
+        const ideaChange:Idea = { id: idea.id,typeContent: idea.typeContent, data: inputVal}
+        await updateIdea(db,ideaChange)
         router.back();
-    } catch (error) {
-        console.error("Failed to update person:", error);
-        Alert.alert("Error", "Could not update the idea");
+      } catch (error:any) {
+        setError(error.message)
+      } finally { setLoading(false) }
     }
   };
   
@@ -42,7 +52,7 @@ const EditIdea = () => {
     <View className='p-10 gap-8'>
       <Stack.Screen options={{ headerShown: false }} />
       <Text className='screen-title'>Editando una idea</Text>
-      {(idea.typeContent === 'text') && 
+      { idea &&(idea.typeContent === 'text') && 
         <TextInput
           value={inputVal}
           onChangeText={setInputVal}
@@ -51,7 +61,7 @@ const EditIdea = () => {
         />
       }
 
-      { (idea.typeContent === 'image-video' &&  idea.data.endsWith('.mp4')) && 
+      {idea && (idea.typeContent === 'image-video' &&  idea.data.endsWith('.mp4')) && 
       <Video
         source={{ uri: idea.data }}
         style={{ width: 300, height: 150 }}
@@ -59,15 +69,15 @@ const EditIdea = () => {
         useNativeControls />
       }
 
-      {(idea.typeContent === 'image-video' && !idea.data.endsWith('.mp4')) && 
+      {idea && (idea.typeContent === 'image-video' && !idea.data.endsWith('.mp4')) && 
         <Image
         source={{ uri: idea.data }}
         style={{ width: 200, height: 150, borderRadius: 10 }}
         />}
 
-      {idea.typeContent === 'audio' && 
+      {idea && idea.typeContent === 'audio' && 
                 <AudioPlayer 
-                audioUri={data}
+                audioUri={idea.data}
                 isFocused={isScreenFocused}
               />
                 }

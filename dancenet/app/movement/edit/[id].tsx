@@ -1,4 +1,3 @@
-
 import { View, Text, ScrollView, FlatList, Alert, TextInput } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { router, Stack, useLocalSearchParams, useRouter } from 'expo-router'
@@ -9,69 +8,64 @@ import SelectPerson from '@/components/SelectPerson'
 import { Picker } from '@react-native-picker/picker'
 import FormButtons from '@/components/FormButtons'
 import TimePicker from '@/components/TimePicker'
+import { Movement } from '@/interfaces/interfaceMovement'
+import { useMovementStore } from '@/store/movementStore'
+import { Person } from '@/interfaces/interfacePerson'
+import { useScenePersonStore } from '@/store/scenePeopleStore'
+import { PersonInScene } from '@/interfaces/interfaceScenePeople'
+import { usePersonStore } from '@/store/personStore'
+import { usePersonMovementStore } from '@/store/personMovementStore'
+import { PersonWithMovement } from '@/interfaces/interfacePersonMovement'
+import ErrorScreen from '@/components/ErrorScreen'
+import { useSelection } from '@/utils/useSelection'
 
 const EditMovement = () => {
   const { id } = useLocalSearchParams()
-  const database = useSQLiteContext()
+  const db = useSQLiteContext()
 
   const [loading, setLoading] = useState(true)
-  const [movement, setMovement] = useState<any>(null)
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
+  const [error, setError] = useState(null)
+  const [movement, setMovement] = useState<Movement | null>(null)
+  const [name, setName] = useState<string>('')
+  const [description, setDescription] = useState<string>('')
   const [start, setStart] = useState({ minutes: 0, seconds: 0 })
   const [end, setEnd] = useState({ minutes: 0, seconds: 0 })
-  const [level, setLevel] = useState('')
-  const [peopleList, setPeopleList] = useState<any[]>([])
-  const [selectedPeople, setSelectedPeople] = useState<number[]>([])
+  const [level, setLevel] = useState<string>('')
+  const [peopleList, setPeopleList] = useState<Person[]>([])
+  const [selectedPeople, handleSelectPerson] = useSelection<number>([])
   const [height, setHeight] = useState(100)
+  const { getMovementById, updateMovement } = useMovementStore()
+  const { getPeopleOfScene } = useScenePersonStore()
+  const { getPersonById } = usePersonStore()
+  const { getPeopleOfMovements, updatePeopleForMovement } = usePersonMovementStore()
 
   // Load movement and people
   useEffect(() => {
     const loadMovementAndPeople = async () => {
       try {
-        // Load movement
-        const results = await database.getAllAsync(
-          `SELECT * FROM movements WHERE id = ?`,
-          [id]
-        )
-        if (results.length === 0) {
-          Alert.alert('Error', 'No se encontró la pauta de movimiento')
-          router.back()
-          return
+        const mov:Movement | null = getMovementById(Number(id))
+        if(mov){
+          setMovement(mov)
+          setName(mov.name)
+          setDescription(mov.description)
+          setLevel(mov.level)
+          setStart({
+            minutes: Math.floor(mov.start_time / 60),
+            seconds: mov.start_time % 60,
+          })
+          setEnd({
+            minutes: Math.floor(mov.end_time / 60),
+            seconds: mov.end_time % 60,
+          })
+          const pairsPersonScene:PersonInScene[] = getPeopleOfScene(mov.scene_id)
+          setPeopleList(pairsPersonScene.map(pair => getPersonById(pair.person_id)).filter((p): p is Person => p !== null))
+
+          const pairsPersonMovement:PersonWithMovement[] = getPeopleOfMovements(Number(id))
+          const initialSelected = pairsPersonMovement.map((pair:PersonWithMovement) => pair.person_id)
+          initialSelected.forEach(id => handleSelectPerson(id))
         }
-        const mov = results[0]
-        setMovement(mov)
-        setName(mov.name)
-        setDescription(mov.description)
-        setLevel(mov.level)
-        setStart({
-          minutes: Math.floor(mov.start_time / 60),
-          seconds: mov.start_time % 60,
-        })
-        setEnd({
-          minutes: Math.floor(mov.end_time / 60),
-          seconds: mov.end_time % 60,
-        })
-
-        // Load people for the scene
-        const scenePeople = await database.getAllAsync(
-          `SELECT people.* 
-           FROM people
-           JOIN scene_people ON people.id = scene_people.person_id
-           WHERE scene_people.scene_id = ?;`,
-          [mov.scene_id]
-        )
-        setPeopleList(scenePeople)
-
-        // Load selected people for this movement
-        const selected = await database.getAllAsync(
-          `SELECT person_id FROM person_movement WHERE movement_id = ?`,
-          [id]
-        )
-        setSelectedPeople(selected.map((row: any) => row.person_id))
-      } catch (error) {
-        console.error('Error loading movement or people:', error)
-        router.back()
+      } catch (error:any) {
+        setError(error.message)
       } finally {
         setLoading(false)
       }
@@ -80,44 +74,26 @@ const EditMovement = () => {
   }, [id])
 
   const saveMovement = async () => {
-    try {
-      setLoading(true)
-      // Convert time to total seconds
-      const startSeconds = (start.minutes * 60) + start.seconds
-      const endSeconds = (end.minutes * 60) + end.seconds
+    if(movement){
+      try {
+        setLoading(true)
+        const startSeconds = (start.minutes * 60) + start.seconds
+        const endSeconds = (end.minutes * 60) + end.seconds
 
-      // Update movement
-      await database.runAsync(
-        `UPDATE movements SET name = ?, description = ?, start_time = ?, end_time = ?, level = ? WHERE id = ?`,
-        [name, description, startSeconds, endSeconds, level, id]
-      )
-
-      // Remove old person-movement relationships
-      await database.runAsync(
-        `DELETE FROM person_movement WHERE movement_id = ?`,
-        [id]
-      )
-
-      // Insert new person-movement relationships
-      for (const personId of selectedPeople) {
-        await database.runAsync(
-          `INSERT INTO person_movement (person_id, movement_id, creativeprocess_id) VALUES (?, ?, ?)`,
-          [personId, id, movement.creativeprocess_id]
-        )
+        const mov:Movement = { id: movement.id, description: description, name: name, level: level, start_time: startSeconds, end_time: endSeconds, scene_id: movement.scene_id, creativeprocess_id: movement.creativeprocess_id}
+        await updateMovement(db, mov)
+        await updatePeopleForMovement( db, movement.id, selectedPeople );
+        router.back()
+      } catch (error:any) {
+        setError(error.message)
+      } finally {
+        setLoading(false)
       }
-
-      router.back()
-    } catch (error) {
-      console.error('Error updating movement:', error)
-      Alert.alert('Error', 'Ocurrió un error al guardar los cambios')
-    } finally {
-      setLoading(false)
     }
   }
 
-  if (loading || !movement) {
-    return <LoadingScreen />
-  }
+  if (loading) { return <LoadingScreen/> }
+  if(error) {return <ErrorScreen error={error}/> }
 
   return (
     <View className='p-10'>
@@ -172,7 +148,7 @@ const EditMovement = () => {
             <Text className='text-xl'>Nivel de esta pauta de movimiento</Text>
             <Picker
               selectedValue={level}
-              onValueChange={(itemValue) => setLevel(itemValue)}
+              onValueChange={setLevel}
               mode='dropdown'
               dropdownIconColor='#6D28D9'
             >
@@ -207,16 +183,10 @@ const EditMovement = () => {
               renderItem={({ item }) => (
                 <SelectPerson
                   name={item.name}
-                  img={item.image}
+                  img={item.img}
                   id={item.id}
                   isSelected={selectedPeople.includes(item.id)}
-                  onPress={() => {
-                    setSelectedPeople((prev) =>
-                      prev.includes(item.id)
-                        ? prev.filter((id) => id !== item.id)
-                        : [...prev, item.id]
-                    )
-                  }}
+                  onPress={() => handleSelectPerson(item.id)}
                 />
               )}
               keyExtractor={(item) => item.id.toString()}
@@ -232,3 +202,4 @@ const EditMovement = () => {
 }
 
 export default EditMovement
+

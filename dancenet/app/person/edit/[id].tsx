@@ -5,35 +5,37 @@ import { useSQLiteContext } from 'expo-sqlite';
 import LoadingScreen from '@/components/LoadingScreen';
 import * as ImagePicker from "expo-image-picker";
 import FormButtons from '@/components/FormButtons';
+import { Person } from '@/interfaces/interfacePerson';
+import { usePersonStore } from '@/store/personStore';
+import ErrorScreen from '@/components/ErrorScreen';
 
 const EditPerson = () => {
     const { id } = useLocalSearchParams();
-    const database = useSQLiteContext();
+    const db = useSQLiteContext();
     const [name, setName] = useState('');
     const [img, setImg] = useState('');
     const [notes, setNotes] = useState('');
-    const [errorName, setErrorName] = useState(false);
+    const [errorName, setErrorName] = useState<string>();
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null)
+    const [person, setPerson] = useState<Person | null>()
+    const { getPersonById, updatePerson } = usePersonStore()
 
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                const result = await database.getAllAsync("SELECT * FROM people WHERE id = ?;", [id]);
-                if (result.length > 0) {
-                    setName(result[0].name);
-                    setImg(result[0].img);
-                    setNotes(result[0].notes);
-                } else {
-                    console.log("No person found with the given ID");
-                }
-            } catch (error) {
-                console.error("Error fetching person:", error);
-            } finally {
-                setLoading(false);
+        try {
+            const p:Person | null = getPersonById(Number(id))
+            if(p){
+                setPerson(p)
+                setName(p.name)
+                setImg(p.img)
+                setNotes(p.notes)
             }
-        };
-        loadData();
-    }, [id, database]);
+        } catch (error: any) {
+            setError(error)
+        } finally {
+            setLoading(false)
+        }
+    }, [id]);
 
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -56,21 +58,24 @@ const EditPerson = () => {
     };
 
     const handleSave = async () => {
-        try {
-            await database.runAsync(
-                "UPDATE people SET name = ?, img = ?, notes = ? WHERE id = ?;",
-                [name, img, notes, id]
-            );
-            router.back();
-        } catch (error) {
-            console.error("Failed to update person:", error);
-            Alert.alert("Error", "Could not update the person");
+        if(name.trim()===''){ setErrorName("Debe tener un nombre") }
+        if(person){
+            try {
+                setErrorName("")
+                setLoading(true)
+                const p:Person = { id: Number(id), name: name, img: img, notes: notes}
+                await updatePerson(db,p)
+            } catch (error: any) {
+                setError(error)
+            } finally {
+                setLoading(false)
+            }
         }
+        
     };
 
-    if (loading) {
-        return <LoadingScreen />;
-    }
+    if (loading) { return <LoadingScreen />;}
+    if (error) {return <ErrorScreen error = {error}/>}
 
     return (
         <View className='p-10 gap-8'>
