@@ -58,24 +58,30 @@ const EditObjectInfo = () => {
                 setBase64Image(ob.img)
 
                 const pairsScenePeople:PersonInScene[] = getPeopleOfScene(ob.scene_id)
-                setPeople(pairsScenePeople.map(pair => getPersonById(Number(id))).filter((p): p is Person => p !== null))
+                
+                setPeople(pairsScenePeople.map(pair => getPersonById(pair.person_id)).filter((p): p is Person => p !== null))
 
                 const pairsPeopleObject:ObjectOfPerson[] = getPeopleOfObject(Number(id))
+
                 const initialSelectedPeople = pairsPeopleObject.map((pair:ObjectOfPerson) => pair.person_id)
+
                 initialSelectedPeople.forEach(id => handleSelectPerson(id))
                 
                 const pairsPeopleResObject:ObjectOfResponsiblePerson[] = getResponsiblePeopleOfObject(Number(id)) 
+
                 const initialSelectedResPeople = pairsPeopleResObject.map((pair:ObjectOfResponsiblePerson) => pair.person_id)
+
                 initialSelectedResPeople.forEach(id => handleSelectPersonRes(id))
 
                 setMovements(getMovementsOfScene(ob.scene_id))
 
                 const pairsMovementObjects:ObjectOfMovement[] = getMovementsOfObjects(Number(id))
                 const initialSelectedMovements = pairsMovementObjects.map((pair:ObjectOfMovement) => pair.movement_id)
+
                 initialSelectedMovements.forEach(id => handleSelectMovement(id))
             }
         } catch (error: any) {
-            setError(error)
+            setError(error.message)
         } finally {
             setLoading(false)
         }

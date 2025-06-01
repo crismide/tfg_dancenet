@@ -66,7 +66,7 @@ const FormMovement = () => {
                 }
                 const id_movement = await createMovement(db, movement)
                 if(id_movement){
-                    selectedPeople.map(async person_id => await putPersonWithMovement(db, person_id, id_movement, Number(id_process)))
+                    selectedPeople.map(async person_id => await putPersonWithMovement(db, person_id, id_movement))
                 }
                 router.back();
             } catch (error:any) { setError(error.message)

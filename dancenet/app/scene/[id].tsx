@@ -1,5 +1,5 @@
 import { View, Text, Pressable, ScrollView, FlatList, Image } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Href, Link, router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PreviewPerson from '@/components/PreviewPerson';
@@ -28,6 +28,7 @@ import { useScenePersonStore } from '@/store/scenePeopleStore';
 import { usePersonStore } from '@/store/personStore';
 import { IdeaInScene } from '@/interfaces/interfaceSceneIdea';
 import { PersonInScene } from '@/interfaces/interfaceScenePeople';
+import { useSQLiteContext } from 'expo-sqlite';
 
 const SceneDetails = () => {
     const { id, creativeProcessId } = useLocalSearchParams();
@@ -39,7 +40,7 @@ const SceneDetails = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const { deleteScene } = useSceneStore()
     const [ error, setError ] = useState(null)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     const [scene, setScene] = useState<Scene | null>()
     const [people, setPeople] = useState<Person[]>([])
@@ -57,33 +58,29 @@ const SceneDetails = () => {
     const { getMovementsOfScene } = useMovementStore()
     const { getObjectsOfScene } = useObjectStore()
 
-    useFocusEffect(
-      React.useCallback(() => {
-        let isActive = true;
-        try {
-              setLoading(true)
-              const sc:Scene | null = getSceneById(Number(id))
-              const pairsIdeaScene:IdeaInScene[] = getIdeasOfScene(Number(id))
-              const ids:Idea[] = pairsIdeaScene.map(pair => getIdeaById(pair.idea_id)).filter((i): i is Idea => i !== null);  
-              const pairsPeopleScene:PersonInScene[] = getPeopleOfScene(Number(id))
-              const pl:Person[] = pairsPeopleScene.map(pair => getPersonById(pair.person_id)).filter((p): p is Person => p !== null); 
-              const spcs:Space[] = getSpacesOfScene(Number(id))
-              const mvs:Movement[] = getMovementsOfScene(Number(id))
-              const objs:Object[] = getObjectsOfScene(Number(id))
+    useEffect(() => {
+      try {
+        const sc:Scene | null = getSceneById(Number(id))
+        const pairsIdeaScene:IdeaInScene[] = getIdeasOfScene(Number(id))
+        const ids:Idea[] = pairsIdeaScene.map(pair => getIdeaById(pair.idea_id)).filter((i): i is Idea => i !== null);  
+        const pairsPeopleScene:PersonInScene[] = getPeopleOfScene(Number(id))
+        const pl:Person[] = pairsPeopleScene.map(pair => getPersonById(pair.person_id)).filter((p): p is Person => p !== null); 
+        const spcs:Space[] = getSpacesOfScene(Number(id))
+        const mvs:Movement[] = getMovementsOfScene(Number(id))
+        const objs:Object[] = getObjectsOfScene(Number(id))
 
-              setScene(sc)
-              setIdeas(ids)
-              setPeople(pl)
-              setSpaces(spcs)
-              setMovements(mvs)
-              setObjects(objs)
-              
-          } catch (error:any) {
-              setError(error.message)
-          } finally { setLoading(false) }
-        return () => { isActive = false; };
-      }, [id])
-    );
+        setScene(sc)
+        setIdeas(ids)
+        setPeople(pl)
+        setSpaces(spcs)
+        setMovements(mvs)
+        setObjects(objs)
+      } catch (error: any) {
+        setError(error.message)
+      } finally {
+        setLoading(false)
+      }
+    },[id,getPeopleOfScene,getIdeasOfScene])
 
     const options = [
       { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: creativeProcessId, id_scene:id }} },

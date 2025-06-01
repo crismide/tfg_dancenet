@@ -5,108 +5,78 @@ import { useSQLiteContext } from 'expo-sqlite';
 import LoadingScreen from '@/components/LoadingScreen';
 import BackButton from '@/components/BackButton';
 import SelectIdea from '@/components/SelectIdea';
+import { Idea } from '@/interfaces/interfaceIdea';
+import { useIdeaStore } from '@/store/ideaStore';
+import { useSelection } from '@/utils/useSelection';
+import ErrorScreen from '@/components/ErrorScreen';
+import { useIdeaCreativeProcessStore } from '@/store/ideaCreativeProcessStore';
+import { IdeaInCreativeProcess } from '@/interfaces/interfaceIdeaCreativeProcess';
+import { IdeaInScene } from '@/interfaces/interfaceSceneIdea';
+import { useSceneIdeaStore } from '@/store/sceneIdeaStore';
 
 const selectIdeas = () => {
-  const database = useSQLiteContext();
+  const db = useSQLiteContext();
   const { id_process, id_scene, source } = useLocalSearchParams(); 
   const [loading, setLoading] = useState(true);
-  const [ideas, setIdeas] = useState(true);
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [tempSelectedIds, setTempSelectedIds] = useState([]);
-  
+  const [ideasContext, setIdeasContext] = useState<Idea[]>([]);
+  const { ideas } = useIdeaStore()
+  const [error, setError] = useState(null)
+  const [selectedIdeas, handleSelectIdeas] = useSelection<number>([])
+  //STORES
+  const { getIdeasOfCreativeProcess, updateIdeasForCreativeProcess } = useIdeaCreativeProcessStore()
+  const { getIdeasOfScene, updateIdeasOfScenes } = useSceneIdeaStore()
+  const { getIdeaById } = useIdeaStore()
+  // option scene or process
 
   useEffect(() => {
-      const loadData = async () => {
-        try {
-          const ideasResult = source==='process' ? await database.getAllAsync("SELECT * FROM ideas;")
-           : await database.getAllAsync( ` SELECT ideas.* FROM ideas
-              JOIN idea_creativeprocess ON ideas.id = idea_creativeprocess.idea_id
-              WHERE idea_creativeprocess.creativeprocess_id = ?;
-              `, [id_process]);  
-  
-            setIdeas(ideasResult)
-  
-          const selectedIdeasResult = source==='process' ? await database.getAllAsync(
-            `SELECT idea_id FROM idea_creativeprocess WHERE creativeprocess_id = ?;`,
-            [id_process]) : await database.getAllAsync(
-              `SELECT idea_id FROM scene_idea WHERE scene_id = ?;`,[id_scene])
-    
-          // Extract person IDs and set them in selectedIds + tempSelectedIds
-          const selectedIdeasIds = selectedIdeasResult.map((row) => row.idea_id);
-          setSelectedIds(selectedIdeasIds);
-          setTempSelectedIds(selectedIdeasIds); // Sync temp selection with DB selection
-        } catch (error) {
-          console.error("Error fetching people:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      loadData();
-    }, [database, id_process]);
+    try {
+      switch (source) {
+        case 'process':
+          setIdeasContext(ideas)
 
-  const handleSelect = (id) => {
-    setTempSelectedIds((prevTempSelectedIds) => {
-      if (prevTempSelectedIds.includes(id)) {
-        return prevTempSelectedIds.filter((selectedId) => selectedId !== id);
-      } else {
-        return [...prevTempSelectedIds, id];
+          const initialSelectedIdeasCreativeProcess = getIdeasOfCreativeProcess(Number(id_process)).map((pair:IdeaInCreativeProcess) => pair.idea_id)
+          initialSelectedIdeasCreativeProcess.forEach(id => handleSelectIdeas(id))
+          break;
+        case 'scene':
+          setIdeasContext(getIdeasOfCreativeProcess(Number(id_process)).map((pair:IdeaInCreativeProcess) => getIdeaById(pair.idea_id)).filter((i): i is Idea => i !== null))
+
+          const initialSelectedIdeasScene = getIdeasOfScene(Number(id_scene)).map((pair:IdeaInScene) => pair.idea_id)
+          initialSelectedIdeasScene.forEach(id => handleSelectIdeas(id))
+
+          break;
+        default:
+          break;
       }
-    });
-  };
+    } catch (error: any) {
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }  
+  }, [id_process, id_scene, source]);
 
   const handleAddIdeas = async () => {
       try {
-        // Find new people to add
-        const ideasToAdd = tempSelectedIds.filter(id => !selectedIds.includes(id));
-        // Find people to remove
-        const ideasToRemove = selectedIds.filter(id => !tempSelectedIds.includes(id));
-    
-        // Insert new people
-        if(source==='process'){
-          await Promise.all(ideasToAdd.map(id =>
-            database.runAsync(
-              `INSERT INTO idea_creativeprocess (idea_id, creativeprocess_id) VALUES (?, ?);`,
-              [id, id_process]
-            )
-          ));
-      
-          // Delete removed people
-          await Promise.all(ideasToRemove.map(id =>
-            database.runAsync(
-              `DELETE FROM idea_creativeprocess WHERE idea_id = ? AND creativeprocess_id = ?;`,
-              [id, id_process]
-            )
-          ));
+        setLoading(true)
+        switch (source) {
+          case 'process':
+            await updateIdeasForCreativeProcess(db, Number(id_process), selectedIdeas)
+            break;
+          case 'scene':
+            await updateIdeasOfScenes(db, Number(id_scene), Number(id_process), selectedIdeas)
+          default:
+            break;
         }
-  
-        if(source==='scene'){
-          await Promise.all(ideasToAdd.map(id =>
-            database.runAsync(
-              `INSERT INTO scene_idea (idea_id, scene_id,creativeprocess_id) VALUES (?, ?,?);`,
-              [id, id_scene,id_process]
-            )
-          ));
-      
-          // Delete removed people
-          await Promise.all(ideasToRemove.map(id =>
-            database.runAsync(
-              `DELETE FROM scene_idea WHERE idea_id = ? AND scene_id = ? AND creativeprocess_id = ?;`,
-              [id, id_scene, id_process] // Ensure you pass all necessary IDs
-            )
-          ));
-        }
-    
-        // Update the selectedIds state to reflect the confirmed selection
-        setSelectedIds(tempSelectedIds);
         router.back()
-    
-        console.log("Updated creative process:", tempSelectedIds);
-      } catch (error) {
-        console.error("Error updating creative process:", error);
+      } catch (error: any) {
+        setError(error.message)
+      } finally {
+        setLoading(false)
       }
     };
-    
+  
+
   if (loading) { return <LoadingScreen/>}
+  if(error) {return <ErrorScreen error={error}/> }
 
   return (
     <View className='p-10 gap-8 mb-10'>
@@ -114,19 +84,19 @@ const selectIdeas = () => {
       <BackButton/>
       <View>
         <View className='flex flex-row justify-between items-center'>
-          <Text className='screen-title'>Seleccionando ideas</Text>
+          <Text className="screen-title">{"Seleccionando\nideas"}</Text>
           <Pressable onPress={handleAddIdeas}>
             <Text className='text-[#C286F1]'>AÑADIR</Text>
           </Pressable>
         </View>
         <FlatList
-        data={ideas}
+        data={ideasContext}
         renderItem={({ item }) => (
           <SelectIdea
             typeContent={item.typeContent}
             data={item.data}
-            isSelected={tempSelectedIds.includes(item.id)} // Use temp selection
-            onPress={() => handleSelect(item.id)}
+            isSelected={selectedIdeas.includes(item.id)} // Use temp selection
+            onPress={() => handleSelectIdeas(item.id)}
           />
         )}
         keyExtractor={(item) => item.id.toString()}

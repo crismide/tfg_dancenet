@@ -24,7 +24,7 @@ const FormEscena = () => {
       setNameError("")
       try {
         const scene: SceneParams = { name:name, creativeprocess_id: Number(id_process)}
-        const scene_id = await createScene(db, scene)
+        await createScene(db, scene)
       router.back();
       setName("")
     } catch {

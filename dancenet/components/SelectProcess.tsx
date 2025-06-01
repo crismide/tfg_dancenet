@@ -1,6 +1,7 @@
+import { SelectCreativeProcessProps } from '@/interfaces/interfaceComponents';
 import { View, Text, Image, Pressable } from 'react-native';
 
-const SelectProcess = ({ name, image,id,isSelected, onPress }) => {
+const SelectProcess = ({ name, image, isSelected, onPress }:SelectCreativeProcessProps) => {
 
   return (
     <Pressable 
@@ -10,7 +11,7 @@ const SelectProcess = ({ name, image,id,isSelected, onPress }) => {
                 padding: 16,
                 borderRadius: 16,
                 alignSelf: 'flex-start',
-                marginRight: 15,
+                marginRight: 15
         }}>
      <View>
         <Image

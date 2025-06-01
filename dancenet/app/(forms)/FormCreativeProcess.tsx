@@ -29,8 +29,8 @@ const FormCreativeProcess = () => {
           name: name,
           img: base64Image || undefined   
         };
-        const creativeprocess_id = await createCreativeProcess(db,process)
-        router.push(`/creative-process/${creativeprocess_id}`);
+        await createCreativeProcess(db,process)
+        router.back()
         setName("")
     } catch {
        Alert.alert("Error", "Hubo un problema al guardar el proceso creativo.");

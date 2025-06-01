@@ -19,19 +19,17 @@ import { Person } from '@/interfaces/interfacePerson';
 import { Idea } from '@/interfaces/interfaceIdea';
 import { useSceneStore } from '@/store/scenesStore';
 import { CreativeProcess } from '@/interfaces/interfaceCreativeProcess';
-import { PersonInCreativeProcess } from '@/interfaces/interfacepersonCreativeProcess';
 import { usePersonCreativeProcessStore } from '@/store/personCreativeProcessStore';
 import { usePersonStore } from '@/store/personStore';
 import { IdeaInCreativeProcess } from '@/interfaces/interfaceIdeaCreativeProcess';
 import { useIdeaCreativeProcessStore } from '@/store/ideaCreativeProcessStore';
 import { useIdeaStore } from '@/store/ideaStore';
+import { PersonInCreativeProcess } from '@/interfaces/interfacePersonCreativeProcess';
 
 const CreativeProcessDetail = () => {
   const { id } = useLocalSearchParams();
-  const database = useSQLiteContext();
   const [modalPeopleVisible, setModalPeopleVisible] = useState(false);
   const [modalIdeasVisible, setModalIdeasVisible] = useState(false);
-  // const { scenes, people, ideas } = useCreativeProcess(database, id);
   const [ creativeProcess, setCreativeProcess ] = useState<CreativeProcess|null>()
   const [ scenes, setScenes ] = useState<Scene[]>([])
   const [ people, setPeople ] = useState<Person[]>([])

@@ -2,143 +2,120 @@ import { View, Text, Pressable, FlatList, Alert } from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
 import { useSQLiteContext } from 'expo-sqlite';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import useIdea from '@/hooks/useIdea';
 import LoadingScreen from '@/components/LoadingScreen';
 import BackButton from '@/components/BackButton';
-import usePerson from '@/hooks/usePerson';
-import useAllScenes from '@/hooks/useAllScenes';
 import SelectScene from '@/components/SelectScene';
+import { Scene } from '@/interfaces/interfaceScene';
+import { useScenePersonStore } from '@/store/scenePeopleStore';
+import { useSceneStore } from '@/store/scenesStore';
+import { useSelection } from '@/utils/useSelection';
+import { PersonInScene } from '@/interfaces/interfaceScenePeople';
+import { useSceneIdeaStore } from '@/store/sceneIdeaStore';
+import { IdeaInScene } from '@/interfaces/interfaceSceneIdea';
+import { PersonInCreativeProcess } from '@/interfaces/interfacePersonCreativeProcess';
+import { usePersonCreativeProcessStore } from '@/store/personCreativeProcessStore';
+import { IdeaInCreativeProcess } from '@/interfaces/interfaceIdeaCreativeProcess';
+import { useIdeaCreativeProcessStore } from '@/store/ideaCreativeProcessStore';
+import ErrorScreen from '@/components/ErrorScreen';
 
 const selectScenes = () => {
-  const database = useSQLiteContext();
-  const { id, object, tableJoined } = useLocalSearchParams<{ id: string; object: 'person' | 'idea'; tableJoined: string }>();
-
-  const { scenes } = object === 'idea' ? useIdea(database, id) : usePerson(database, id);
-  
+  const { id, object } = useLocalSearchParams<{ id: string; object: 'person' | 'idea'}>();
+  const [selectedScenes, handleSelectScene] = useSelection<number>([])
+  const [scenes, setScenes] = useState<Scene[]>([])
+  const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [tempSelectedIds, setTempSelectedIds] = useState([]);
-  const [errorFetching, setErrorFetching] = useState(false)
-  const [allScenes, setAllScenes] = useState([]);
-  const hasInitializedSelectedIds = useRef(false);
+  const db = useSQLiteContext()
+
+  // STORES
+  const { getScenesOfPerson, updateScenesOfPerson } = useScenePersonStore()
+  const { getScenesOfCreativeProcess } = useSceneStore()
+  const { getScenesOfIdea, updateScenesOfIdea } = useSceneIdeaStore()
+  const { getCreativeProcessesOfPerson } = usePersonCreativeProcessStore()
+  const { getCreativeProcessesOfIdea } = useIdeaCreativeProcessStore()
 
   useEffect(() => {
-    const loadData = async () => {
       try {
-        let query = '';
-        const queryParams = [Number(id)];
+        switch (object) {
+          case 'person':
+            const pairsCreativeProcessPerson:PersonInCreativeProcess[] = getCreativeProcessesOfPerson(Number(id))
+            
+            const scsPerson: Scene[] = pairsCreativeProcessPerson.flatMap((pair: PersonInCreativeProcess) => getScenesOfCreativeProcess(pair.creativeprocess_id));
+            
+            setScenes(scsPerson)
 
-        if (object === 'person') {
-          query = `
-            SELECT s.* FROM scenes s
-            WHERE s.creativeprocess_id IN (
-              SELECT pcp.creativeprocess_id
-              FROM person_creativeprocess pcp
-              WHERE pcp.person_id = ?
-            );
-          `;
-        } else if (object === 'idea') {
-          query = `
-            SELECT s.* FROM scenes s
-            WHERE s.creativeprocess_id IN (
-              SELECT icp.creativeprocess_id
-              FROM idea_creativeprocess icp
-              WHERE icp.idea_id = ?
-            );
-          `;
-        } else {
-          console.warn("Invalid object type provided:", object);
-          setAllScenes([]);
-          setErrorFetching(true);
-          setLoading(false);
-          return;
+            const initialSelectedScenesPerson = getScenesOfPerson(Number(id)).map((pair:PersonInScene) => pair.scene_id)
+            initialSelectedScenesPerson.forEach(id => handleSelectScene(id))
+            break;
+          case 'idea':
+            const pairsCreativeProcessIdea:IdeaInCreativeProcess[] = getCreativeProcessesOfIdea(Number(id))
+
+            const scsIdea: Scene[] = pairsCreativeProcessIdea.flatMap((pair: IdeaInCreativeProcess) => getScenesOfCreativeProcess(pair.creativeprocess_id))
+            setScenes(scsIdea)
+
+            const initialSelectedScenesIdea = getScenesOfIdea(Number(id)).map((pair:IdeaInScene) => pair.scene_id)
+            initialSelectedScenesIdea.forEach(id => handleSelectScene(id))
+          default:
+            break;
         }
-
-        const result = await database.getAllAsync<any>(query, queryParams); // Specify Scene type if available
-        setAllScenes(result);
-        if (!hasInitializedSelectedIds.current) {
-        const initialIds = scenes.map((scene) => scene.id); // Specify Scene type
-        setSelectedIds(initialIds);
-        setTempSelectedIds(initialIds);
-        hasInitializedSelectedIds.current = true;
-    }
-      } catch (error) {
-        console.error(`Error fetching all scenes for ${object} ${id}:`, error);
-        setErrorFetching(true);
+      } catch (error: any) {
+        setError(error.message)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
+  }, [id]);
+
+  const handleModifyScenes = async () => {
+  try {
+    setLoading(true)
+    const selectedSceneObjects = scenes.filter(scene => selectedScenes.includes(scene.id)).map(scene => ({
+      scene_id: scene.id,
+      creativeprocess_id: scene.creativeprocess_id
+    }));
+    switch (object) {
+      case 'person':
+        await updateScenesOfPerson(db, Number(id), selectedSceneObjects);
+        break;
+      case 'idea':
+        await updateScenesOfIdea(db, Number(id), selectedSceneObjects);
+        break;
+      default:
+        break;
     }
-    if (scenes.length > 0) {loadData()}
-  }, [allScenes,scenes]);
+    router.back()
+  } catch (error: any) {
+    setError(error.message)
+  } finally {
+    setLoading(false)
+  }
+}
 
-  const handleSelect = (sceneId: number) => {
-    setTempSelectedIds((prev) =>
-      prev.includes(sceneId) ? prev.filter((selectedId) => selectedId !== sceneId) : [...prev, sceneId]
-    );
-  };
-
-  const handleModifyProcesses = async () => {
-    try {
-      const scenesToAdd = tempSelectedIds.filter(sceneId => !selectedIds.includes(sceneId));
-      const scenesToRemove = selectedIds.filter(sceneId => !tempSelectedIds.includes(sceneId));
-
-      // Add new scene links
-      await Promise.all(scenesToAdd.map((sceneId) => {
-          const sceneDetails = allScenes.find(s => s.id === sceneId);
-          if (sceneDetails) {
-           database.runAsync(
-              `INSERT INTO ${tableJoined} (${object}_id, scene_id, creativeprocess_id) VALUES (?, ?, ?);`,
-              [id, sceneId, sceneDetails.creativeprocess_id]
-            );
-          } 
-        })
-      );
-
-      await Promise.all(scenesToRemove.map((sceneId) => {
-          const sceneDetails = allScenes.find(s => s.id === sceneId);
-          if (sceneDetails) {
-           database.runAsync(
-              `DELETE FROM ${tableJoined} WHERE ${object}_id = ? AND scene_id = ?;`,[id, sceneId]
-            );
-          } 
-        })
-      );
-      setSelectedIds(tempSelectedIds);
-      router.back()
-    } catch { Alert.alert("Ha ocurrido un error modificando las escenas") }
-  };
-
-  if (loading) return <LoadingScreen />;
+  if(loading) { return <LoadingScreen/> }
+  if(error) {return <ErrorScreen error={error}/> }
 
   return (
     <View className="p-10 gap-8 mb-10">
       <Stack.Screen options={{ headerShown: false }} />
-      <BackButton />
-      {!errorFetching &&
-        <View>
+      <BackButton /><View>
         <View className="flex flex-row justify-between items-center">
-          <Text className="screen-title">Seleccionando escenas</Text>
-          <Pressable onPress={handleModifyProcesses}>
+          <Text className="screen-title">{"Seleccionando\nescenas"}</Text>
+          <Pressable onPress={handleModifyScenes}>
             <Text className="text-[#C286F1]">MODIFICAR</Text>
           </Pressable>
         </View>
         <FlatList
-          data={allScenes}
+          data={scenes}
           contentContainerStyle={{ marginBottom: 80 }}
           renderItem={({ item }) => (
             <SelectScene
               name={item.name}
               id={item.id}
-              isSelected={tempSelectedIds.includes(item.id)}
-              onPress={() => handleSelect(item.id)}
+              isSelected={selectedScenes.includes(item.id)}
+              onPress={() => handleSelectScene(item.id)}
             />
           )}
           keyExtractor={(item) => item.id.toString()}
         />
       </View>
-      }
-      {errorFetching && <Text>Lo sentimos, ha ocurrido un fallo</Text>}
     </View>
   );
 };

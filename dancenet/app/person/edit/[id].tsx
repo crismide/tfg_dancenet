@@ -65,6 +65,7 @@ const EditPerson = () => {
                 setLoading(true)
                 const p:Person = { id: Number(id), name: name, img: img, notes: notes}
                 await updatePerson(db,p)
+                router.back()
             } catch (error: any) {
                 setError(error)
             } finally {
