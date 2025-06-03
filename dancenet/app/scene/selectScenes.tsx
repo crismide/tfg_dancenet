@@ -108,7 +108,6 @@ const selectScenes = () => {
           renderItem={({ item }) => (
             <SelectScene
               name={item.name}
-              id={item.id}
               isSelected={selectedScenes.includes(item.id)}
               onPress={() => handleSelectScene(item.id)}
             />

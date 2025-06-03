@@ -6,7 +6,6 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import PreviewScene from '@/components/PreviewScene';
 import PreviewPerson from '@/components/PreviewPerson';
 import CustomModal from '@/components/CustomModal';
-import useCreativeProcess from '@/hooks/useCreativeProcess';
 import LoadingScreen from '@/components/LoadingScreen';
 import BackButton from '@/components/BackButton';
 import PreviewIdea from '@/components/PreviewIdea';
@@ -25,6 +24,7 @@ import { IdeaInCreativeProcess } from '@/interfaces/interfaceIdeaCreativeProcess
 import { useIdeaCreativeProcessStore } from '@/store/ideaCreativeProcessStore';
 import { useIdeaStore } from '@/store/ideaStore';
 import { PersonInCreativeProcess } from '@/interfaces/interfacePersonCreativeProcess';
+import { CustomModalOption } from '@/interfaces/interfaceComponents';
 
 const CreativeProcessDetail = () => {
   const { id } = useLocalSearchParams();
@@ -46,44 +46,47 @@ const CreativeProcessDetail = () => {
   const { getPersonById } = usePersonStore()
   const { getIdeasOfCreativeProcess } = useIdeaCreativeProcessStore()
   const { getIdeaById } = useIdeaStore()
+
+  // Function to load all data
+  const loadData = () => {
+    try {
+      setLoading(true)
+      const cp = getCreativeProcessById(Number(id));
+      const sc = getScenesOfCreativeProcess(Number(id));
+      const pairsPeopleAndCreativeProcess:PersonInCreativeProcess[] = getPeopleOfCreativeProcess(Number(id));
+      const ppl = pairsPeopleAndCreativeProcess
+        .map(pair => getPersonById(pair.person_id))
+        .filter((person): person is Person => person !== null);
+
+      const pairsIdeasAndCreativeProcess:IdeaInCreativeProcess[] = getIdeasOfCreativeProcess(Number(id))
+      const ideas = pairsIdeasAndCreativeProcess.map(pair => getIdeaById(pair.idea_id)).filter((idea): idea is Idea => idea !== null);
+      
+      setCreativeProcess(cp);
+      setScenes(sc);
+      setPeople(ppl);
+      setIdeas(ideas)
+
+    } catch (error:any) {
+      setError(error.message)
+    } finally { 
+      setLoading(false) 
+    }
+  };
  
+  // Load data whenever the screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      let isActive = true;
-      const loadData = () => {
-          try {
-          setLoading(true)
-          const cp = getCreativeProcessById(Number(id));
-          const sc = getScenesOfCreativeProcess(Number(id));
-          const pairsPeopleAndCreativeProcess:PersonInCreativeProcess[] = getPeopleOfCreativeProcess(Number(id));
-          const ppl = pairsPeopleAndCreativeProcess
-            .map(pair => getPersonById(pair.person_id))
-            .filter((person): person is Person => person !== null);
-
-          const pairsIdeasAndCreativeProcess:IdeaInCreativeProcess[] = getIdeasOfCreativeProcess(Number(id))
-          const ideas = pairsIdeasAndCreativeProcess.map(pair => getIdeaById(pair.idea_id)).filter((idea): idea is Idea => idea !== null);
-          
-          setCreativeProcess(cp);
-          setScenes(sc);
-          setPeople(ppl);
-          setIdeas(ideas)
-
-        } catch (error:any) {
-          setError(error.message)
-        } finally { setLoading(false) }
-      };
       loadData();
-      return () => { isActive = false; };
-    }, [id, getCreativeProcessById, getScenesOfCreativeProcess, getPeopleOfCreativeProcess, getPersonById])
+    }, [id, getCreativeProcessById, getScenesOfCreativeProcess, getPeopleOfCreativeProcess, getPersonById, getIdeasOfCreativeProcess, getIdeaById])
   );
 
-  const optionsPeople = [
+
+  const optionsPeople:CustomModalOption[] = [
     { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: id, id_scene:"" }} },
     { label: "Elegir ya existente", icon: "users", href: {pathname:"/person/selectPeople", params: {id_process: id, id_scene:"",source:"creative-process"}}},
   ];
 
-
-  const optionsIdeas = [
+  const optionsIdeas:CustomModalOption[] = [
     { label: "Texto", icon: "file-alt", href: {pathname:"/(forms)/FormIdea", params: {typeMedia:"text",source:"process", id_process: id}},},
     { label: "Audio", icon: "microphone", href: {pathname:"/(forms)/FormIdea", params: {typeMedia:"audio",source:"process",id_process: id}},},
     { label: "Multimedia", icon: "photo-video", href: {pathname:"/(forms)/FormIdea", params: {typeMedia:"image-video",source:"process",id_process: id}},},
@@ -110,7 +113,7 @@ const CreativeProcessDetail = () => {
 
               {activeIdeas && 
                 <View className='gap-8'>
-                  <AddIdealButtonModal source={'process'} id_process={id} id_scene={undefined}/>
+                  <AddIdealButtonModal source={'process'} id_process={Number(id)} id_scene={undefined}/>
                   <CustomModal visible={modalIdeasVisible} onClose={() => setModalIdeasVisible(false)} options={optionsIdeas} />
                   {ideas.length < 1 ? <Text className='text-lg text-gray-400'>Aún no tienes ideas asociadas a este proceso creativo, crea una nueva o escoge una o varias existentes con el botón "Añadir idea +"</Text>:
                   <FlatList
@@ -151,7 +154,7 @@ const CreativeProcessDetail = () => {
                       <PreviewScene 
                         name={item.name} 
                         id={item.id} 
-                        id_process={id}/>}
+                        creativeprocess_id={Number(id)}/>}
                       horizontal={true}
                       contentContainerStyle={{ gap: 15 }}/>
                   }
@@ -175,7 +178,7 @@ const CreativeProcessDetail = () => {
                   {people.length < 1 ? <Text className='text-lg text-gray-400'>Aún no tienes personas asociadas a este proceso creativo, crea una nueva o escoge una o varias existente con el botón "Añadir participantes +"</Text> :
                   <FlatList
                     data={people}
-                    renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"creative-process"} id_process={id}/>}
+                    renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"creative-process"} id_process={Number(id)}/>}
                     horizontal={true}
                     contentContainerStyle={{ gap: 20 }}
                   />}

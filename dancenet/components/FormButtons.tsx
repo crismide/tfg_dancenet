@@ -1,11 +1,7 @@
 import { View, Text, Pressable } from 'react-native'
 import React from 'react'
 import { router } from 'expo-router'
-
-interface FormButtonsProps {
-  handleSave: () => void;
-  textButton?: string;
-}
+import { FormButtonsProps } from '@/interfaces/interfaceComponents'
 
 const FormButtons = ({handleSave, textButton = 'Crear'}:FormButtonsProps) => {
   return (

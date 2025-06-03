@@ -40,33 +40,42 @@ const Index = () => {
   const { loadPeopleInCreativeProcesses } = usePersonCreativeProcessStore()
   const { loadPeopleWithMovements } = usePersonMovementStore()
   const { loadPeopleInScenes } = useScenePersonStore()
-  const { loadSpaces } = useSpaceStore()
+  const { loadSpaces, spaces } = useSpaceStore()
 
   const [ loading, setLoading ] = useState(true)
   const [ error, setError ] = useState(null)
 
   useEffect(() => {
-    try {
-      loadCreativeProcesses(db)
-      loadIdeasInCreativeProcesses(db)
-      loadIdeasInScenes(db)
-      loadPeople(db)
-      loadIdeas(db)
-      loadScenes(db)
-      loadObjects(db)
-      loadMovements(db)
-      loadObjectsOfMovements(db)
-      loadObjectsOfResponsiblePeople(db)
-      loadObjectsOfPeople(db)
-      loadPeopleInCreativeProcesses(db)
-      loadPeopleWithMovements(db)
-      loadIdeasInScenes(db)
-      loadPeopleInScenes(db)
-      loadSpaces(db)
+    console.log("spaces updated: ", spaces)
+  }, [spaces])
+
+  useEffect(() => {
+    const loadData = (async () => {
+      try {
+      await loadCreativeProcesses(db)
+      await loadIdeasInCreativeProcesses(db)
+      await loadIdeasInScenes(db)
+      await loadPeople(db)
+      await loadIdeas(db)
+      await loadScenes(db)
+      await loadObjects(db)
+      await loadMovements(db)
+      await loadObjectsOfMovements(db)
+      await loadObjectsOfResponsiblePeople(db)
+      await loadObjectsOfPeople(db)
+      await loadPeopleInCreativeProcesses(db)
+      await loadPeopleWithMovements(db)
+      await loadIdeasInScenes(db)
+      await loadPeopleInScenes(db)
+      await loadSpaces(db)
 
     } catch (error:any) {
       setError(error.message)
-    } finally { setLoading(false) }
+    } finally { 
+      setLoading(false) 
+    }
+    })
+    loadData()
   },[])
 
   if(loading){return <LoadingScreen/>}

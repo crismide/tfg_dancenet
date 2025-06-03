@@ -1,13 +1,9 @@
+import { GradientTextProps } from '@/interfaces/interfaceComponents'
 import React from 'react'
 import { View } from 'react-native'
 import Svg, { Text, Defs, LinearGradient, Stop } from 'react-native-svg'
 
-interface GradientTextProps {
-  text: string
-  fontSize?: number
-}
-
-const GradientText: React.FC<GradientTextProps> = ({ text, fontSize = 40 }) => {
+const GradientText = ({ text, fontSize = 40 }:GradientTextProps) => {
   return (
     <View>
       <Svg height={fontSize * 1.5} width="100%">
@@ -23,7 +19,7 @@ const GradientText: React.FC<GradientTextProps> = ({ text, fontSize = 40 }) => {
           fontSize={fontSize}
           fontWeight="bold"
           textAnchor="start"
-          fill="url(#gradient)" // ✅ Gradient applied to text
+          fill="url(#gradient)"
         >
           {text}
         </Text>

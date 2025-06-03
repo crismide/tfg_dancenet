@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, Button, Image, Alert, ScrollView, FlatList } from 'react-native';
+import { View, Text, TextInput, Alert, ScrollView, FlatList } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -23,7 +23,7 @@ const FormPerson = () => {
         name: "",
         notes: ""
     });
-    const [image, setImage] = useState(null);
+    const [image, setImage] = useState<string | null>(null);
     const [base64Image, setBase64Image] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(true);
@@ -135,7 +135,6 @@ const FormPerson = () => {
                             renderItem={({ item }) => (
                                 <SelectProcess
                                     name={item.name}
-                                    id={item.id}
                                     isSelected={selectedProcessIds.includes(item.id)}
                                     onPress={() => handleProcessSelect(item.id)} 
                                     image={item.img}                                />
@@ -154,7 +153,6 @@ const FormPerson = () => {
                             renderItem={({ item }) => (
                                 <SelectScene
                                     name={item.name}
-                                    id={item.id}
                                     isSelected={selectedSceneIds.includes(item.id)}
                                     onPress={() => handleSceneSelect(item.id)}
                                 />

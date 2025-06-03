@@ -7,7 +7,6 @@ import { useSQLiteContext } from 'expo-sqlite'
 import GalleryPicker from '@/components/GalleryPicker'
 import SelectScene from '@/components/SelectScene'
 import SelectProcess from '@/components/SelectProcess'
-import { useIsFocused } from '@react-navigation/native'
 import { useCreativeProcessStore } from '@/store/creativeProcessStore'
 import { useSceneStore } from '@/store/scenesStore'
 import { getPathAudioFile } from '@/utils/useSaveAudioFile'
@@ -30,16 +29,15 @@ const FormIdea = () => {
   ? Number(id_scene[0])
   : Number(id_scene ?? -1);
   const db = useSQLiteContext()
-  const [media, setMedia] = useState(null);
+  const [media, setMedia] = useState<string | null>(null);
   const [data, setData] = useState("");
   const [dataError, setDataError] = useState("")
   const [height, setHeight] = useState(100);
   const [selectedIds, handleSelect] = useSelection<number>([]);
-  const isScreenFocused = useIsFocused();
   const { creativeProcesses } = useCreativeProcessStore()
   const { scenes } = useSceneStore()
   const { createIdea } = useIdeaStore()
-  const { putIdeaInCreativeProcess, getCreativeProcessesOfIdea } = useIdeaCreativeProcessStore()
+  const { putIdeaInCreativeProcess } = useIdeaCreativeProcessStore()
   const { putIdeaInScene } = useSceneIdeaStore()
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -109,7 +107,6 @@ const FormIdea = () => {
         <View className="p-10">
           <AudioPickerRecorder 
             onAudioSelected={setData}
-            isFocused={isScreenFocused}
           />
         </View>
       </View> : 
@@ -130,7 +127,6 @@ const FormIdea = () => {
                     <SelectProcess
                         image={item.img}
                         name={item.name}
-                        id={item.id}
                         isSelected={selectedIds.includes(item.id)}
                         onPress={() => handleSelect(item.id)}
                     />
@@ -147,7 +143,6 @@ const FormIdea = () => {
                 renderItem={({item}) => (
                     <SelectScene
                         name={item.name}
-                        id={item.id}
                         isSelected={selectedIds.includes(item.id)}
                         onPress={() => handleSelect(item.id)}
                     />

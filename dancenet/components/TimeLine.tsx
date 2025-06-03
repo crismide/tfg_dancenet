@@ -1,26 +1,30 @@
 import { Movement } from '@/interfaces/interfaceMovement'
 import { Href, router } from 'expo-router'
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native'
-import { TimelineProps } from "@/interfaces/interfaceComponents"
+import { TimelineEvent, TimelineProps } from "@/interfaces/interfaceComponents"
 
+// Timeline constants
 const timelineHeight = 400
 const interval = 0.2
 
-const isOverlapping = (a, b) => a.start < b.end && b.start < a.end
+// Overlap check with types
+const isOverlapping = (a: { start: number; end: number }, b: { start: number; end: number }): boolean =>
+  a.start < b.end && b.start < a.end
 
-const getColorByLevel = (level: string) => {
-    const colors: {[key: string]: string} = {
-      bajo: '#B4F186',
-      medio: '#868AF1',
-      alto: '#FF8282'
-    }
-    return colors[level] || '#CCCCCC'
+// Color by level
+const getColorByLevel = (level: string): string => {
+  const colors: { [key: string]: string } = {
+    bajo: '#B4F186',
+    medio: '#868AF1',
+    alto: '#FF8282'
+  }
+  return colors[level] || '#CCCCCC'
 }
-  
 
-function assignColumns(events) {
-  const columns = []
-  const result = []
+// Assign columns to events to avoid overlap
+function assignColumns(events: TimelineEvent[]): (TimelineEvent & { column: number; maxColumns: number })[] {
+  const columns: TimelineEvent[][] = []
+  const result: (TimelineEvent & { column: number; maxColumns: number })[] = []
 
   for (const event of events) {
     let col = 0
@@ -31,14 +35,15 @@ function assignColumns(events) {
     }
     if (!columns[col]) columns[col] = []
     columns[col].push(event)
-    result.push({ ...event, column: col, maxColumns: null })
+    // Initialize maxColumns as 1 (or 0), not null
+    result.push({ ...event, column: col, maxColumns: 1 })
   }
 
   result.forEach((e) => {
     let max = 1
     result.forEach((other) => {
       if (isOverlapping(e, other)) {
-        max = Math.max(max, other.column + 1)
+        max = Math.max(max, (other.column ?? 0) + 1)
       }
     })
     e.maxColumns = max
@@ -46,43 +51,44 @@ function assignColumns(events) {
 
   return result
 }
-const Timeline = ({movements}:TimelineProps) => {
-  const processedMovements = movements.map(movement => ({
-        title: movement.name,
-        start: movement.start_time / 60,  // Convert seconds to minutes
-        end: movement.end_time / 60,
-        color: getColorByLevel(movement.level),
-        id: movement.id,
-        id_scene: movement.scene_id
-    }))
 
-    const events = assignColumns(processedMovements)
-    const totalDuration = Math.max(...processedMovements.map(m => m.end), 0)
+const Timeline = ({ movements }: TimelineProps) => {
+  const processedMovements: TimelineEvent[] = movements.map(movement => ({
+    title: movement.name,
+    start: movement.start_time / 60,  // Convert seconds to minutes
+    end: movement.end_time / 60,
+    color: getColorByLevel(movement.level),
+    id: movement.id,
+    id_scene: movement.scene_id
+  }))
+
+  const events = assignColumns(processedMovements)
+  const totalDuration = Math.max(...processedMovements.map(m => m.end), 0)
 
   // Generate labels every 0.2 seconds
-    const timeLabels = []
-    for (let t = 0; t <= totalDuration; t += interval) {
-        timeLabels.push(parseFloat(t.toFixed(1)))
-    }
+  const timeLabels: number[] = []
+  for (let t = 0; t <= totalDuration; t += interval) {
+    timeLabels.push(parseFloat(t.toFixed(1)))
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.row}>
         {/* Time labels */}
         <View style={styles.timeLabels}>
-            <Text style={styles.minutosLabel}>Minutos</Text>
-            {timeLabels.map((label, idx) => (
-                <Text
-                key={idx}
-                style={{
-                    height: (interval / totalDuration) * timelineHeight,
-                    fontSize: 12,
-                    color: '#999',
-                }}
-                >
-                {label.toFixed(1)}
-                </Text>
-            ))}
+          <Text style={styles.minutosLabel}>Minutos</Text>
+          {timeLabels.map((label, idx) => (
+            <Text
+              key={idx}
+              style={{
+                height: (interval / totalDuration) * timelineHeight,
+                fontSize: 12,
+                color: '#999',
+              }}
+            >
+              {label.toFixed(1)}
+            </Text>
+          ))}
         </View>
 
         {/* Timeline */}
@@ -95,7 +101,7 @@ const Timeline = ({movements}:TimelineProps) => {
 
             return (
               <Pressable
-                key={index}
+                key={item.id}
                 onPress={() => router.push({ pathname: `/movement/${item.id}` } as Href)}
                 style={[
                   styles.movement,

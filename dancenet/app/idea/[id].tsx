@@ -98,7 +98,6 @@ const IdeaDetails = () => {
                 {typeContent === 'audio' && data && 
                     <AudioPlayer 
                     audioUri={data}
-                    isFocused={isFocused}
                   />
                 }
                 {creativeProcesses.length > 0 &&
@@ -118,7 +117,7 @@ const IdeaDetails = () => {
                         <Text className='text-xl mb-3 font-bold'>Correspondiente a las escenas...</Text>
                         <FlatList
                         data={scenes}
-                        renderItem={({ item }) => <PreviewScene name={item.name} id={item.id} id_process={id_process}/>}
+                        renderItem={({ item }) => <PreviewScene name={item.name} id={item.id} creativeprocess_id={Number(id_process)}/>}
                         horizontal={true}
                         contentContainerStyle={{ gap: 20 }}
                     />

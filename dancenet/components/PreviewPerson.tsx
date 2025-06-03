@@ -1,71 +1,70 @@
 import { View, Text, Pressable, Image, Alert } from 'react-native'
 import React from 'react'
-import { router } from 'expo-router';
+import { Href, router } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useSQLiteContext } from 'expo-sqlite';
+import { PreviewPersonProps } from '@/interfaces/interfaceComponents';
+import { usePersonCreativeProcessStore } from '@/store/personCreativeProcessStore';
+import { useScenePersonStore } from '@/store/scenePeopleStore';
 
-const PreviewPerson = ({name,img,id,source,id_process}) => {
+const PreviewPerson = ({name,img,id,source,id_process}:PreviewPersonProps) => {
     const database = useSQLiteContext();
+    const { deletePersonFromCreativeProcess } = usePersonCreativeProcessStore();
+    const { deletePersonFromScene } = useScenePersonStore();
     
     const handlePress = () => {
-        router.push({ pathname: `/person/${id}`, params: { source: source, id_process: id_process } });
+        router.push({
+          pathname: "/person/[id]",
+          params: { id: String(id), source, id_process }
+        });
     }
+
     const handleRemove = async () => {
-        if(source==='creative-process'){
-            Alert.alert(
-                      "Quitando a una persona del proceso creativo", // Title of the alert
-                      "Estás segurx de que quieres quitar a esta persona del proceso creativo?", // Message in the alert
-                      [
-                        {
-                          text: "Cancelar", // Button to cancel the action
-                          style: "cancel", // Style for the cancel button
-                        },
-                        {
-                          text: "Aceptar", // Button to confirm the deletion
-                          onPress: async () => {
-                            try {
-                              // Execute the delete query using runAsync
-                              await database.runAsync(
-                                `DELETE FROM person_creativeprocess
-                                 WHERE person_id = ? AND creativeprocess_id = ?;`,
-                                [id, id_process]
-                            );
-                            } catch (error) {
-                              console.error("Failed to delete creative process:", error);
-                            }
-                          },
-                        },
-                      ],
-                      { cancelable: true } // Allow the user to dismiss the alert by tapping outside
-                    );
-        }
-        if(source==='scene'){
-            Alert.alert(
-                "Quitando a una persona de la escena", // Title of the alert
-                "Estás segurx de que quieres quitar a esta persona de la escena?", // Message in the alert
-                [
-                  {
-                    text: "Cancelar", // Button to cancel the action
-                    style: "cancel", // Style for the cancel button
-                  },
-                  {
-                    text: "Aceptar", // Button to confirm the deletion
-                    onPress: async () => {
-                      try {
-                        // Execute the delete query using runAsync
-                        await database.runAsync(
-                          `DELETE FROM scene_people
-                           WHERE person_id = ? AND scene_id = ?;`,
-                          [id, id_process]
-                      );
-                      } catch (error) {
-                        console.error("Failed to delete creative process:", error);
-                      }
+        switch (source) {
+            case "creative-process":
+                Alert.alert("Quitando a una persona del proceso creativo",
+                    "Estás segurx de que quieres quitar a esta persona del proceso creativo?",
+                    [{
+                        text: "Cancelar",
+                        style: "cancel"
                     },
-                  },
-                ],
-                { cancelable: true } // Allow the user to dismiss the alert by tapping outside
-              );
+                    {
+                        text: "Aceptar",
+                        onPress: async() => {
+                            try {
+                                const id_process_person: number = id_process ? id_process : -1
+                                await deletePersonFromCreativeProcess(database, id, id_process_person)
+                            } catch (error) {
+                                Alert.alert("Ha habido algún problema quitando esta persona del proceso creativo")
+                            }
+                        }
+                    }], { cancelable: true }
+                )
+                break;
+
+            case "scene":
+                Alert.alert("Quitando a una persona de la escena",
+                    "Estás segurx de que quieres quitar a esta persona de la escena?",
+                    [{
+                        text: "Cancelar",
+                        style: "cancel"
+                    },
+                    {
+                        text: "Aceptar",
+                        onPress: async() => {
+                            try {
+                                const id_scene_person: number = id_process ? id_process : -1
+                                await deletePersonFromScene(database, id, id_scene_person)
+                            } catch (error) {
+                                Alert.alert("Ha habido algún problema quitando esta persona de la escena")
+                            }
+                        }
+                    }], { cancelable: true }
+                )
+                break;
+
+            default:
+                break;
         }
     }
 

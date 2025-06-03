@@ -1,7 +1,8 @@
-import { View, Text, Pressable, Image } from 'react-native'
+import { SelectMoveProps } from '@/interfaces/interfaceComponents'
+import { View, Text, Pressable } from 'react-native'
 
 
-const SelectMove = ({name,level, isSelected, onPress}) => {
+const SelectMove = ({name,level, isSelected, onPress}:SelectMoveProps) => {
 
     return (
         <Pressable

@@ -109,7 +109,7 @@ const PersonDetails = () => {
                         <PreviewScene 
                             name={item.name} 
                             id={item.id} 
-                            id_process={id_process}/>}
+                            creativeprocess_id={Number(id_process)}/>}
                             horizontal={true}
                             contentContainerStyle={{ gap: 15 }}
                     />

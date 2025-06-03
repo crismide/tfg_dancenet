@@ -1,9 +1,7 @@
-import { View, Text, FlatList, ScrollView, ActivityIndicator, Pressable } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useSQLiteContext } from 'expo-sqlite'
+import { View, Text, FlatList, ScrollView } from 'react-native'
+import React from 'react'
 import PreviewPerson from '@/components/PreviewPerson'
-import { Link, router, Stack } from 'expo-router'
-import { useIsFocused } from '@react-navigation/native'
+import { Link } from 'expo-router'
 import { usePersonStore } from '@/store/personStore'
 
 const people = () => {
@@ -23,7 +21,8 @@ const people = () => {
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
       <FlatList
         data={people}
-        renderItem={({item}) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"people"} id_process={""}/>}
+        renderItem={({item}) => 
+        <PreviewPerson name={item.name} img={item.img} id={item.id} source={"people"} id_process={null}/>}
       />
     </ScrollView>
       }

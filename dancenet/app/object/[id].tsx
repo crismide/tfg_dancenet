@@ -1,12 +1,11 @@
 import { View, Text, ScrollView, Image, FlatList } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import BackButton from '@/components/BackButton'
 import EditDeletebuttons from '@/components/EditDeletebuttons'
 import { useSQLiteContext } from 'expo-sqlite'
 import LoadingScreen from '@/components/LoadingScreen'
 import PreviewMove from '@/components/PreviewMove'
-import useObjectInfo from '@/hooks/useObject'
 import PreviewPerson from '@/components/PreviewPerson'
 import { useObjectStore } from '@/store/objectStore'
 import { Movement } from '@/interfaces/interfaceMovement'
@@ -24,8 +23,6 @@ import { Object } from '@/interfaces/interfaceObject'
 
 const objectDetail = () => {
     const { id } = useLocalSearchParams();
-    const database = useSQLiteContext();
-    //const {object,movements,people,peopleRes,loading} = useObjectInfo(database,id)
     const [ object, setObject ] = useState<Object | null>()
     const [ movements, setMovements ] = useState<Movement[]>([])
     const [ people, setPeople ] = useState<Person[]>([])
@@ -103,7 +100,7 @@ const objectDetail = () => {
                         <FlatList
                             data={people}
                             keyExtractor={(item) => item.id.toString()}
-                            renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"people"} id_process={id}/>}
+                            renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"people"} id_process={Number(id)}/>}
                             horizontal={true}
                             contentContainerStyle={{ gap: 10 }}
                         />
@@ -115,7 +112,7 @@ const objectDetail = () => {
                         <FlatList
                             data={peopleRes}
                             keyExtractor={(item) => item.id.toString()}
-                            renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"people"} id_process={id}/>}
+                            renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"people"} id_process={Number(id)}/>}
                             horizontal={true}
                             contentContainerStyle={{ gap: 10 }}
                         />

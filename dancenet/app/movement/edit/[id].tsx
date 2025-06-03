@@ -184,7 +184,6 @@ const EditMovement = () => {
                 <SelectPerson
                   name={item.name}
                   img={item.img}
-                  id={item.id}
                   isSelected={selectedPeople.includes(item.id)}
                   onPress={() => handleSelectPerson(item.id)}
                 />

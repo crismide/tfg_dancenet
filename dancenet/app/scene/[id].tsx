@@ -29,9 +29,11 @@ import { usePersonStore } from '@/store/personStore';
 import { IdeaInScene } from '@/interfaces/interfaceSceneIdea';
 import { PersonInScene } from '@/interfaces/interfaceScenePeople';
 import { useSQLiteContext } from 'expo-sqlite';
+import { CustomModalOption } from '@/interfaces/interfaceComponents';
 
 const SceneDetails = () => {
     const { id, creativeProcessId } = useLocalSearchParams();
+    const db = useSQLiteContext();
     const [activeIdeas, setActiveIdeas] = useState(false)
     const [activeMove, setActiveMove] = useState(false)
     const [activeSpace, setActiveSpace] = useState(false)
@@ -42,7 +44,7 @@ const SceneDetails = () => {
     const [ error, setError ] = useState(null)
     const [loading, setLoading] = useState(true)
 
-    const [scene, setScene] = useState<Scene | null>()
+    const [scene, setScene] = useState<Scene | null>()
     const [people, setPeople] = useState<Person[]>([])
     const [ideas, setIdeas] = useState<Idea[]>([]);
     const [spaces, setSpaces] = useState<Space[]>();
@@ -58,31 +60,51 @@ const SceneDetails = () => {
     const { getMovementsOfScene } = useMovementStore()
     const { getObjectsOfScene } = useObjectStore()
 
-    useEffect(() => {
-      try {
-        const sc:Scene | null = getSceneById(Number(id))
-        const pairsIdeaScene:IdeaInScene[] = getIdeasOfScene(Number(id))
-        const ids:Idea[] = pairsIdeaScene.map(pair => getIdeaById(pair.idea_id)).filter((i): i is Idea => i !== null);  
-        const pairsPeopleScene:PersonInScene[] = getPeopleOfScene(Number(id))
-        const pl:Person[] = pairsPeopleScene.map(pair => getPersonById(pair.person_id)).filter((p): p is Person => p !== null); 
-        const spcs:Space[] = getSpacesOfScene(Number(id))
-        const mvs:Movement[] = getMovementsOfScene(Number(id))
-        const objs:Object[] = getObjectsOfScene(Number(id))
+    useFocusEffect(
+        React.useCallback(() => {
+          let isActive = true;
+          const loadData = async () => {
+              try {
+                setLoading(true);
+                
+                if (!isActive) return;
 
-        setScene(sc)
-        setIdeas(ids)
-        setPeople(pl)
-        setSpaces(spcs)
-        setMovements(mvs)
-        setObjects(objs)
-      } catch (error: any) {
-        setError(error.message)
-      } finally {
-        setLoading(false)
-      }
-    },[id,getPeopleOfScene,getIdeasOfScene])
+                // Get updated data from stores
+                const sc: Scene | null = getSceneById(Number(id))
+                const pairsIdeaScene: IdeaInScene[] = getIdeasOfScene(Number(id))
+                const ids: Idea[] = pairsIdeaScene.map(pair => getIdeaById(pair.idea_id)).filter((i): i is Idea => i !== null);  
+                const pairsPeopleScene: PersonInScene[] = getPeopleOfScene(Number(id))
+                const pl: Person[] = pairsPeopleScene.map(pair => getPersonById(pair.person_id)).filter((p): p is Person => p !== null); 
+                const spcs: Space[] = getSpacesOfScene(Number(id))
+                const mvs: Movement[] = getMovementsOfScene(Number(id))
+                const objs: Object[] = getObjectsOfScene(Number(id))
 
-    const options = [
+                setScene(sc)
+                setIdeas(ids)
+                setPeople(pl)
+                setSpaces(spcs)
+                setMovements(mvs)
+                setObjects(objs)
+    
+            } catch (error: any) {
+              if (isActive) {
+                setError(error.message)
+              }
+            } finally { 
+              if (isActive) {
+                setLoading(false) 
+              }
+            }
+          };
+          
+          loadData();
+          
+          return () => { 
+            isActive = false; 
+          };
+        }, [id, db]));
+
+    const options:CustomModalOption[] = [
       { label: "Crear", icon: "user-plus", href: {pathname: "/(forms)/FormPerson",params: { id_process: creativeProcessId, id_scene:id }} },
       { label: "Elegir ya existente", icon: "users", href: {pathname:"/person/selectPeople", params: {id_process: creativeProcessId, id_scene:id, source:'scene'
       }}},
@@ -107,7 +129,7 @@ const SceneDetails = () => {
                   <Text className='text-2xl font-bold'>Ideas</Text>
               </Pressable>
               {activeIdeas && <View className='inside-category'>
-                <AddIdealButtonModal source={"scene"} id_process={creativeProcessId} id_scene={id}/>
+                <AddIdealButtonModal source={"scene"} id_process={Number(creativeProcessId)} id_scene={Number(id)}/>
                 {ideas.length < 1 ? <Text className='text-lg text-gray-400'>Aún no tienes ideas asociadas a esta escena, crea una nueva o escoge una o varias existentes con el botón "Añadir idea +"</Text> : 
                 <FlatList
                 data={ideas}
@@ -208,7 +230,7 @@ const SceneDetails = () => {
                   <FlatList
                     data={people}
                     keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"scene"} id_process={creativeProcessId}/>}
+                    renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"scene"} id_process={Number(creativeProcessId)}/>}
                     horizontal={true}
                     contentContainerStyle={{ gap: 20 }}
                   />
@@ -231,7 +253,7 @@ const SceneDetails = () => {
                     <FlatList
                       data={objects}
                       keyExtractor={(item) => item.id.toString()}
-                      renderItem={({ item }) => <PreviewObject img={item.img} id={item.id} id_process={item.creativeprocess_id} id_scene={item.scene_id}/>}
+                      renderItem={({ item }) => <PreviewObject img={item.img} id={item.id}/>}
                       horizontal={true}
                       contentContainerStyle={{ gap: 20 }}
                     />

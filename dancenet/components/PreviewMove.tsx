@@ -1,8 +1,9 @@
-import { router } from 'expo-router'
+import { PreviewMoveProps } from '@/interfaces/interfaceComponents'
+import { Href, router } from 'expo-router'
 import { View, Text, Pressable, Image } from 'react-native'
 
 
-const PreviewMove = ({name,level,id}) => {
+const PreviewMove = ({name,level,id}:PreviewMoveProps) => {
 
     return (
         <Pressable
@@ -11,7 +12,7 @@ const PreviewMove = ({name,level,id}) => {
                 padding: 16,
                 alignSelf: 'flex-start',
             }}
-            onPress={() => {router.push({ pathname: `/movement/${id}` })}}
+            onPress={() => {router.push({ pathname: `/movement/${id}` } as Href)}}
         >
             <View className='flex flex-row gap-4'>
                 {level === 'bajo' && <View className='h-8 w-8 bg-[#B4F186]'/>}

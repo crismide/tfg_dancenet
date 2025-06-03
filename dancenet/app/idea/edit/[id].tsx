@@ -1,14 +1,13 @@
-import { View, Text, TextInput, Image, Alert, TouchableHighlight } from 'react-native'
+import { View, Text, TextInput, Image, TouchableHighlight } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import useIdea from '@/hooks/useIdea';
 import { ResizeMode, Video } from 'expo-av';
 import LoadingScreen from '@/components/LoadingScreen';
 import FormButtons from '@/components/FormButtons';
 import AudioPlayer from '@/components/AudioPlayer';
 import { useIsFocused } from '@react-navigation/native';
-import { Idea, IdeaParams } from '@/interfaces/interfaceIdea';
+import { Idea } from '@/interfaces/interfaceIdea';
 import ErrorScreen from '@/components/ErrorScreen';
 import { useIdeaStore } from '@/store/ideaStore';
 
@@ -78,7 +77,6 @@ const EditIdea = () => {
       {idea && idea.typeContent === 'audio' && 
                 <AudioPlayer 
                 audioUri={idea.data}
-                isFocused={isScreenFocused}
               />
                 }
       <View className='gap-4'>

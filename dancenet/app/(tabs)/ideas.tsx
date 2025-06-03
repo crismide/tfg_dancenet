@@ -1,11 +1,8 @@
 import { View, Text, ScrollView, FlatList } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useSQLiteContext } from 'expo-sqlite'
-import LoadingScreen from '@/components/LoadingScreen'
+import React from 'react'
 import PreviewIdea from '@/components/PreviewIdea'
 import AddIdealButtonModal from '@/components/AddIdealButtonModal'
 import { useIdeaStore } from '@/store/ideaStore'
-import ErrorScreen from '@/components/ErrorScreen'
 
 
 const Ideas = () => {

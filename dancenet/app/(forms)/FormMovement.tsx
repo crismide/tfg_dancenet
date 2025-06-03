@@ -60,7 +60,7 @@ const FormMovement = () => {
             try {
                 const startSeconds = (start.minutes * 60) + start.seconds;
                 const endSeconds = (end.minutes * 60) + end.seconds;
-                
+
                 const movement:MovementParams = {
                     description, name, level, start_time: startSeconds, end_time: endSeconds, scene_id:Number(id_scene), creativeprocess_id:Number(id_process)
                 }
@@ -161,7 +161,6 @@ const FormMovement = () => {
                                     <SelectPerson
                                     name={item.name}
                                     img={item.img}
-                                    id={item.id}
                                     isSelected={selectedPeople.includes(item.id)}
                                     onPress={() => handleSelectPerson(item.id)}
                                 />

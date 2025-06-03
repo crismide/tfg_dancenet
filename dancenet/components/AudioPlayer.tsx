@@ -4,17 +4,14 @@ import { Audio } from 'expo-av';
 import Slider from '@react-native-community/slider';
 import { FontAwesome } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { AudioPlayerProps } from '@/interfaces/interfaceComponents';
 
-interface AudioPlayerProps {
-  audioUri: string | null;
-  isFocused: boolean;
-}
-
-const AudioPlayer = ({ audioUri, isFocused }: AudioPlayerProps) => {
+const AudioPlayer = ({ audioUri }: AudioPlayerProps) => {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Cleanup on unmount or when audioUri changes
   const stopAudio = async () => {
@@ -27,9 +24,49 @@ const AudioPlayer = ({ audioUri, isFocused }: AudioPlayerProps) => {
     setPosition(0);
   };
 
-  useEffect(() => {
-    return () => {
+  // Load audio metadata to get duration without playing
+  const loadAudioMetadata = async () => {
+    if (!audioUri || sound) return;
+    
+    setIsLoading(true);
+    try {
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: audioUri },
+        { shouldPlay: false } // Don't auto-play
+      );
       
+      setSound(newSound);
+      
+      // Set up status update listener to get duration
+      newSound.setOnPlaybackStatusUpdate(status => {
+        if (status.isLoaded) {
+          setPosition(status.positionMillis);
+          setDuration(status.durationMillis || 0);
+          if (status.didJustFinish) {
+            setIsPlaying(false);
+            setPosition(0);
+          }
+        }
+      });
+      
+      // Get initial status to set duration
+      const status = await newSound.getStatusAsync();
+      if (status.isLoaded && status.durationMillis) {
+        setDuration(status.durationMillis);
+      }
+    } catch (error) {
+      console.error('Error loading audio metadata:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (audioUri) {
+      loadAudioMetadata();
+    }
+    
+    return () => {
       stopAudio();
     };
   }, [audioUri]);
@@ -47,33 +84,14 @@ const AudioPlayer = ({ audioUri, isFocused }: AudioPlayerProps) => {
 
   // Handle audio playback
   const handlePlayback = async () => {
-    if (!audioUri) return;
+    if (!audioUri || !sound) return;
 
-    if (sound) {
-      if (isPlaying) {
-        await sound.pauseAsync();
-      } else {
-        await sound.playAsync();
-      }
-      setIsPlaying(!isPlaying);
+    if (isPlaying) {
+      await sound.pauseAsync();
+      setIsPlaying(false);
     } else {
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: audioUri },
-        { shouldPlay: true }
-      );
-      setSound(newSound);
+      await sound.playAsync();
       setIsPlaying(true);
-      
-      newSound.setOnPlaybackStatusUpdate(status => {
-        if (status.isLoaded) {
-          setPosition(status.positionMillis);
-          setDuration(status.durationMillis || 0);
-          if (status.didJustFinish) {
-            setIsPlaying(false);
-            setPosition(0);
-          }
-        }
-      });
     }
   };
 
@@ -90,37 +108,44 @@ const AudioPlayer = ({ audioUri, isFocused }: AudioPlayerProps) => {
     <View className="w-full">
       <View className="flex-row items-center justify-between px-4">
         <View className="flex-1 mr-4">
-            <Slider
+          <Slider
             value={position}
             minimumValue={0}
             maximumValue={duration}
             onSlidingComplete={async value => {
-                if (sound) {
+              if (sound) {
                 await sound.setPositionAsync(value);
-                }
+              }
             }}
             thumbTintColor="#C286F1"
             minimumTrackTintColor="#C286F1"
             maximumTrackTintColor="#C286F1"
-            />
-      </View>
-      <TouchableOpacity
+            disabled={isLoading || !sound}
+          />
+        </View>
+        <TouchableOpacity
           onPress={handlePlayback}
           className="p-4"
+          disabled={isLoading || !sound}
         >
-          <FontAwesome
-            name={isPlaying ? "pause" : "play"}
-            size={24}
-            color="#C286F1"
-          />
+          {isLoading ? (
+            <FontAwesome name="spinner" size={24} color="#C286F1" />
+          ) : (
+            <FontAwesome
+              name={isPlaying ? "pause" : "play"}
+              size={24}
+              color="#C286F1"
+            />
+          )}
         </TouchableOpacity>
       </View>
 
       <View className="flex-row justify-between mt-2">
         <Text className="text-gray-600">{formatTime(position)}</Text>
-        <Text className="text-gray-600">{formatTime(duration)}</Text>
+        <Text className="text-gray-600">
+          {isLoading ? "Loading..." : formatTime(duration)}
+        </Text>
       </View>
-
     </View>
   );
 };

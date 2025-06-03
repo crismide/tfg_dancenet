@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, Image, Pressable, Alert } from 'react-native';
 import { ResizeMode, Video } from 'expo-av';
 import { router, Href } from 'expo-router';
-import { useIsFocused } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import FontAwesome5 from '@expo/vector-icons/build/FontAwesome5';
 import AudioPlayer from './AudioPlayer';
@@ -12,7 +11,6 @@ import { useSceneIdeaStore } from '@/store/sceneIdeaStore';
 
 const PreviewIdea = ({ typeContent, data, id, source, id_process, id_scene }:PreviewIdeaProps) => {
   const db = useSQLiteContext();
-  const isScreenFocused = useIsFocused();
   const { deleteIdeaFromCreativeProcess } = useIdeaCreativeProcessStore()
   const { deleteIdeasFromScenesOfCreativeProcess, deleteIdeaFromScene } = useSceneIdeaStore()
   
@@ -120,7 +118,6 @@ const PreviewIdea = ({ typeContent, data, id, source, id_process, id_scene }:Pre
         <View>
           <AudioPlayer 
             audioUri={data}
-            isFocused={isScreenFocused}
           />
           {renderRemoveButton()}
         </View>

@@ -1,21 +1,36 @@
-import React, { useState, useRef } from 'react';
-import { View, Image, Button, Alert, Dimensions } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Image, Button, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Video, ResizeMode } from 'expo-av';
+import { GalleryPickerProps } from '@/interfaces/interfaceComponents';
 
-const GalleryPicker = ({ image, setImage, setBase64Image, allowVideos = false, isObject = false}) => {
-  const [mediaType, setMediaType] = useState(allowVideos ? 'both' : 'images');
+// Helper to determine which mediaTypes to use (MediaType array, expo-image-picker v14+)
+
+const GalleryPicker = ({
+  image,
+  setImage,
+  setBase64Image,
+  allowVideos = false,
+  isObject = false,
+}: GalleryPickerProps) => {
+  const mediaTypes =
+  (ImagePicker as any).MediaType
+    ? [ (ImagePicker as any).MediaType.IMAGE, (ImagePicker as any).MediaType.VIDEO ]
+    : ImagePicker.MediaTypeOptions.All;
   const videoRef = useRef(null);
 
   const pickMedia = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission required', 'Sorry, we need camera roll permissions to make this work!');
+      Alert.alert(
+        'Se necesita permiso',
+        '¡Lo siento, necesitamos acceso a tu galería para realizar esta acción!'
+      );
       return;
     }
 
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: mediaType === 'images' ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.All,
+      mediaTypes,
       allowsEditing: false,
       quality: 1,
       base64: true,
@@ -35,7 +50,7 @@ const GalleryPicker = ({ image, setImage, setBase64Image, allowVideos = false, i
 
   return (
     <View>
-    <View style={{ justifyContent: 'center', alignItems: 'center', marginVertical: 20 }}>
+      <View style={{ justifyContent: 'center', alignItems: 'center', marginVertical: 20 }}>
         {isObject && !allowVideos ? (
           image ? (
             <Image
@@ -44,13 +59,9 @@ const GalleryPicker = ({ image, setImage, setBase64Image, allowVideos = false, i
               resizeMode="contain"
             />
           ) : (
-            <View style={{ 
-              width: 200, 
-              height: 200, 
-              backgroundColor: '#D9D9D9' 
-            }} />
+            <View style={{ width: 200, height: 200, backgroundColor: '#D9D9D9' }} />
           )
-        ) : mediaType === 'both' ? (
+        ) : allowVideos ? (
           image ? (
             image.endsWith('.mp4') ? (
               <Video
@@ -71,30 +82,32 @@ const GalleryPicker = ({ image, setImage, setBase64Image, allowVideos = false, i
           ) : (
             <View style={{ width: 200, height: 200, backgroundColor: '#D9D9D9' }} />
           )
+        ) : image ? (
+          <Image
+            source={{ uri: image }}
+            style={{ width: 100, height: 100, borderRadius: 50 }}
+            resizeMode="contain"
+          />
         ) : (
-          image ? (
-            <Image
-              source={{ uri: image }}
-              style={{ width: 100, height: 100, borderRadius: 50 }}
-              resizeMode="contain"
-            />
-          ) : (
-            <View style={{ 
-              width: 100, 
-              height: 100, 
-              backgroundColor: '#D9D9D9', 
-              borderRadius: 50 
-            }} />
-          )
+          <View
+            style={{
+              width: 100,
+              height: 100,
+              backgroundColor: '#D9D9D9',
+              borderRadius: 50,
+            }}
+          />
         )}
       </View>
 
       <View>
-      <Button
-        title={mediaType === 'images' ? 'Elige una imagen' : 'Elige una imagen o video'}
-        color="#F1A636"
-        onPress={pickMedia}
-      />
+        <Button
+          title={
+            allowVideos ? 'Elige una imagen o video' : 'Elige una imagen'
+          }
+          color="#F1A636"
+          onPress={pickMedia}
+        />
       </View>
     </View>
   );

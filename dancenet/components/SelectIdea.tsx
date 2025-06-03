@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { ResizeMode, Video } from 'expo-av';
 import { useIsFocused } from '@react-navigation/native';
 import AudioPlayer from './AudioPlayer';
+import { SelectIdeasProps } from '@/interfaces/interfaceComponents';
 
-const SelectIdea = ({ typeContent, data, onPress, isSelected }) => {
+const SelectIdea = ({ typeContent, data, onPress, isSelected }: SelectIdeasProps) => {
   const isScreenFocused = useIsFocused();
   return <Pressable
   style={{
@@ -37,7 +38,6 @@ onPress={onPress}>
   {typeContent === 'audio' && 
     <AudioPlayer 
       audioUri={data}
-      isFocused={isScreenFocused}
     />}
 </Pressable>
 };

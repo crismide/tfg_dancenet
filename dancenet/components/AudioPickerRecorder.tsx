@@ -4,13 +4,9 @@ import { Audio } from 'expo-av';
 import * as DocumentPicker from 'expo-document-picker';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import AudioPlayer from './AudioPlayer';
+import { AudioPickerRecorderProps } from '@/interfaces/interfaceComponents';
 
-interface AudioPickerRecorderProps {
-  isFocused: boolean;
-  onAudioSelected: (uri: string) => void;
-}
-
-const AudioPickerRecorder = ({ isFocused, onAudioSelected }: AudioPickerRecorderProps) => {
+const AudioPickerRecorder = ({onAudioSelected }: AudioPickerRecorderProps) => {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [audioUri, setAudioUri] = useState<string | null>(null);
@@ -116,7 +112,6 @@ const AudioPickerRecorder = ({ isFocused, onAudioSelected }: AudioPickerRecorder
       {/* Audio Player */}
       <AudioPlayer 
         audioUri={audioUri} 
-        isFocused={isFocused}
       />
     </View>
   );

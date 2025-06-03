@@ -20,13 +20,14 @@ import { useMovementObjectsStore } from '@/store/movementObjectStore'
 import { usePeopleObjectUserStore } from '@/store/peopleObjetUserStore'
 import { usePeopleObjectResponsibleStore } from '@/store/peopleObjectResponsibleStore'
 import { useSelection } from '@/utils/useSelection'
+import GalleryPicker from '@/components/GalleryPicker'
 
 const FormObject = () => {
     const {id_scene, id_process} = useLocalSearchParams()
     const db = useSQLiteContext()
     const [loading, setLoading] = useState(true)
 
-    const [image, setImage] = useState(null);
+    const [image, setImage] = useState<string | null>(null);
     const [base64Image, setBase64Image] = useState("");
     const [movementList, setMovementList] = useState<Movement[]>([])
     const [selectedMovement, handleSelectMovement] = useSelection<number>([])
@@ -96,7 +97,7 @@ const saveObject = async () => {
             <View className='gap-8'>
                 <View className='gap-4'>
                     <Text className='text-xl'>¿Qué objeto es?</Text>
-                    <ImagePickerComponent image={image} setImage={setImage} setBase64Image={setBase64Image} isObject/>
+                    <GalleryPicker image={image} setImage={setImage} setBase64Image={setBase64Image} isObject/>
                 </View>
                 <View className='gap-4'>
                     <Text className='text-xl'>¿Con qué pauta de movimiento está asociada?</Text>
@@ -124,7 +125,6 @@ const saveObject = async () => {
                                 <SelectPerson
                                 name={item.name}
                                 img={item.img}
-                                id={item.id}
                                 isSelected={selectedPeople.includes(item.id)}
                                 onPress={() => handleSelectPeople(item.id)}
                             />
@@ -144,7 +144,6 @@ const saveObject = async () => {
                             <SelectPerson
                             name={item.name}
                             img={item.img}
-                            id={item.id}
                             isSelected={selectedPeopleRes.includes(item.id)}
                             onPress={() => handleSelectPeopleRes(item.id)}
                         />

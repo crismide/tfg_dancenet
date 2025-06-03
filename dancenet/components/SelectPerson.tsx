@@ -1,6 +1,7 @@
+import { SelectPersonProps } from '@/interfaces/interfaceComponents'
 import { View, Text, Pressable, Image } from 'react-native'
 
-const SelectPerson = ({name, img, id, isSelected, onPress}) => {
+const SelectPerson = ({name, img, isSelected, onPress}:SelectPersonProps) => {
 
     return (
         <Pressable

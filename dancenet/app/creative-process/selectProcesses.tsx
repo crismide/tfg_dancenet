@@ -1,8 +1,7 @@
 import { View, Text, Pressable, FlatList } from 'react-native'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSQLiteContext } from 'expo-sqlite';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import useIdea from '@/hooks/useIdea';
 import LoadingScreen from '@/components/LoadingScreen';
 import SelectProcess from '@/components/SelectProcess';
 import BackButton from '@/components/BackButton';
@@ -90,7 +89,6 @@ const selectProcesses = () => {
             <SelectProcess
               name={item.name}
               image={item.img}
-              id={item.id}
               isSelected={selectedCreativeProcesses.includes(item.id)}
               onPress={() => handleSelectCreativeProcesses(item.id)}
             />

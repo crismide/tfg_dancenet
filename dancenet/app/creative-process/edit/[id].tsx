@@ -1,6 +1,5 @@
 import { View, Text, TextInput, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import useCreativeProcess from '@/hooks/useCreativeProcess';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -14,9 +13,9 @@ const EditCreativeProcess = () => {
   const { id } = useLocalSearchParams();
   const db:SQLiteDatabase = useSQLiteContext();
   const { getCreativeProcessById, updateCreativeProcess, loading, error } = useCreativeProcessStore();
-  const [image,setImage] = useState<string | undefined>("")
+  const [image,setImage] = useState<string |null>("")
   const [name,setName] = useState<string>("")
-  const [base64Image,setBase64Image] = useState<string | undefined>("")
+  const [base64Image,setBase64Image] = useState("")
 
   useEffect(() => {
     const process:CreativeProcess | null = getCreativeProcessById(Number(id))

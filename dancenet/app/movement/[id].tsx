@@ -93,7 +93,7 @@ const MovementDetails = () => {
                     <FlatList
                     data={people}
                     keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"people"} id_process={id}/>}
+                    renderItem={({ item }) => <PreviewPerson name={item.name} img={item.img} id={item.id} source={"people"} id_process={Number(id)}/>}
                     horizontal={true}
                     contentContainerStyle={{ gap: 20 }}
                   />

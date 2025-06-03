@@ -11,7 +11,6 @@ import ErrorScreen from '@/components/ErrorScreen';
 
 const SpaceDetails = () => {
     const { id } = useLocalSearchParams();
-    const db = useSQLiteContext();
     const [ base64, setBase64 ] = useState<string>('')
     const { deleteSpace, getSpaceById, loading, error } = useSpaceStore()
 

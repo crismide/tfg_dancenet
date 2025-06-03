@@ -1,20 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Pressable, Text, View } from "react-native";
 import CustomModal from "./CustomModal";
-import { router } from "expo-router";
+import { AddIdealButtonModalProps, CustomModalOption } from "@/interfaces/interfaceComponents";
 
-const AddIdealButtonModal = ({source,id_process,id_scene}) => {
+const AddIdealButtonModal = ({source,id_process,id_scene}:AddIdealButtonModalProps) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isIdeaModalVisible, setIdeaModalVisible] = useState(false);
   const [isInitialModalVisible, setInitialModalVisible] = useState(false);
 
-  const initialOptions = [
+  // Helper function to close all modals
+  const closeAllModals = () => {
+    setModalVisible(false);
+    setIdeaModalVisible(false);
+    setInitialModalVisible(false);
+  };
+
+  const initialOptions:CustomModalOption[] = [
     {
       label: "Crear nueva idea",
       icon: "plus-circle",
       onPress: () => {
         setInitialModalVisible(false);
-        setIdeaModalVisible(true);
+        // Add small delay to prevent state conflicts
+        setTimeout(() => setIdeaModalVisible(true), 100);
       },
     },
     {
@@ -24,26 +32,29 @@ const AddIdealButtonModal = ({source,id_process,id_scene}) => {
         pathname: "/idea/selectIdeas",
         params: { source: source, id_process: id_process, id_scene: id_scene },
       },
+      onPress: closeAllModals, // Close modals when navigating
     },
   ];
 
-  const options1 = [
+  const options1:CustomModalOption[] = [
     {
       label: "Proceso\nCreativo",
       icon: "eye",
       href: "/(forms)/FormCreativeProcess",
+      onPress: closeAllModals, // Close modals when navigating
     },
     {
       label: "Idea",
       icon: "lightbulb",
       onPress: () => {
         setModalVisible(false);
-        setIdeaModalVisible(true);
+        // Add small delay to prevent state conflicts
+        setTimeout(() => setIdeaModalVisible(true), 100);
       },
     },
   ];
 
-  const ideaOptions = [
+  const ideaOptions:CustomModalOption[] = [
     {
       label: "Texto",
       icon: "file-alt",
@@ -51,6 +62,7 @@ const AddIdealButtonModal = ({source,id_process,id_scene}) => {
         pathname: "/(forms)/FormIdea",
         params: { typeMedia: "text", source: source, id_process: id_process, id_scene: id_scene },
       },
+      onPress: closeAllModals, // Close modals when navigating
     },
     {
       label: "Audio",
@@ -59,6 +71,7 @@ const AddIdealButtonModal = ({source,id_process,id_scene}) => {
         pathname: "/(forms)/FormIdea",
         params: { typeMedia: "audio", source: source,id_process: id_process, id_scene: id_scene },
       },
+      onPress: closeAllModals, // Close modals when navigating
     },
     {
       label: "Multimedia",
@@ -67,10 +80,10 @@ const AddIdealButtonModal = ({source,id_process,id_scene}) => {
         pathname: "/(forms)/FormIdea",
         params: { typeMedia: "image-video", source: source,id_process: id_process, id_scene: id_scene },
       },
+      onPress: closeAllModals, // Close modals when navigating
     },
   ];
 
-  // Modify the Pressable component and modal visibility logic
 return (
   <>
     {/* Floating "+" Button for both 'general' and 'ideas' sources */}
@@ -78,9 +91,11 @@ return (
       <Pressable
         onPress={() => {
           if (source === 'ideas') {
-            setIdeaModalVisible(true);  // Directly show idea options
+            closeAllModals();
+            setTimeout(() => setIdeaModalVisible(true), 100);
           } else {
-            setModalVisible(true);  // Existing general flow
+            closeAllModals();
+            setTimeout(() => setModalVisible(true), 100);
           }
         }}
         className="bg-[#7B7474] w-16 h-16 rounded-xl justify-center items-center shadow-lg"
@@ -88,7 +103,10 @@ return (
         <Text className="text-5xl text-[#C8C8C8]">+</Text>
       </Pressable>
     ) : (
-      <Pressable onPress={() => setInitialModalVisible(true)}>
+      <Pressable onPress={() => {
+        closeAllModals();
+        setTimeout(() => setInitialModalVisible(true), 100);
+      }}>
         <View className='border-2 p-3 w-2/3 border-[#828282]'>
           <Text className='text-lg text-[#828282]'>Añadir idea +</Text>
         </View>
@@ -99,7 +117,9 @@ return (
     {source !== 'ideas' && (
       <CustomModal
         visible={isInitialModalVisible}
-        onClose={() => setInitialModalVisible(false)}
+        onClose={() => {
+          setInitialModalVisible(false);
+        }}
         options={initialOptions}
       />
     )}
@@ -111,9 +131,9 @@ return (
         setIdeaModalVisible(false);
         // Only return to previous modal for non-idea sources
         if (source === 'general') {
-          setModalVisible(true);
+          setTimeout(() => setModalVisible(true), 100);
         } else if (source !== 'ideas') {
-          setInitialModalVisible(true);
+          setTimeout(() => setInitialModalVisible(true), 100);
         }
       }}
       options={ideaOptions}
@@ -122,7 +142,9 @@ return (
     {/* Keep existing general modal */}
     <CustomModal
       visible={isModalVisible}
-      onClose={() => setModalVisible(false)}
+      onClose={() => {
+        setModalVisible(false);
+      }}
       options={options1}
     />
   </>

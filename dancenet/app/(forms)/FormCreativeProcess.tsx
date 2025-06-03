@@ -12,7 +12,7 @@ import LoadingScreen from '@/components/LoadingScreen'
 const FormCreativeProcess = () => {
   const [name,setName] = useState("")
   const [nameError,setNameError] = useState("")
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState<string | null>(null);
   const [base64Image, setBase64Image] = useState("");
   const db = useSQLiteContext()
   const { createCreativeProcess, loading, error } = useCreativeProcessStore()

@@ -1,4 +1,4 @@
-import { View, Text, FlatList, ScrollView, ActivityIndicator, Pressable } from 'react-native';
+import { View, Text, FlatList, ScrollView, Pressable } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import SelectPerson from '@/components/SelectPerson';
@@ -6,12 +6,10 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import BackButton from '@/components/BackButton';
 import LoadingScreen from '@/components/LoadingScreen';
 import ErrorScreen from '@/components/ErrorScreen';
-import { useCreativeProcessStore } from '@/store/creativeProcessStore';
 import { usePersonStore } from '@/store/personStore';
 import { Person } from '@/interfaces/interfacePerson';
 import { usePersonCreativeProcessStore } from '@/store/personCreativeProcessStore';
 import { useSelection } from '@/utils/useSelection';
-import { PersonInCreativeProcess } from '@/interfaces/interfacePersonCreativeProcess';
 import { useScenePersonStore } from '@/store/scenePeopleStore';
 
 const selectPeople = () => {
@@ -95,7 +93,6 @@ const selectPeople = () => {
           <SelectPerson
             name={item.name}
             img={item.img}
-            id={item.id}
             isSelected={selectedPeople.includes(item.id)}
             onPress={() => handleSelectPeople(item.id)}
           />

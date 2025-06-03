@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, FlatList, Alert } from 'react-native'
+import { View, Text, ScrollView, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
@@ -151,7 +151,6 @@ const EditObjectInfo = () => {
                                     <SelectPerson
                                         name={item.name}
                                         img={item.img}
-                                        id={item.id}
                                         isSelected={selectedPeople.includes(item.id)}
                                         onPress={() => handleSelectPerson(item.id) }
                                     />
@@ -173,7 +172,6 @@ const EditObjectInfo = () => {
                                     <SelectPerson
                                         name={item.name}
                                         img={item.img}
-                                        id={item.id}
                                         isSelected={selectedPeopleRes.includes(item.id)}
                                         onPress={() => handleSelectPersonRes(item.id)}
                                     />

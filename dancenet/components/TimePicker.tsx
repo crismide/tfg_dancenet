@@ -1,12 +1,8 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 import { Picker } from '@react-native-picker/picker'
+import { TimePickerProps } from '@/interfaces/interfaceComponents'
 
-interface TimePickerProps {
-  time: { minutes: number; seconds: number }
-  setTime: (time: { minutes: number; seconds: number }) => void
-  label?: string
-}
 
 const TimePicker = ({ time, setTime }: TimePickerProps) => {
   return (

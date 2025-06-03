@@ -1,7 +1,8 @@
 import { View, Text, Pressable } from 'react-native'
 import React from 'react'
+import { SelectSceneProps } from '@/interfaces/interfaceComponents'
 
-const SelectScene = ({name, id, isSelected, onPress}) => {
+const SelectScene = ({name, isSelected, onPress}:SelectSceneProps) => {
   return (
     <Pressable
         style={{
