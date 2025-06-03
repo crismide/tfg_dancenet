@@ -43,6 +43,23 @@ export const usePeopleObjectUserStore = create<ObjectOfPersonState>((set,get) =>
             set({ error: error?.message || String(error), loading: false });
             throw error;
         }  
-    }
+    },
+    updatePeopleForObject: async ( db: SQLiteDatabase, object_id: number, person_ids: number[]) => {
+        set({ loading: true, error: null });
+        try {
+            await db.runAsync('DELETE FROM people_object_user WHERE object_id = ?', [object_id]);
+            for (const person_id of person_ids) {
+            await db.runAsync(
+                'INSERT INTO people_object_user (person_id, object_id) VALUES (?, ?)',
+                [person_id, object_id]
+            );
+            }
+            await get().loadObjectsOfPeople(db);
+            set({ loading: false });
+        } catch (error: any) {
+            set({ error: error?.message || String(error), loading: false });
+            throw error;
+        }
+    },
 
 }))

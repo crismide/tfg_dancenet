@@ -16,6 +16,7 @@ export interface SpaceState {
   loading: boolean;
   error: string | null;
   getSpaceById: (id: number) => Space | null;
+  getSpacesOfScene: (id: number) => Space[]
   loadSpaces: (db: SQLiteDatabase) => Promise<void>;
   createSpace: (db: SQLiteDatabase, space: SpaceParams) => Promise<number | undefined>;
   updateSpace: (db: SQLiteDatabase,space: Space) => Promise<void>;

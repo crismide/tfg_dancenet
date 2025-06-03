@@ -15,4 +15,10 @@ export interface PersonInCreativeProcessState {
     loadPeopleInCreativeProcesses: (db: SQLiteDatabase) => Promise<void>
     putPersonInCreativeProcess: (db: SQLiteDatabase,person_id: number, creativeprocess_id: number) => Promise<void>;
     deletePersonFromCreativeProcess: (db: SQLiteDatabase,person_id: number, creativeprocess_id: number) => Promise<void>;
+    updateCreativeProcessesForPerson: (db: SQLiteDatabase,person_id: number, creativeprocess_ids: number[]) => Promise<void>;
+    updatePeopleForCreativeProcess: (
+    db: SQLiteDatabase,
+    creativeprocess_id: number,
+    person_ids: number[]
+    ) => Promise<void>;
 }

@@ -11,6 +11,7 @@ export const usePersonMovementStore = create<PersonWithMovementState>((set,get) 
         const { peopleWithMovements } = get();
         return peopleWithMovements.filter(pair => pair.movement_id === id_movement ) || []
     },
+    
     loadPeopleWithMovements: async (db: SQLiteDatabase) => {
         set({ loading: true, error: null });
             try {
@@ -22,10 +23,10 @@ export const usePersonMovementStore = create<PersonWithMovementState>((set,get) 
                 set({ error: error?.message || String(error), loading: false });
             }
     },
-    putPersonWithMovement: async (db: SQLiteDatabase,person_id: number, movement_id:number, creativeprocess_id: number) => {
+    putPersonWithMovement: async (db: SQLiteDatabase,person_id: number, movement_id:number) => {
         set({ loading: true, error: null })
         try {
-            await db.runAsync('INSERT INTO person_movement (person_id, movement_id, movement_id, ) VALUES (?, ?, ?)',[person_id, creativeprocess_id, creativeprocess_id])
+            await db.runAsync('INSERT INTO person_movement (person_id, movement_id ) VALUES (?, ?)',[person_id, movement_id])
             await get().loadPeopleWithMovements(db)
             set({ loading: false })
         } catch (error:any) {
@@ -42,5 +43,29 @@ export const usePersonMovementStore = create<PersonWithMovementState>((set,get) 
             set({ error: error?.message || String(error), loading: false });
             throw error;
         }
-    }
+    },
+    updatePeopleForMovement: async ( db: SQLiteDatabase, movement_id: number, person_ids: number[]) => {
+        // Start loading
+        set({ loading: true, error: null });
+        try {
+            // Remove all old associations
+            await db.runAsync(
+            `DELETE FROM person_movement WHERE movement_id = ?`,
+            [movement_id]
+            );
+            // Insert new associations
+            for (const person_id of person_ids) {
+            await db.runAsync(
+                `INSERT INTO person_movement (person_id, movement_id) VALUES (?, ?)`,
+                [person_id, movement_id]
+            );
+            }
+            // Refresh state
+            await get().loadPeopleWithMovements(db);
+            set({ loading: false });
+        } catch (error: any) {
+            set({ error: error?.message || String(error), loading: false });
+            throw error;
+        }
+    },
 }))

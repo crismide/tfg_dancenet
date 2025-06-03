@@ -15,4 +15,5 @@ export interface ObjectOfMovementState {
     loadObjectsOfMovements: (db: SQLiteDatabase) => Promise<void>
     putObjectOfMovement: (db: SQLiteDatabase,movement_id: number, object_id: number) => Promise<void>;
     deleteObjectsOfMovements: (db: SQLiteDatabase,movement_id: number, object_id: number) => Promise<void>;
+    updateMovementsForObject: ( db: SQLiteDatabase, object_id: number, movement_ids: number[])=> Promise<void>;
 }

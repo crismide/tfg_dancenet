@@ -43,6 +43,23 @@ export const usePeopleObjectResponsibleStore = create<ObjectOfResponsiblePersonS
             set({ error: error?.message || String(error), loading: false });
             throw error;
         }  
-    }
+    },
+    updateResPeopleForObject: async ( db: SQLiteDatabase, object_id: number, person_ids: number[]) => {
+        set({ loading: true, error: null });
+        try {
+            await db.runAsync('DELETE FROM people_object_responsible WHERE object_id = ?', [object_id]);
+            for (const person_id of person_ids) {
+            await db.runAsync(
+                'INSERT INTO people_object_responsible (person_id, object_id) VALUES (?, ?)',
+                [person_id, object_id]
+            );
+            }
+            await get().loadObjectsOfResponsiblePeople(db);
+            set({ loading: false });
+        } catch (error: any) {
+            set({ error: error?.message || String(error), loading: false });
+            throw error;
+        }
+    },
 
 }))

@@ -12,12 +12,17 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   return scenes.find(cp => cp.id === id) || null;
   },
 
+  getScenesOfCreativeProcess: (creativeprocess_id: number) => {
+  const { scenes } = get();
+  return scenes.filter(scene => scene.creativeprocess_id === creativeprocess_id) || null;
+  },
+
 
   loadScenes: async (db: SQLiteDatabase) => {
     set({ loading: true, error: null });
     try {
       const result = await db.getAllAsync<Scene>(
-        'SELECT * FROM scenes ORDER BY name ASC;'
+        'SELECT * FROM scenes;'
       );
       set({ scenes: result, loading: false });
     } catch (error: any) {

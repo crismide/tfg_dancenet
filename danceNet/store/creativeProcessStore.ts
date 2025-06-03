@@ -18,7 +18,7 @@ export const useCreativeProcessStore = create<CreativeProcessState>((set, get) =
     set({ loading: true, error: null });
     try {
       const result = await db.getAllAsync<CreativeProcess>(
-        'SELECT * FROM creativeprocesses ORDER BY name ASC;'
+        'SELECT * FROM creativeprocesses;'
       );
       set({ creativeProcesses: result, loading: false });
     } catch (error: any) {

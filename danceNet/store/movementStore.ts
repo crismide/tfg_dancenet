@@ -12,12 +12,16 @@ export const useMovementStore = create<MovementState>((set, get) => ({
   return movements.find(cp => cp.id === id) || null;
   },
 
+  getMovementsOfScene: (id_scene:number) => {
+    const { movements } = get()
+    return movements.filter(movement => movement.scene_id === id_scene) || []; 
+  },
 
   loadMovements: async (db: SQLiteDatabase) => {
     set({ loading: true, error: null });
     try {
       const result = await db.getAllAsync<Movement>(
-        'SELECT * FROM movements ORDER BY typeContent ASC;'
+        'SELECT * FROM movements;'
       );
       set({ movements: result, loading: false });
     } catch (error: any) {

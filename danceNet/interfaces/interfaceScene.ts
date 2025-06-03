@@ -16,6 +16,7 @@ export interface SceneState {
   loading: boolean;
   error: string | null;
   getSceneById: (id: number) => Scene | null;
+  getScenesOfCreativeProcess: (creativeprocess_id: number) => Scene[];
   loadScenes: (db: SQLiteDatabase) => Promise<void>;
   createScene: (db: SQLiteDatabase, scene: SceneParams) => Promise<number | undefined>;
   updateScene: (db: SQLiteDatabase,scene: Scene) => Promise<void>;

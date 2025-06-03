@@ -15,4 +15,6 @@ export interface IdeaInCreativeProcessState {
     loadIdeasInCreativeProcesses: (db: SQLiteDatabase) => Promise<void>
     putIdeaInCreativeProcess: (db: SQLiteDatabase,idea_id: number, creativeprocess_id: number) => Promise<number | undefined>;
     deleteIdeaFromCreativeProcess: (db: SQLiteDatabase,idea_id: number, creativeprocess_id: number) => Promise<void>;
+    updateIdeasForCreativeProcess: ( db: SQLiteDatabase, creativeprocess_id: number, ideas_ids: number[]) => Promise<void>;
+    updateCreativeProcessesForIdea: (db: SQLiteDatabase,idea_id: number, creativeprocess_ids: number[]) => Promise<void>;
 }

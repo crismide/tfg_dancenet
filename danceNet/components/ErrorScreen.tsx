@@ -9,7 +9,7 @@ const ErrorScreen = ({error}:ErrorScreenProps) => {
     <View className='screen'>
         <Stack.Screen options={{ headerShown: false }} />
         <BackButton/>
-        <Text>Algo ha ido mal: ...</Text>
+        <Text className='screen-title'>Algo ha ido mal: ...</Text>
         <Text className='commentMessage'>{error}</Text>
     </View>
   )

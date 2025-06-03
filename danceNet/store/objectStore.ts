@@ -12,12 +12,16 @@ export const useObjectStore = create<ObjectState>((set, get) => ({
   return objects.find(cp => cp.id === id) || null;
   },
 
+  getObjectsOfScene: (id_scene:number) => {
+    const { objects } = get()
+    return objects.filter(ob => ob.scene_id === id_scene) || []
+  },
 
   loadObjects: async (db: SQLiteDatabase) => {
     set({ loading: true, error: null });
     try {
       const result = await db.getAllAsync<Object>(
-        'SELECT * FROM objects ORDER BY typeContent ASC;'
+        'SELECT * FROM objects;'
       );
       set({ objects: result, loading: false });
     } catch (error: any) {

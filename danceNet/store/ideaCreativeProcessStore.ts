@@ -52,5 +52,52 @@ export const useIdeaCreativeProcessStore = create<IdeaInCreativeProcessState>((s
             set({ error: error?.message || String(error), loading: false });
             throw error;
         }
+    },
+    updateIdeasForCreativeProcess: async ( db: SQLiteDatabase, creativeprocess_id: number, ideas_ids: number[]) => {
+        // Start loading
+        set({ loading: true, error: null });
+        try {
+            // Remove all old associations
+            await db.runAsync(
+            `DELETE FROM idea_creativeprocess WHERE creativeprocess_id = ?`,
+            [creativeprocess_id]
+            );
+            // Insert new associations
+            for (const idea_id of ideas_ids) {
+            await db.runAsync(
+                `INSERT INTO idea_creativeprocess (idea_id, creativeprocess_id) VALUES (?, ?)`,
+                [idea_id, creativeprocess_id]
+            );
+            }
+            // Refresh state
+            await get().loadIdeasInCreativeProcesses(db);
+            set({ loading: false });
+        } catch (error: any) {
+            set({ error: error?.message || String(error), loading: false });
+            throw error;
+        }
+    }, 
+    updateCreativeProcessesForIdea: async ( db: SQLiteDatabase, idea_id: number, creativeprocess_ids: number[]) => {
+    set({ loading: true, error: null });
+    try {
+        // Remove all old associations for this idea
+        await db.runAsync(
+        `DELETE FROM idea_creativeprocess WHERE idea_id = ?`,
+        [idea_id]
+        );
+        // Insert new associations
+        for (const creativeprocess_id of creativeprocess_ids) {
+        await db.runAsync(
+            `INSERT INTO idea_creativeprocess (idea_id, creativeprocess_id) VALUES (?, ?)`,
+            [idea_id, creativeprocess_id]
+        );
+        }
+        // Refresh state
+        await get().loadIdeasInCreativeProcesses(db);
+        set({ loading: false });
+    } catch (error: any) {
+        set({ error: error?.message || String(error), loading: false });
+        throw error;
     }
+    },
 }))

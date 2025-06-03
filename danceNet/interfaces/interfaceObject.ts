@@ -18,6 +18,7 @@ export interface ObjectState {
   loading: boolean;
   error: string | null;
   getObjectById: (id: number) => Object | null;
+  getObjectsOfScene: (id_scene:number) => Object[];
   loadObjects: (db: SQLiteDatabase) => Promise<void>;
   createObject: (db: SQLiteDatabase, object: ObjectParams) => Promise<number | undefined>;
   updateObject: (db: SQLiteDatabase,object: Object) => Promise<void>;

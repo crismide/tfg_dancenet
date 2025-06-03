@@ -12,12 +12,16 @@ export const useSpaceStore = create<SpaceState>((set, get) => ({
   return spaces.find(cp => cp.id === id) || null;
   },
 
+  getSpacesOfScene: (id_scene:number) => {
+    const { spaces } = get()
+    return spaces.filter(sp => sp.scene_id === id_scene) || []
+  },
 
   loadSpaces: async (db: SQLiteDatabase) => {
     set({ loading: true, error: null });
     try {
       const result = await db.getAllAsync<Space>(
-        'SELECT * FROM spaces ORDER BY typeContent ASC;'
+        'SELECT * FROM spaces;'
       );
       set({ spaces: result, loading: false });
     } catch (error: any) {

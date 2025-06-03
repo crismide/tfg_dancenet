@@ -46,6 +46,23 @@ export const useMovementObjectsStore = create<ObjectOfMovementState>((set,get) =
             set({ error: error?.message || String(error), loading: false });
             throw error;
         }  
-    }
+    },
+    updateMovementsForObject: async ( db: SQLiteDatabase, object_id: number, movement_ids: number[]) => {
+        set({ loading: true, error: null });
+        try {
+            await db.runAsync('DELETE FROM movement_object WHERE object_id = ?', [object_id]);
+            for (const movement_id of movement_ids) {
+            await db.runAsync(
+                'INSERT INTO movement_object (movement_id, object_id) VALUES (?, ?)',
+                [movement_id, object_id]
+            );
+            }
+            await get().loadObjectsOfMovements(db);
+            set({ loading: false });
+        } catch (error: any) {
+            set({ error: error?.message || String(error), loading: false });
+            throw error;
+        }
+        },
 
 }))

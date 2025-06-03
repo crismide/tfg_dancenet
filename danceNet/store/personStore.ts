@@ -12,12 +12,11 @@ export const usePersonStore = create<PersonState>((set, get) => ({
   return people.find(cp => cp.id === id) || null;
   },
 
-
   loadPeople: async (db: SQLiteDatabase) => {
     set({ loading: true, error: null });
     try {
       const result = await db.getAllAsync<Person>(
-        'SELECT * FROM people ORDER BY name ASC;'
+        'SELECT * FROM people;'
       );
       set({ people: result, loading: false });
     } catch (error: any) {

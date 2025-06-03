@@ -14,4 +14,5 @@ export interface ObjectOfResponsiblePersonState {
     loadObjectsOfResponsiblePeople: (db: SQLiteDatabase) => Promise<void>
     putObjectOfResponsiblePerson: (db: SQLiteDatabase,object_id: number, person_id: number) => Promise<void>;
     deleteObjectOfResponsiblePerson: (db: SQLiteDatabase,object_id: number, person_id: number) => Promise<void>;
+    updateResPeopleForObject: ( db: SQLiteDatabase, object_id: number, person_ids: number[]) => Promise<void>;
 }

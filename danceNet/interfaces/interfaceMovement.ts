@@ -26,6 +26,7 @@ export interface MovementState {
   loading: boolean;
   error: string | null;
   getMovementById: (id: number) => Movement | null;
+  getMovementsOfScene: (id_scene:number) => Movement[] | []
   loadMovements: (db: SQLiteDatabase) => Promise<void>;
   createMovement: (db: SQLiteDatabase, movement: MovementParams) => Promise<number | undefined>;
   updateMovement: (db: SQLiteDatabase,movement: Movement) => Promise<void>;

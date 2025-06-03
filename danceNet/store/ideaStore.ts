@@ -8,16 +8,15 @@ export const useIdeaStore = create<IdeaState>((set, get) => ({
   error: null,
 
   getIdeaById: (id: number) => {
-  const { ideas } = get();
-  return ideas.find(cp => cp.id === id) || null;
+    const { ideas } = get();
+    return ideas.find(cp => cp.id === id) || null;
   },
-
 
   loadIdeas: async (db: SQLiteDatabase) => {
     set({ loading: true, error: null });
     try {
       const result = await db.getAllAsync<Idea>(
-        'SELECT * FROM ideas ORDER BY typeContent ASC;'
+        'SELECT * FROM ideas;'
       );
       set({ ideas: result, loading: false });
     } catch (error: any) {
