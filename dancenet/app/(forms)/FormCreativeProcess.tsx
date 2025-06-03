@@ -15,8 +15,9 @@ const FormCreativeProcess = () => {
   const [image, setImage] = useState<string | null>(null);
   const [base64Image, setBase64Image] = useState("");
   const db = useSQLiteContext()
-  const { createCreativeProcess, loading, error } = useCreativeProcessStore()
-  
+  const { createCreativeProcess } = useCreativeProcessStore()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   const handleSave = async () => {
     if(name.trim() === ""){
@@ -25,6 +26,7 @@ const FormCreativeProcess = () => {
     else {
       setNameError("")
       try {
+        setLoading(true)
         const process: CreativeProcessParams = {
           name: name,
           img: base64Image || undefined   
@@ -32,9 +34,9 @@ const FormCreativeProcess = () => {
         await createCreativeProcess(db,process)
         router.back()
         setName("")
-    } catch {
-       Alert.alert("Error", "Hubo un problema al guardar el proceso creativo.");
-    }
+    } catch (error:any){
+       setError(error.message)
+    } finally { setLoading(false) }
     }
   }
 

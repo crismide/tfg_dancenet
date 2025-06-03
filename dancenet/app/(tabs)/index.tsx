@@ -2,11 +2,11 @@ import { View, Text, ScrollView, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import "../../global.css"
 import GradientText from '../../components/GradientText'
-import { useSQLiteContext } from 'expo-sqlite'
 import PreviewProcess from '@/components/PreviewProcess'
 import LoadingScreen from '@/components/LoadingScreen'
 import AddIdealButtonModal from '@/components/AddIdealButtonModal'
 import { useCreativeProcessStore } from '@/store/creativeProcessStore'
+import { useSQLiteContext } from 'expo-sqlite'
 import ErrorScreen from '@/components/ErrorScreen'
 import { useIdeaCreativeProcessStore } from '@/store/ideaCreativeProcessStore'
 import { useSceneIdeaStore } from '@/store/sceneIdeaStore'
@@ -44,10 +44,6 @@ const Index = () => {
 
   const [ loading, setLoading ] = useState(true)
   const [ error, setError ] = useState(null)
-
-  useEffect(() => {
-    console.log("spaces updated: ", spaces)
-  }, [spaces])
 
   useEffect(() => {
     const loadData = (async () => {
