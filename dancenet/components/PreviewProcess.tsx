@@ -12,7 +12,7 @@ const PreviewProcess = ({ name, img, id }:CreativeProcess) => {
         source={img ? { uri: img } : require('../assets/default-img.png')}
         style={{ width: 100, height: 100 }}
       />
-      <Text className='text-xl'>{name}</Text>
+      <Text className='text-xl w-[100px]'>{name}</Text>
     </Pressable>
   
   );
