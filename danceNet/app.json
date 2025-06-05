@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "dancenet",
-    "slug": "dancenet",
+    "name": "dancingnet",
+    "slug": "dancingnet",
+    "owner": "crismide",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -49,7 +50,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "ad1273b2-a230-42be-b02d-765344fa5108"
+        "projectId": "228782ba-4649-431b-a18b-73212eddf87d"
       }
     }
   }
