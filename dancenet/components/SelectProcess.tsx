@@ -18,7 +18,7 @@ const SelectProcess = ({ name, image, isSelected, onPress }:SelectCreativeProces
             source={image ? { uri: image } : require('../assets/default-img.png')}
             style={{ width: 100, height: 100 }}
         />
-        <Text className='text-xl'>{name}</Text>
+        <Text className='text-xl' style={{ width: 100 }}>{name}</Text>
      </View>
     </Pressable>
   

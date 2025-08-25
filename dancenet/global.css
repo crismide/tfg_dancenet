@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base{
+    :root{
+        --main-color: #C286F1;
+    }
+}
+
+@layer components{
+    .modal-button{
+        @apply border-white w-20 h-20 border-4 rounded-lg justify-center items-center mb-3
+    }
+    .screen-title{
+        @apply text-3xl font-bold
+    }
+
+    .form-button{
+        @apply rounded-xl p-3 shadow-lg w-36
+    }
+    .cancel-button{
+        @apply bg-[#5B5B5B]
+    }
+    .continue-button{
+        @apply bg-[#C286F1]
+    }
+    .button-text{
+        @apply text-white text-[16px] text-center
+    }
+    .input-text-box{
+        @apply border-2 rounded-lg border-gray-300 p-4
+    }
+    .inside-category{
+        @apply p-4 gap-5
+    }
+    .screen{
+        @apply p-10 gap-8 flex-1
+    }
+    .errorMessage{
+        @apply text-xl text-red-600 font-bold
+    }
+    .commentMessage{
+        @apply text-xl text-gray-400
+    }
+}

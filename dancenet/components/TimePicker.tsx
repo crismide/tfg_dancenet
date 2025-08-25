@@ -10,6 +10,9 @@ const TimePicker = ({ time, setTime }: TimePickerProps) => {
       <View className="flex flex-row gap-2 items-center ">
         {/* Minutes Picker */}
         <View className="flex-1 ">
+          <Text className="text-center text-sm font-medium text-gray-700 mb-1">
+            Minutos
+          </Text>
           <Picker
             selectedValue={time.minutes}
             onValueChange={(itemValue) => 
@@ -35,6 +38,9 @@ const TimePicker = ({ time, setTime }: TimePickerProps) => {
 
         {/* Seconds Picker */}
         <View className="flex-1">
+          <Text className="text-center text-sm font-medium text-gray-700 mb-1">
+            Segundos
+          </Text>
           <Picker
             selectedValue={time.seconds}
             onValueChange={(itemValue) => 
